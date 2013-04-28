@@ -4,10 +4,10 @@ class Riot
   end
 
   def read(position)
-    @ram[position - 0x80] if position.between? 0x80, 0xFF
+    @ram[position - 0x80]
   end
 
   def write(position, value)
-    @ram[position - 0x80] = value if position.between? 0x80, 0xFF
+    @ram[position - 0x80] = value
   end
 end
