@@ -13,25 +13,65 @@ describe Cpu do
     end
   end
 
-  describe '#next' do
+  describe 'DEX' do
     before do
       cpu.memory = [0xCA] # DEX
       cpu.pc = 0x0000
-      cpu.x  = 0x07
     end
 
-    it 'should execute an instruction' do
-      cpu.next
-
-      cpu.x.should == 0x06
+    describe '#fetch' do
+      it 'should advance PC to the following instruction' do
+        expect { cpu.fetch }.to change { cpu.pc }.by(1)
+      end
     end
 
-    it 'should advance PC to the following instruction' do
-      expect { cpu.next }.to change { cpu.pc }.by(1)
-    end
+    describe '#execute' do
+      context 'default' do
+        before { cpu.x = 0x07 }
 
-    it 'should return the "time" (# of CPU cyles) taken by an instruction' do
-      cpu.next.should == 2
+        it 'should decrease the x register' do
+          cpu.execute
+
+          cpu.x.should == 0x06
+        end
+
+        it 'should return the "time" (# of CPU cyles) it took to run the instruction' do
+          cpu.execute.should == 2
+        end
+
+        it 'should not affect flags' do
+          cpu.execute
+
+          cpu.flags[:z].should be_false
+          cpu.flags[:n].should be_false
+        end
+      end
+
+      context 'zero result' do
+        before { cpu.x = 0x01 }
+
+        it 'should set the zero-flag' do
+          cpu.execute
+
+          cpu.flags[:z].should be_true
+        end
+      end
+
+      context 'negative result' do
+        before { cpu.x = 0x00 }
+
+        it "should wrap around" do
+          cpu.execute
+
+          cpu.x.should == 0xFF # -1 in 8-bit two's complement
+        end
+
+        it 'should set the sign flag if negative' do
+          cpu.execute
+
+          cpu.flags[:n].should be_true
+        end
+      end
     end
   end
 end
