@@ -5,19 +5,19 @@ class Memory
     @tia  = tia
   end
 
-  def read(address)
+  def [](address)
     case address
-    when 0x0000..0x000D then @tia.read(address)
-    when 0x0080..0x00FF then @riot.read(address)
-    when 0xF000..0xFFFF then @cart.read(address)
+    when 0x0000..0x000D then @tia[address]
+    when 0x0080..0x00FF then @riot[address]
+    when 0xF000..0xFFFF then @cart[address]
     end
   end
 
-  def write(address, value)
+  def []=(address, value)
     if address.between? 0x0000, 0x002C
-      @tia.write(address, value)
+      @tia[address] = value
     else
-      @riot.write(address, value)
+      @riot[address] = value
     end
   end
 end
