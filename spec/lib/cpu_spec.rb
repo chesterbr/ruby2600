@@ -39,7 +39,7 @@ describe Cpu do
           cpu.execute.should == 2
         end
 
-        it 'should not affect flags' do
+        it 'should not set flags' do
           cpu.execute
 
           cpu.flags[:z].should be_false
