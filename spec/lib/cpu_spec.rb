@@ -3,6 +3,18 @@ require 'spec_helper'
 describe Cpu do
   subject(:cpu) { Cpu.new }
 
+  %w'z n'.each do |flag|
+    it 'should initialize with a readable #{flag} flag' do
+      expect { cpu.flags[flag.to_s] }.to_not raise_error
+    end
+  end
+
+  %w'x y'.each do |register|
+    it "should initialize with a byte-size #{register} register" do
+      (0..255).should cover(cpu.send(register))
+    end
+  end
+
   describe '#reset' do
     before { cpu.memory = { 0xFFFC => 0x34, 0xFFFD => 0x12 } }
 

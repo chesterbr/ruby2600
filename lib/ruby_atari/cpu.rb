@@ -5,6 +5,7 @@ class Cpu
 
   def initialize
     @flags = {}
+    @x = @y = 0
   end
 
   def reset
