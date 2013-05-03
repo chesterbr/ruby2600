@@ -1,5 +1,5 @@
 class Cpu
-  attr_accessor :memory, :pc, :x, :flags
+  attr_accessor :memory, :pc, :x, :y, :flags
 
   RESET_VECTOR = 0xFFFC
 
@@ -12,17 +12,24 @@ class Cpu
   end
 
   def fetch
-    #... decoded as DEX (baby steps!)
+    @opcode = memory[@pc]
+    #... still not worrying (DEX=DEY=1 byte)
     @pc += 1
-
   end
 
   def execute
-    #... decoded as DEX (baby steps!)
-    @x = @x == 0 ? 0xFF : @x - 1
-    @flags[:z] = (@x == 0)
-    @flags[:n] = (@x & 0b10000000 != 0)
-    @flags
-    2
+    # lots of refactorable repetition here, but for now...
+    case @opcode
+    when 0xCA # DEX
+      @x = @x == 0 ? 0xFF : @x - 1
+      @flags[:z] = (@x == 0)
+      @flags[:n] = (@x & 0b10000000 != 0)
+      2
+    when 0x88 # DEY
+      @y = @y == 0 ? 0xFF : @y - 1
+      @flags[:z] = (@y == 0)
+      @flags[:n] = (@y & 0b10000000 != 0)
+      2
+    end
   end
 end

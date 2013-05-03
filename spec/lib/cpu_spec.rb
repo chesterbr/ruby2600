@@ -27,7 +27,10 @@ describe Cpu do
 
     describe '#execute' do
       context 'default' do
-        before { cpu.x = 0x07 }
+        before do
+          cpu.x = 0x07
+          cpu.fetch
+        end
 
         it 'should decrease the x register' do
           cpu.execute
@@ -48,7 +51,10 @@ describe Cpu do
       end
 
       context 'zero result' do
-        before { cpu.x = 0x01 }
+        before do
+          cpu.x = 0x01
+          cpu.fetch
+        end
 
         it 'should set the zero-flag' do
           cpu.execute
@@ -58,7 +64,10 @@ describe Cpu do
       end
 
       context 'negative result' do
-        before { cpu.x = 0x00 }
+        before do
+          cpu.x = 0x00
+          cpu.fetch
+        end
 
         it "should wrap around" do
           cpu.execute
@@ -66,7 +75,7 @@ describe Cpu do
           cpu.x.should == 0xFF # -1 in 8-bit two's complement
         end
 
-        it 'should set the sign flag if negative' do
+        it 'should set the sign flag' do
           cpu.execute
 
           cpu.flags[:n].should be_true
@@ -74,4 +83,76 @@ describe Cpu do
       end
     end
   end
+
+  describe 'DEY' do
+    before do
+      cpu.memory = [0x88] # DEX
+      cpu.pc = 0x0000
+    end
+
+    describe '#fetch' do
+      it 'should advance PC to the following instruction' do
+        expect { cpu.fetch }.to change { cpu.pc }.by(1)
+      end
+    end
+
+    describe '#execute' do
+      context 'default' do
+        before do
+          cpu.y = 0x07
+          cpu.fetch
+        end
+
+        it 'should decrease the y register' do
+          cpu.execute
+
+          cpu.y.should == 0x06
+        end
+
+        it 'should return the "time" (# of CPU cyles) it took to run the instruction' do
+          cpu.execute.should == 2
+        end
+
+        it 'should not set flags' do
+          cpu.execute
+
+          cpu.flags[:z].should be_false
+          cpu.flags[:n].should be_false
+        end
+      end
+
+      context 'zero result' do
+        before do
+          cpu.y = 0x01
+          cpu.fetch
+        end
+
+        it 'should set the zero-flag' do
+          cpu.execute
+
+          cpu.flags[:z].should be_true
+        end
+      end
+
+      context 'negative result' do
+        before do
+          cpu.y = 0x00
+          cpu.fetch
+        end
+
+        it "should wrap around" do
+          cpu.execute
+
+          cpu.y.should == 0xFF # -1 in 8-bit two's complement
+        end
+
+        it 'should set the sign flag' do
+          cpu.execute
+
+          cpu.flags[:n].should be_true
+        end
+      end
+    end
+  end
+
 end
