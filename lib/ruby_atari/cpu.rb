@@ -68,15 +68,48 @@ class Cpu
   def execute
     # lots of refactorable repetition here, but for now...
     case @opcode
+    when 0xA2 # LDX, immediate
+      @x = memory[@pc - 1]
+      update_zero_flag(@x)
+      update_negative_flag(@x)
+    when 0xA6 # LDX, Zero Page
+      @x = memory[memory[@pc - 1]]
+      update_zero_flag(@x)
+      update_negative_flag(@x)
+    when 0xB6 # LDX, Zero Page,Y
+      @x = memory[memory[@pc - 1] + @y]
+      update_zero_flag(@x)
+      update_negative_flag(@x)
+    when 0xAE # LDX, Absolute
+      @x = memory[memory[@pc - 1] * 0x100 + memory[@pc - 2]]
+      update_zero_flag(@x)
+      update_negative_flag(@x)
+    when 0xBE # LDX, Absolute,Y
+      @x = memory[memory[@pc - 1] * 0x100 + memory[@pc - 2] + @y]
+      update_zero_flag(@x)
+      update_negative_flag(@x)
+      # +1 if page boundary crossed
+      # FIXME on LDX this is fine, but fetch memory[@pc -2] before
+      #       any memory-changing operation
+      return 1 + CYCLE_COUNT[@opcode] if memory[@pc - 2] + @y > 0xFF
     when 0xCA # DEX
       @x = @x == 0 ? 0xFF : @x - 1
-      @flags[:z] = (@x == 0)
-      @flags[:n] = (@x & 0b10000000 != 0)
+      update_zero_flag(@x)
+      update_negative_flag(@x)
     when 0x88 # DEY
       @y = @y == 0 ? 0xFF : @y - 1
-      @flags[:z] = (@y == 0)
-      @flags[:n] = (@y & 0b10000000 != 0)
+      update_zero_flag(@y)
+      update_negative_flag(@y)
     end
     CYCLE_COUNT[@opcode]
   end
+
+  def update_zero_flag(value)
+    @flags[:z] = (value == 0)
+  end
+
+  def update_negative_flag(value)
+    @flags[:n] = (value & 0b10000000 != 0)
+  end
+
 end
