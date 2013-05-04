@@ -168,7 +168,7 @@ describe Cpu do
 
       context 'absolute' do
         before do
-          cpu.memory[0..2] = [0xAC, 0x34, 0x12] # LDX $1234
+          cpu.memory[0..2] = [0xAE, 0x34, 0x12] # LDX $1234
           cpu.flags[:n] = false
         end
 
@@ -185,7 +185,7 @@ describe Cpu do
 
       context 'absolute, y' do
         before do
-          cpu.memory[0..2] = [0xAC, 0x34, 0x12]  # 0000: LDX $1234,Y
+          cpu.memory[0..2] = [0xBE, 0x34, 0x12]  # 0000: LDX $1234,Y
           cpu.y = 0x10
         end
 
