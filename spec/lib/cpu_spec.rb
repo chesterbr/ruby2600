@@ -25,146 +25,89 @@ describe Cpu do
     end
   end
 
-  describe 'DEX' do
-    before do
-      cpu.memory = [0xCA] # DEX
-      cpu.pc = 0x0000
-    end
+  shared_examples_for 'advance PC by' do |instruction_size|
+    it { expect { cpu.step }.to change { cpu.pc }.by(instruction_size) }
+  end
 
-    describe '#fetch' do
-      it 'should advance PC to the following instruction' do
-        expect { cpu.fetch }.to change { cpu.pc }.by(1)
+  describe '#step' do
+    context 'DEX' do
+      before do
+        cpu.memory = [0xCA] # DEX
+        cpu.pc = 0x0000
+        cpu.x = 0x07
       end
-    end
 
-    describe '#execute' do
-      context 'default' do
-        before do
-          cpu.x = 0x07
-          cpu.fetch
-        end
+      it_should 'advance PC by', 1
 
-        it 'should decrease the x register' do
-          cpu.execute
+      it_should 'take two cycles'
 
-          cpu.x.should == 0x06
-        end
-
-        it 'should return the "time" (# of CPU cyles) it took to run the instruction' do
-          cpu.execute.should == 2
-        end
-
-        it 'should not set flags' do
-          cpu.execute
-
-          cpu.flags[:z].should be_false
-          cpu.flags[:n].should be_false
-        end
+      it 'should decrease value' do
+        expect { cpu.step }.to change { cpu.x }.by(-1)
       end
+
+      it_should 'reset z flag'
+
+      it_should 'reset n flag'
 
       context 'zero result' do
-        before do
-          cpu.x = 0x01
-          cpu.fetch
-        end
+        before { cpu.x = 0x01 }
 
-        it 'should set the zero-flag' do
-          cpu.execute
+        it_should 'set z flag'
 
-          cpu.flags[:z].should be_true
-        end
+        it_should 'reset n flag'
       end
 
       context 'negative result' do
-        before do
-          cpu.x = 0x00
-          cpu.fetch
+        before { cpu.x = 0x00 }
+
+        it "should wrap around to two's complement" do
+          expect { cpu.step }.to change { cpu.x }.to(0xFF)
         end
 
-        it "should wrap around" do
-          cpu.execute
+        it_should 'reset z flag'
 
-          cpu.x.should == 0xFF # -1 in 8-bit two's complement
-        end
-
-        it 'should set the sign flag' do
-          cpu.execute
-
-          cpu.flags[:n].should be_true
-        end
-      end
-    end
-  end
-
-  describe 'DEY' do
-    before do
-      cpu.memory = [0x88] # DEX
-      cpu.pc = 0x0000
-    end
-
-    describe '#fetch' do
-      it 'should advance PC to the following instruction' do
-        expect { cpu.fetch }.to change { cpu.pc }.by(1)
+        it_should 'set n flag'
       end
     end
 
-    describe '#execute' do
-      context 'default' do
-        before do
-          cpu.y = 0x07
-          cpu.fetch
-        end
-
-        it 'should decrease the y register' do
-          cpu.execute
-
-          cpu.y.should == 0x06
-        end
-
-        it 'should return the "time" (# of CPU cyles) it took to run the instruction' do
-          cpu.execute.should == 2
-        end
-
-        it 'should not set flags' do
-          cpu.execute
-
-          cpu.flags[:z].should be_false
-          cpu.flags[:n].should be_false
-        end
+    context 'DEY' do
+      before do
+        cpu.memory = [0x88] # DEY
+        cpu.pc = 0x0000
+        cpu.y = 0x07
       end
+
+      it_should 'advance PC by', 1
+
+      it_should 'take two cycles'
+
+      it 'should decrease value' do
+        expect { cpu.step }.to change { cpu.y }.by(-1)
+      end
+
+      it_should 'reset z flag'
+
+      it_should 'reset n flag'
 
       context 'zero result' do
-        before do
-          cpu.y = 0x01
-          cpu.fetch
-        end
+        before { cpu.y = 0x01 }
 
-        it 'should set the zero-flag' do
-          cpu.execute
+        it_should 'set z flag'
 
-          cpu.flags[:z].should be_true
-        end
+        it_should 'reset n flag'
       end
 
       context 'negative result' do
-        before do
-          cpu.y = 0x00
-          cpu.fetch
+        before { cpu.y = 0x00 }
+
+        it "should wrap around to two's complement" do
+          expect { cpu.step }.to change { cpu.y }.to(0xFF)
         end
 
-        it "should wrap around" do
-          cpu.execute
+        it_should 'reset z flag'
 
-          cpu.y.should == 0xFF # -1 in 8-bit two's complement
-        end
-
-        it 'should set the sign flag' do
-          cpu.execute
-
-          cpu.flags[:n].should be_true
-        end
+        it_should 'set n flag'
       end
     end
   end
-
 end

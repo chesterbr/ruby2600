@@ -12,6 +12,13 @@ class Cpu
     @pc = memory[RESET_VECTOR] + 0x100 * memory[RESET_VECTOR + 1]
   end
 
+  def step
+    fetch
+    execute
+  end
+
+  private
+
   def fetch
     @opcode = memory[@pc]
     #... still not worrying (DEX=DEY=1 byte)
