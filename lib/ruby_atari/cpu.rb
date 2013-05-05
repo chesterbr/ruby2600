@@ -85,7 +85,7 @@ class Cpu
       update_zero_flag(@x)
       update_negative_flag(@x)
     when 0xBE # LDX, Absolute,Y
-      @x = memory[memory[@pc - 1] * 0x100 + memory[@pc - 2] + @y]
+      @x = memory[(memory[@pc - 1] * 0x100 + memory[@pc - 2] + @y) % 0x10000]
       update_zero_flag(@x)
       update_negative_flag(@x)
       # +1 if page boundary crossed

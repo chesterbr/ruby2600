@@ -305,7 +305,7 @@ describe Cpu do
 
       context 'absolute, y' do
         before do
-          cpu.memory[0..2] = [0xBE, 0x34, 0x12]  # 0000: LDX $1234,Y
+          cpu.memory[0..2] = [0xBE, 0x34, 0x12]  # LDX $1234,Y
           cpu.y = 0x10
         end
 
@@ -321,6 +321,12 @@ describe Cpu do
           it_should 'set x value', 0xFF
 
           it_should 'take five cycles'
+        end
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..2] = 0xBE, 0xF5, 0xFF}  # LDX $FFF5,Y
+
+          it_should 'set x value', 0x11
         end
       end
 
