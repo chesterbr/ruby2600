@@ -106,6 +106,127 @@ describe Cpu do
       end
     end
 
+    context 'LDA' do
+      before do
+        cpu.pc = 0x0000
+        cpu.memory = []
+        cpu.memory[0x00A5] = 0x33
+        cpu.memory[0x00B5] = 0x66
+        cpu.memory[0x1234] = 0x99
+        cpu.memory[0x1244] = 0xCC
+        cpu.memory[0x1304] = 0xFF
+      end
+
+      context 'immediate' do
+        before do
+          cpu.memory[0..1] = [0xA9, 0x22] # LDA #$22
+          cpu.flags[:z] = true
+          cpu.flags[:n] = true
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take two cycles'
+
+        it_should 'set a value', 0x22
+
+        it_should 'reset z flag'
+
+        it_should 'reset n flag'
+      end
+
+      context 'zero page' do
+        before do
+          cpu.memory[0..2] = [0xA5, 0xA5, 0xFF] # LDA $A5 (+junk)
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take three cycles'
+
+        it_should 'set a value', 0x33
+      end
+
+      context 'zero page, x' do
+        before do
+          cpu.memory[0..2] = [0xB5, 0xA5, 0xFF] # LDA $A5,X (+junk)
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take four cycles'
+
+        it_should 'set a value', 0x66
+      end
+
+      context 'absolute' do
+        before do
+          cpu.memory[0..2] = [0xAD, 0x34, 0x12] # LDA $1234
+          cpu.flags[:n] = false
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set a value', 0x99
+
+        it_should 'set n flag'
+      end
+
+      context 'absolute, x' do
+        before do
+          cpu.memory[0..2] = [0xBD, 0x34, 0x12]  # 0000: LDA $1234,Y
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set a value', 0xCC
+
+        context 'crossing page boundary' do
+          before { cpu.x = 0xD0 }
+
+          it_should 'set a value', 0xFF
+
+          it_should 'take five cycles'
+        end
+      end
+
+      context 'absolute, y' do
+        before do
+          cpu.memory[0..2] = [0xB9, 0x34, 0x12]  # 0000: LDA $1234,Y
+          cpu.y = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set a value', 0xCC
+
+        context 'crossing page boundary' do
+          before { cpu.y = 0xD0 }
+
+          it_should 'set a value', 0xFF
+
+          it_should 'take five cycles'
+        end
+      end
+
+      context '(indirect, x)' do
+        pending 'should be tested'
+      end
+
+      context '(indirect, y)' do
+        pending 'should be tested'
+      end
+
+    end
+
     context 'LDX' do
       before do
         cpu.pc = 0x0000
