@@ -9,7 +9,7 @@ describe Cpu do
     end
   end
 
-  %w'x y'.each do |register|
+  %w'x y a'.each do |register|
     it "should initialize with a byte-size #{register} register" do
       (0..255).should cover(cpu.send(register))
     end

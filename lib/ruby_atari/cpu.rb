@@ -1,5 +1,5 @@
 class Cpu
-  attr_accessor :memory, :pc, :x, :y, :flags
+  attr_accessor :memory, :pc, :x, :y, :a, :flags
 
   RESET_VECTOR = 0xFFFC
 
@@ -46,7 +46,7 @@ class Cpu
 
   def initialize
     @flags = {}
-    @x = @y = 0
+    @x = @y = @a = 0
   end
 
   def reset
@@ -68,23 +68,23 @@ class Cpu
   def execute
     # lots of refactorable repetition here, but for now...
     case @opcode
-    when 0xA2 # LDX, immediate
+    when 0xA2 # LDX; immediate
       @x = memory[@pc - 1]
       update_zero_flag(@x)
       update_negative_flag(@x)
-    when 0xA6 # LDX, Zero Page
+    when 0xA6 # LDX; Zero Page
       @x = memory[memory[@pc - 1]]
       update_zero_flag(@x)
       update_negative_flag(@x)
-    when 0xB6 # LDX, Zero Page,Y
+    when 0xB6 # LDX; Zero Page,Y
       @x = memory[(memory[@pc - 1] + @y) % 0x100]
       update_zero_flag(@x)
       update_negative_flag(@x)
-    when 0xAE # LDX, Absolute
+    when 0xAE # LDX; Absolute
       @x = memory[memory[@pc - 1] * 0x100 + memory[@pc - 2]]
       update_zero_flag(@x)
       update_negative_flag(@x)
-    when 0xBE # LDX, Absolute,Y
+    when 0xBE # LDX; Absolute,Y
       @x = memory[(memory[@pc - 1] * 0x100 + memory[@pc - 2] + @y) % 0x10000]
       update_zero_flag(@x)
       update_negative_flag(@x)
