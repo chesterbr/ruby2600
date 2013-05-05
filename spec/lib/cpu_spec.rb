@@ -231,6 +231,7 @@ describe Cpu do
       before do
         cpu.pc = 0x0000
         cpu.memory = []
+        cpu.memory[0x0005] = 0x11
         cpu.memory[0x00A5] = 0x33
         cpu.memory[0x00B5] = 0x66
         cpu.memory[0x1234] = 0x99
@@ -279,6 +280,12 @@ describe Cpu do
         it_should 'take four cycles'
 
         it_should 'set x value', 0x66
+
+        context 'crossing zero-page boundary' do
+          before { cpu.y = 0x60 }
+
+          it_should 'set x value', 0x11
+        end
       end
 
       context 'absolute' do

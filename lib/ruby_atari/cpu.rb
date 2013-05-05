@@ -77,7 +77,7 @@ class Cpu
       update_zero_flag(@x)
       update_negative_flag(@x)
     when 0xB6 # LDX, Zero Page,Y
-      @x = memory[memory[@pc - 1] + @y]
+      @x = memory[(memory[@pc - 1] + @y) % 0x100]
       update_zero_flag(@x)
       update_negative_flag(@x)
     when 0xAE # LDX, Absolute
