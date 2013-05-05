@@ -1,3 +1,30 @@
+shared_examples_for 'set a value' do |expected|
+  it do
+    cpu.step
+
+    value = cpu.a
+    value.should be(expected), "Expected: #{expected}, found: #{value}"
+  end
+end
+
+shared_examples_for 'set x value' do |expected|
+  it do
+    cpu.step
+
+    value = cpu.x
+    value.should be(expected), "Expected: #{expected}, found: #{value}"
+  end
+end
+
+shared_examples_for 'set y value' do |expected|
+  it do
+    cpu.step
+
+    value = cpu.y
+    value.should be(expected), "Expected: #{expected}, found: #{value}"
+  end
+end
+
 shared_examples_for "set z flag" do
   it do
     cpu.step

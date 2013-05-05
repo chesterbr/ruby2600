@@ -128,9 +128,7 @@ describe Cpu do
 
         it_should 'take two cycles'
 
-        it 'should set x value' do
-          expect { cpu.step }.to change { cpu.x }.to(0x22)
-        end
+        it_should 'set x value', 0x22
 
         it_should 'reset z flag'
 
@@ -139,21 +137,19 @@ describe Cpu do
 
       context 'zero page' do
         before do
-          cpu.memory[0..1] = [0xA6, 0xA5] # LDX $A5
+          cpu.memory[0..2] = [0xA6, 0xA5, 0xFF] # LDX $A5 (+junk)
         end
 
         it_should 'advance PC by two'
 
         it_should 'take three cycles'
 
-        it 'should set x value' do
-          expect { cpu.step }.to change { cpu.x }.to(0x33)
-        end
+        it_should 'set x value', 0x33
       end
 
       context 'zero page, y' do
         before do
-          cpu.memory[0..1] = [0xB6, 0xA5] # LDX $A5,Y
+          cpu.memory[0..2] = [0xB6, 0xA5, 0xFF] # LDX $A5,Y (+junk)
           cpu.y = 0x10
         end
 
@@ -161,9 +157,7 @@ describe Cpu do
 
         it_should 'take four cycles'
 
-        it 'should set x value' do
-          expect { cpu.step }.to change { cpu.x }.to(0x66)
-        end
+        it_should 'set x value', 0x66
       end
 
       context 'absolute' do
@@ -176,9 +170,7 @@ describe Cpu do
 
         it_should 'take four cycles'
 
-        it 'should set x value' do
-          expect { cpu.step }.to change { cpu.x }.to(0x99)
-        end
+        it_should 'set x value', 0x99
 
         it_should 'set n flag'
       end
@@ -193,25 +185,16 @@ describe Cpu do
 
         it_should 'take four cycles'
 
-        it 'should set x value' do
-          expect { cpu.step }.to change { cpu.x }.to(0xCC)
-        end
+        it_should 'set x value', 0xCC
 
         context 'crossing page boundary' do
           before { cpu.y = 0xD0 }
 
-          it 'should set x value' do
-            expect { cpu.step }.to change { cpu.x }.to(0xFF)
-          end
+          it_should 'set x value', 0xFF
 
           it_should 'take five cycles'
         end
       end
-
-      # all should check if byte was picked up, and n/z flags
-      # absolute, y should take 4cy, but cross-boundary 5
-
-
 
     end
   end
