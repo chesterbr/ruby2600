@@ -68,6 +68,34 @@ class Cpu
   def execute
     # lots of refactorable repetition here, but for now...
     case @opcode
+    when 0xA9 # LDA; immediate
+      @a = memory[@pc - 1]
+      update_zero_flag(@a)
+      update_negative_flag(@a)
+    when 0xA5 # LDA; Zero Page
+      @a = memory[memory[@pc - 1]]
+      update_zero_flag(@a)
+      update_negative_flag(@a)
+    when 0xB5 # LDA; Zero Page,X
+      @a = memory[(memory[@pc - 1] + @x) % 0x100]
+      update_zero_flag(@a)
+      update_negative_flag(@a)
+    when 0xAD # LDA; Absolute
+      @a = memory[memory[@pc - 1] * 0x100 + memory[@pc - 2]]
+      update_zero_flag(@a)
+      update_negative_flag(@a)
+    when 0xBD # LDA; Absolute,X
+      @a = memory[(memory[@pc - 1] * 0x100 + memory[@pc - 2] + @x) % 0x10000]
+      update_zero_flag(@a)
+      update_negative_flag(@a)
+      # +1 if page boundary crossed
+      return 1 + CYCLE_COUNT[@opcode] if memory[@pc - 2] + @x > 0xFF
+    when 0xB9 # LDA; Absolute,Y
+      @a = memory[(memory[@pc - 1] * 0x100 + memory[@pc - 2] + @y) % 0x10000]
+      update_zero_flag(@a)
+      update_negative_flag(@a)
+      # +1 if page boundary crossed
+      return 1 + CYCLE_COUNT[@opcode] if memory[@pc - 2] + @y > 0xFF
     when 0xA2 # LDX; immediate
       @x = memory[@pc - 1]
       update_zero_flag(@x)
@@ -89,8 +117,6 @@ class Cpu
       update_zero_flag(@x)
       update_negative_flag(@x)
       # +1 if page boundary crossed
-      # FIXME on LDX this is fine, but fetch memory[@pc -2] before
-      #       any memory-changing operation
       return 1 + CYCLE_COUNT[@opcode] if memory[@pc - 2] + @y > 0xFF
     when 0xCA # DEX
       @x = @x == 0 ? 0xFF : @x - 1
