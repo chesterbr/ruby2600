@@ -110,6 +110,7 @@ describe Cpu do
       before do
         cpu.pc = 0x0000
         cpu.memory = []
+        cpu.memory[0x0005] = 0x11
         cpu.memory[0x00A5] = 0x33
         cpu.memory[0x00B5] = 0x66
         cpu.memory[0x1234] = 0x99
@@ -158,6 +159,12 @@ describe Cpu do
         it_should 'take four cycles'
 
         it_should 'set a value', 0x66
+
+        context 'crossing zero-page boundary' do
+          before { cpu.x = 0x60 }
+
+          it_should 'set a value', 0x11
+        end
       end
 
       context 'absolute' do
@@ -177,7 +184,7 @@ describe Cpu do
 
       context 'absolute, x' do
         before do
-          cpu.memory[0..2] = [0xBD, 0x34, 0x12]  # 0000: LDA $1234,Y
+          cpu.memory[0..2] = [0xBD, 0x34, 0x12]  # 0000: LDA $1234,X
           cpu.x = 0x10
         end
 
@@ -193,6 +200,12 @@ describe Cpu do
           it_should 'set a value', 0xFF
 
           it_should 'take five cycles'
+        end
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..2] = 0xBD, 0xF5, 0xFF}  # LDA $FFF5,X
+
+          it_should 'set a value', 0x11
         end
       end
 
@@ -215,16 +228,21 @@ describe Cpu do
 
           it_should 'take five cycles'
         end
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..2] = 0xB9, 0xF5, 0xFF}  # LDA $FFF5,Y
+
+          it_should 'set a value', 0x11
+        end
+      end
+
+      context '(indirect), y' do
+        pending 'should be tested'
       end
 
       context '(indirect, x)' do
         pending 'should be tested'
       end
-
-      context '(indirect, y)' do
-        pending 'should be tested'
-      end
-
     end
 
     context 'LDX' do
