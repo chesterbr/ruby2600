@@ -76,6 +76,7 @@ class Cpu
       @a = zero_page_value
       update_zero_flag(@a)
       update_negative_flag(@a)
+      #asd
     when 0xB5 # LDA; Zero Page,X
       @a = zero_page_indexed_x_value
       update_zero_flag(@a)
@@ -96,28 +97,11 @@ class Cpu
       update_negative_flag(@a)
       # +1 if page boundary crossed
       return 1 + CYCLE_COUNT[@opcode] if memory[@pc - 2] + @y > 0xFF
-    when 0xA2 # LDX; immediate
-      @x = immediate_value
+    when 0xA2, 0xA6, 0xB6, 0xAE, 0xBE # LDX
+      @x = read_memory
       update_zero_flag(@x)
       update_negative_flag(@x)
-    when 0xA6 # LDX; Zero Page
-      @x = zero_page_value
-      update_zero_flag(@x)
-      update_negative_flag(@x)
-    when 0xB6 # LDX; Zero Page,Y
-      @x = zero_page_indexed_y_value
-      update_zero_flag(@x)
-      update_negative_flag(@x)
-    when 0xAE # LDX; Absolute
-      @x = absolute_value
-      update_zero_flag(@x)
-      update_negative_flag(@x)
-    when 0xBE # LDX; Absolute,Y
-      @x = absolute_indexed_y_value
-      update_zero_flag(@x)
-      update_negative_flag(@x)
-      # +1 if page boundary crossed
-      return 1 + CYCLE_COUNT[@opcode] if memory[@pc - 2] + @y > 0xFF
+      return 1 + CYCLE_COUNT[@opcode] if mem_boundary_crossed?
     when 0xCA # DEX
       @x = @x == 0 ? 0xFF : @x - 1
       update_zero_flag(@x)
@@ -128,6 +112,25 @@ class Cpu
       update_negative_flag(@y)
     end
     CYCLE_COUNT[@opcode]
+  end
+
+  # http://www.llx.com/~nparker/a2/opcodes.html
+
+  def read_memory
+    # aaaabbbcc
+    # cc=10
+    case (@opcode & 0b00011100) >> 2 # bbb
+    when 0b000 then immediate_value
+    when 0b001 then zero_page_value
+    #when 0b010 then accumulator_value
+    when 0b011 then absolute_value
+    when 0b101 then zero_page_indexed_y_value # LDX only
+    when 0b111 then absolute_indexed_y_value # LDX only
+    end
+  end
+
+  def mem_boundary_crossed?
+    @opcode == 0xBE && memory[@pc - 2] + @y > 0xFF  # LDX; Absolute Y && page boundary crossed
   end
 
   # Memory reading for instructions
