@@ -102,6 +102,11 @@ class Cpu
       update_zero_flag(@x)
       update_negative_flag(@x)
       return 1 + CYCLE_COUNT[@opcode] if mem_boundary_crossed?
+    when 0xA0, 0xA4, 0xB4, 0xAC, 0xBC # LDY
+      @y = read_memory
+      update_zero_flag(@y)
+      update_negative_flag(@y)
+      return 1 + CYCLE_COUNT[@opcode] if mem_boundary_crossed?
     when 0xCA # DEX
       @x = @x == 0 ? 0xFF : @x - 1
       update_zero_flag(@x)
@@ -119,18 +124,33 @@ class Cpu
   def read_memory
     # aaaabbbcc
     # cc=10
-    case (@opcode & 0b00011100) >> 2 # bbb
-    when 0b000 then immediate_value
-    when 0b001 then zero_page_value
-    #when 0b010 then accumulator_value
-    when 0b011 then absolute_value
-    when 0b101 then zero_page_indexed_y_value # LDX only
-    when 0b111 then absolute_indexed_y_value # LDX only
+    bbb = (@opcode & 0b00011100) >> 2
+    cc  = (@opcode & 0b00000011)
+    case cc
+    when 0b00 # BIT, JMP, STY, LDY, CPY, CPX
+      case bbb
+      when 0b000 then immediate_value
+      when 0b001 then zero_page_value
+      #when 0b010 then accumulator_value
+      when 0b011 then absolute_value
+      when 0b101 then zero_page_indexed_x_value
+      when 0b111 then absolute_indexed_x_value
+      end
+    when 0b10 # ASL, ROL, LSR, ROR, STX, LDX, DEC, INC
+      case bbb
+      when 0b000 then immediate_value
+      when 0b001 then zero_page_value
+      #when 0b010 then accumulator_value
+      when 0b011 then absolute_value
+      when 0b101 then zero_page_indexed_y_value # LDX only
+      when 0b111 then absolute_indexed_y_value # LDX only
+      end
     end
   end
 
   def mem_boundary_crossed?
-    @opcode == 0xBE && memory[@pc - 2] + @y > 0xFF  # LDX; Absolute Y && page boundary crossed
+    (@opcode == 0xBE && memory[@pc - 2] + @y > 0xFF) ||  # LDX; Absolute Y && page boundary crossed
+    (@opcode == 0xBC && memory[@pc - 2] + @x > 0xFF)     # LDY; Absolute X && page boundary crossed
   end
 
   # Memory reading for instructions

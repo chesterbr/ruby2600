@@ -328,7 +328,99 @@ describe Cpu do
           it_should 'set x value', 0x11
         end
       end
+    end
 
+    context 'LDY' do
+      context 'immediate' do
+        before do
+          cpu.memory[0..1] = [0xA0, 0x22] # LDY #$22
+          cpu.flags[:z] = true
+          cpu.flags[:n] = true
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take two cycles'
+
+        it_should 'set y value', 0x22
+
+        it_should 'reset z flag'
+
+        it_should 'reset n flag'
+      end
+
+      context 'zero page' do
+        before do
+          cpu.memory[0..2] = [0xA4, 0xA5, 0xFF] # LDY $A5 (+junk)
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take three cycles'
+
+        it_should 'set y value', 0x33
+      end
+
+      context 'zero page, x' do
+        before do
+          cpu.memory[0..2] = [0xB4, 0xA5, 0xFF] # LDY $A5,X (+junk)
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take four cycles'
+
+        it_should 'set y value', 0x66
+
+        context 'crossing zero-page boundary' do
+          before { cpu.x = 0x60 }
+
+          it_should 'set y value', 0x11
+        end
+      end
+
+      context 'absolute' do
+        before do
+          cpu.memory[0..2] = [0xAC, 0x34, 0x12] # LDY $1234
+          cpu.flags[:n] = false
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set y value', 0x99
+
+        it_should 'set n flag'
+      end
+
+      context 'absolute, x' do
+        before do
+          cpu.memory[0..2] = [0xBC, 0x34, 0x12]  # LDY $1234,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set y value', 0xCC
+
+        context 'crossing page boundary' do
+          before { cpu.x = 0xD0 }
+
+          it_should 'set y value', 0xFF
+
+          it_should 'take five cycles'
+        end
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..2] = 0xBC, 0xF5, 0xFF}  # LDY $FFF5,Y
+
+          it_should 'set y value', 0x11
+        end
+      end
     end
   end
 end
