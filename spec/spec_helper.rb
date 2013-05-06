@@ -1,3 +1,5 @@
+require 'rubygems'
+
 require 'ruby_atari'
 require 'support/shared_examples_for_memory.rb'
 require 'support/shared_examples_for_cpu.rb'
