@@ -69,23 +69,23 @@ class Cpu
     # lots of refactorable repetition here, but for now...
     case @opcode
     when 0xA9 # LDA; immediate
-      @a = memory[@pc - 1]
+      @a = immediate_value
       update_zero_flag(@a)
       update_negative_flag(@a)
     when 0xA5 # LDA; Zero Page
-      @a = memory[memory[@pc - 1]]
+      @a = zero_page_value
       update_zero_flag(@a)
       update_negative_flag(@a)
     when 0xB5 # LDA; Zero Page,X
-      @a = memory[(memory[@pc - 1] + @x) % 0x100]
+      @a = zero_page_indexed_x_value
       update_zero_flag(@a)
       update_negative_flag(@a)
     when 0xAD # LDA; Absolute
-      @a = memory[memory[@pc - 1] * 0x100 + memory[@pc - 2]]
+      @a = absolute_value
       update_zero_flag(@a)
       update_negative_flag(@a)
     when 0xBD # LDA; Absolute,X
-      @a = memory[(memory[@pc - 1] * 0x100 + memory[@pc - 2] + @x) % 0x10000]
+      @a = absolute_indexed_x_value
       update_zero_flag(@a)
       update_negative_flag(@a)
       # +1 if page boundary crossed
@@ -97,23 +97,23 @@ class Cpu
       # +1 if page boundary crossed
       return 1 + CYCLE_COUNT[@opcode] if memory[@pc - 2] + @y > 0xFF
     when 0xA2 # LDX; immediate
-      @x = memory[@pc - 1]
+      @x = immediate_value
       update_zero_flag(@x)
       update_negative_flag(@x)
     when 0xA6 # LDX; Zero Page
-      @x = memory[memory[@pc - 1]]
+      @x = zero_page_value
       update_zero_flag(@x)
       update_negative_flag(@x)
     when 0xB6 # LDX; Zero Page,Y
-      @x = memory[(memory[@pc - 1] + @y) % 0x100]
+      @x = zero_page_indexed_y_value
       update_zero_flag(@x)
       update_negative_flag(@x)
     when 0xAE # LDX; Absolute
-      @x = memory[memory[@pc - 1] * 0x100 + memory[@pc - 2]]
+      @x = absolute_value
       update_zero_flag(@x)
       update_negative_flag(@x)
     when 0xBE # LDX; Absolute,Y
-      @x = memory[(memory[@pc - 1] * 0x100 + memory[@pc - 2] + @y) % 0x10000]
+      @x = absolute_indexed_y_value
       update_zero_flag(@x)
       update_negative_flag(@x)
       # +1 if page boundary crossed
@@ -129,6 +129,38 @@ class Cpu
     end
     CYCLE_COUNT[@opcode]
   end
+
+  # Memory reading for instructions
+
+  def immediate_value
+    memory[@pc - 1]
+  end
+
+  def zero_page_value
+    memory[memory[@pc - 1]]
+  end
+
+  def zero_page_indexed_x_value
+    memory[(memory[@pc - 1] + @x) % 0x100]
+  end
+
+  def zero_page_indexed_y_value
+    memory[(memory[@pc - 1] + @y) % 0x100]
+  end
+
+  def absolute_value
+    memory[memory[@pc - 1] * 0x100 + memory[@pc - 2]]
+  end
+
+  def absolute_indexed_x_value
+    memory[(memory[@pc - 1] * 0x100 + memory[@pc - 2] + @x) % 0x10000]
+  end
+
+  def absolute_indexed_y_value
+    memory[(memory[@pc - 1] * 0x100 + memory[@pc - 2] + @y) % 0x10000]
+  end
+
+  # Flag management
 
   def update_zero_flag(value)
     @flags[:z] = (value == 0)
