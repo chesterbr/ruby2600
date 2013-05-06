@@ -26,10 +26,22 @@ describe Cpu do
   end
 
   describe '#step' do
+    before do
+      # Some values to allow testing for different addressing modes
+      cpu.memory = []
+      cpu.memory[0x0005] = 0x11
+      cpu.memory[0x00A5] = 0x33
+      cpu.memory[0x00B5] = 0x66
+      cpu.memory[0x1234] = 0x99
+      cpu.memory[0x1244] = 0xCC
+      cpu.memory[0x1304] = 0xFF
+      # We'll load most test snippets here
+      cpu.pc = 0x0000
+    end
+
     context 'DEX' do
       before do
         cpu.memory = [0xCA] # DEX
-        cpu.pc = 0x0000
         cpu.x = 0x07
       end
 
@@ -37,9 +49,7 @@ describe Cpu do
 
       it_should 'take two cycles'
 
-      it 'should decrease value' do
-        expect { cpu.step }.to change { cpu.x }.by(-1)
-      end
+      it_should 'set x value', 0x06
 
       it_should 'reset z flag'
 
@@ -56,9 +66,7 @@ describe Cpu do
       context 'negative result' do
         before { cpu.x = 0x00 }
 
-        it "should wrap around to two's complement" do
-          expect { cpu.step }.to change { cpu.x }.to(0xFF)
-        end
+        it_should 'set x value', 0xFF
 
         it_should 'reset z flag'
 
@@ -69,7 +77,6 @@ describe Cpu do
     context 'DEY' do
       before do
         cpu.memory = [0x88] # DEY
-        cpu.pc = 0x0000
         cpu.y = 0x07
       end
 
@@ -77,9 +84,7 @@ describe Cpu do
 
       it_should 'take two cycles'
 
-      it 'should decrease value' do
-        expect { cpu.step }.to change { cpu.y }.by(-1)
-      end
+      it_should 'set y value', 0x06
 
       it_should 'reset z flag'
 
@@ -96,9 +101,7 @@ describe Cpu do
       context 'negative result' do
         before { cpu.y = 0x00 }
 
-        it "should wrap around to two's complement" do
-          expect { cpu.step }.to change { cpu.y }.to(0xFF)
-        end
+        it_should 'set y value', 0xFF
 
         it_should 'reset z flag'
 
@@ -107,17 +110,6 @@ describe Cpu do
     end
 
     context 'LDA' do
-      before do
-        cpu.pc = 0x0000
-        cpu.memory = []
-        cpu.memory[0x0005] = 0x11
-        cpu.memory[0x00A5] = 0x33
-        cpu.memory[0x00B5] = 0x66
-        cpu.memory[0x1234] = 0x99
-        cpu.memory[0x1244] = 0xCC
-        cpu.memory[0x1304] = 0xFF
-      end
-
       context 'immediate' do
         before do
           cpu.memory[0..1] = [0xA9, 0x22] # LDA #$22
@@ -246,17 +238,6 @@ describe Cpu do
     end
 
     context 'LDX' do
-      before do
-        cpu.pc = 0x0000
-        cpu.memory = []
-        cpu.memory[0x0005] = 0x11
-        cpu.memory[0x00A5] = 0x33
-        cpu.memory[0x00B5] = 0x66
-        cpu.memory[0x1234] = 0x99
-        cpu.memory[0x1244] = 0xCC
-        cpu.memory[0x1304] = 0xFF
-      end
-
       context 'immediate' do
         before do
           cpu.memory[0..1] = [0xA2, 0x22] # LDX #$22
