@@ -27,21 +27,31 @@ describe Cpu do
 
   describe '#step' do
     before do
-      # Some values to allow testing for different addressing modes
+      # Some positions to play with
       cpu.memory = []
+      cpu.memory[0x0002] = 0xFF
       cpu.memory[0x0005] = 0x11
+      cpu.memory[0x0006] = 0x03
+      cpu.memory[0x00A3] = 0xF5
+      cpu.memory[0x00A4] = 0xFF
       cpu.memory[0x00A5] = 0x33
+      cpu.memory[0x00A6] = 0x20
       cpu.memory[0x00B5] = 0x66
+      cpu.memory[0x00B6] = 0x02
+      cpu.memory[0x0266] = 0xA4
+      cpu.memory[0x0311] = 0xB5
+      cpu.memory[0x2043] = 0x77
+      cpu.memory[0x2103] = 0x88
       cpu.memory[0x1234] = 0x99
       cpu.memory[0x1244] = 0xCC
       cpu.memory[0x1304] = 0xFF
-      # We'll load most test snippets here
+      # Most examples will start at the top
       cpu.pc = 0x0000
     end
 
     context 'DEX' do
       before do
-        cpu.memory = [0xCA] # DEX
+        cpu.memory[0] = 0xCA # DEX
         cpu.x = 0x07
       end
 
@@ -49,7 +59,9 @@ describe Cpu do
 
       it_should 'take two cycles'
 
-      it_should 'set x value', 0x06
+      it 'should decrease value' do
+        expect { cpu.step }.to change { cpu.x }.by(-1)
+      end
 
       it_should 'reset z flag'
 
@@ -66,7 +78,9 @@ describe Cpu do
       context 'negative result' do
         before { cpu.x = 0x00 }
 
-        it_should 'set x value', 0xFF
+        it "should wrap around to two's complement" do
+          expect { cpu.step }.to change { cpu.x }.to(0xFF)
+        end
 
         it_should 'reset z flag'
 
@@ -76,7 +90,7 @@ describe Cpu do
 
     context 'DEY' do
       before do
-        cpu.memory = [0x88] # DEY
+        cpu.memory[0] = 0x88 # DEY
         cpu.y = 0x07
       end
 
@@ -84,7 +98,9 @@ describe Cpu do
 
       it_should 'take two cycles'
 
-      it_should 'set y value', 0x06
+      it 'should decrease value' do
+        expect { cpu.step }.to change { cpu.y }.by(-1)
+      end
 
       it_should 'reset z flag'
 
@@ -101,7 +117,9 @@ describe Cpu do
       context 'negative result' do
         before { cpu.y = 0x00 }
 
-        it_should 'set y value', 0xFF
+        it "should wrap around to two's complement" do
+          expect { cpu.step }.to change { cpu.y }.to(0xFF)
+        end
 
         it_should 'reset z flag'
 
@@ -112,7 +130,7 @@ describe Cpu do
     context 'LDA' do
       context 'immediate' do
         before do
-          cpu.memory[0..1] = [0xA9, 0x22] # LDA #$22
+          cpu.memory[0..1] = 0xA9, 0x22 # LDA #$22
           cpu.flags[:z] = true
           cpu.flags[:n] = true
         end
@@ -129,9 +147,7 @@ describe Cpu do
       end
 
       context 'zero page' do
-        before do
-          cpu.memory[0..2] = [0xA5, 0xA5, 0xFF] # LDA $A5 (+junk)
-        end
+        before { cpu.memory[0..1] = 0xA5, 0xA5 } # LDA $A5
 
         it_should 'advance PC by two'
 
@@ -142,7 +158,7 @@ describe Cpu do
 
       context 'zero page, x' do
         before do
-          cpu.memory[0..2] = [0xB5, 0xA5, 0xFF] # LDA $A5,X (+junk)
+          cpu.memory[0..1] = 0xB5, 0xA5 # LDA $A5,X
           cpu.x = 0x10
         end
 
@@ -161,7 +177,7 @@ describe Cpu do
 
       context 'absolute' do
         before do
-          cpu.memory[0..2] = [0xAD, 0x34, 0x12] # LDA $1234
+          cpu.memory[0..2] = 0xAD, 0x34, 0x12 # LDA $1234
           cpu.flags[:n] = false
         end
 
@@ -176,7 +192,7 @@ describe Cpu do
 
       context 'absolute, x' do
         before do
-          cpu.memory[0..2] = [0xBD, 0x34, 0x12]  # 0000: LDA $1234,X
+          cpu.memory[0..2] = 0xBD, 0x34, 0x12  # 0000: LDA $1234,X
           cpu.x = 0x10
         end
 
@@ -195,7 +211,7 @@ describe Cpu do
         end
 
         context 'crossing memory boundary' do
-          before { cpu.memory[0..2] = 0xBD, 0xF5, 0xFF}  # LDA $FFF5,X
+          before { cpu.memory[0..2] = 0xBD, 0xF5, 0xFF } # LDA $FFF5,X
 
           it_should 'set a value', 0x11
         end
@@ -203,7 +219,7 @@ describe Cpu do
 
       context 'absolute, y' do
         before do
-          cpu.memory[0..2] = [0xB9, 0x34, 0x12]  # 0000: LDA $1234,Y
+          cpu.memory[0..2] = 0xB9, 0x34, 0x12  # 0000: LDA $1234,Y
           cpu.y = 0x10
         end
 
@@ -222,18 +238,56 @@ describe Cpu do
         end
 
         context 'crossing memory boundary' do
-          before { cpu.memory[0..2] = 0xB9, 0xF5, 0xFF}  # LDA $FFF5,Y
+          before { cpu.memory[0..2] = 0xB9, 0xF5, 0xFF } # LDA $FFF5,Y
 
           it_should 'set a value', 0x11
         end
       end
 
       context '(indirect), y' do
-        pending 'should be tested'
+        before do
+          cpu.memory[0..1] = 0xB1, 0xA5  # 0000: LDA ($A5),Y
+          cpu.y = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take five cycles'
+
+        it_should 'set a value', 0x77
+
+        context 'crossing page boundary' do
+          before { cpu.y = 0xD0 }
+
+          it_should 'set a value', 0x88
+
+          it_should 'take six cycles'
+        end
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..1] = 0xB1, 0xA3}  # LDA ($A3),Y
+
+          it_should 'set a value', 0x11
+        end
       end
 
       context '(indirect, x)' do
-        pending 'should be tested'
+        before do
+          cpu.memory[0..1] = 0xA1, 0xA5  # 0000: LDA ($A5,X)
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take six cycles'
+
+        it_should 'set a value', 0xA4
+
+        context 'crossing zero-page boundary' do
+          before { cpu.x = 0x60 }
+
+          it_should 'set a value', 0xB5
+        end
       end
     end
 
@@ -257,9 +311,7 @@ describe Cpu do
       end
 
       context 'zero page' do
-        before do
-          cpu.memory[0..2] = [0xA6, 0xA5, 0xFF] # LDX $A5 (+junk)
-        end
+        before { cpu.memory[0..1] = 0xA6, 0xA5 } # LDX $A5
 
         it_should 'advance PC by two'
 
@@ -270,7 +322,7 @@ describe Cpu do
 
       context 'zero page, y' do
         before do
-          cpu.memory[0..2] = [0xB6, 0xA5, 0xFF] # LDX $A5,Y (+junk)
+          cpu.memory[0..1] = 0xB6, 0xA5 # LDX $A5,Y
           cpu.y = 0x10
         end
 
@@ -289,7 +341,7 @@ describe Cpu do
 
       context 'absolute' do
         before do
-          cpu.memory[0..2] = [0xAE, 0x34, 0x12] # LDX $1234
+          cpu.memory[0..2] = 0xAE, 0x34, 0x12 # LDX $1234
           cpu.flags[:n] = false
         end
 
@@ -304,7 +356,7 @@ describe Cpu do
 
       context 'absolute, y' do
         before do
-          cpu.memory[0..2] = [0xBE, 0x34, 0x12]  # LDX $1234,Y
+          cpu.memory[0..2] = 0xBE, 0x34, 0x12 # LDX $1234,Y
           cpu.y = 0x10
         end
 
@@ -323,7 +375,7 @@ describe Cpu do
         end
 
         context 'crossing memory boundary' do
-          before { cpu.memory[0..2] = 0xBE, 0xF5, 0xFF}  # LDX $FFF5,Y
+          before { cpu.memory[0..2] = 0xBE, 0xF5, 0xFF } # LDX $FFF5,Y
 
           it_should 'set x value', 0x11
         end
@@ -333,7 +385,7 @@ describe Cpu do
     context 'LDY' do
       context 'immediate' do
         before do
-          cpu.memory[0..1] = [0xA0, 0x22] # LDY #$22
+          cpu.memory[0..1] = 0xA0, 0x22 # LDY #$22
           cpu.flags[:z] = true
           cpu.flags[:n] = true
         end
@@ -350,9 +402,7 @@ describe Cpu do
       end
 
       context 'zero page' do
-        before do
-          cpu.memory[0..2] = [0xA4, 0xA5, 0xFF] # LDY $A5 (+junk)
-        end
+        before { cpu.memory[0..1] = 0xA4, 0xA5 } # LDY $A5
 
         it_should 'advance PC by two'
 
@@ -363,7 +413,7 @@ describe Cpu do
 
       context 'zero page, x' do
         before do
-          cpu.memory[0..2] = [0xB4, 0xA5, 0xFF] # LDY $A5,X (+junk)
+          cpu.memory[0..1] = 0xB4, 0xA5 # LDY $A5,X
           cpu.x = 0x10
         end
 
@@ -382,7 +432,7 @@ describe Cpu do
 
       context 'absolute' do
         before do
-          cpu.memory[0..2] = [0xAC, 0x34, 0x12] # LDY $1234
+          cpu.memory[0..2] = 0xAC, 0x34, 0x12 # LDY $1234
           cpu.flags[:n] = false
         end
 
@@ -397,7 +447,7 @@ describe Cpu do
 
       context 'absolute, x' do
         before do
-          cpu.memory[0..2] = [0xBC, 0x34, 0x12]  # LDY $1234,X
+          cpu.memory[0..2] = 0xBC, 0x34, 0x12 # LDY $1234,X
           cpu.x = 0x10
         end
 
@@ -416,10 +466,55 @@ describe Cpu do
         end
 
         context 'crossing memory boundary' do
-          before { cpu.memory[0..2] = 0xBC, 0xF5, 0xFF}  # LDY $FFF5,Y
+          before { cpu.memory[0..2] = 0xBC, 0xF5, 0xFF } # LDY $FFF5,Y
 
           it_should 'set y value', 0x11
         end
+      end
+    end
+
+    context 'STX' do
+      before { cpu.x = 0x2F }
+
+      context 'zero page' do
+        before do
+          cpu.memory[0..1] = 0x86, 0xA5 # STX $A5
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take three cycles'
+
+        it_should 'set memory with value', 0x00A5, 0x2F
+      end
+
+      context 'zero page, y' do
+        before do
+          cpu.memory[0..1] = 0x96, 0xA5 # STX $A5,Y
+          cpu.y = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take four cycles'
+
+        it_should 'set memory with value', 0x00B5, 0x2F
+
+        context 'crossing zero-page boundary' do
+          before { cpu.y = 0x60 }
+
+          it_should 'set memory with value', 0x0005, 0x2F
+        end
+      end
+
+      context 'absolute' do
+        before { cpu.memory[0..2] = 0x8E, 0x34, 0x12 } # STX $1234
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set memory with value', 0x1234, 0x2F
       end
     end
   end

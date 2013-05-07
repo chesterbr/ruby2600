@@ -3,7 +3,7 @@ shared_examples_for 'set a value' do |expected|
     cpu.step
 
     value = cpu.a
-    value.should be(expected), "Expected: #{expected}, found: #{value}"
+    value.should be(expected), "Expected: #{hex_byte(expected)}, found: #{hex_byte(value)}"
   end
 end
 
@@ -12,7 +12,7 @@ shared_examples_for 'set x value' do |expected|
     cpu.step
 
     value = cpu.x
-    value.should be(expected), "Expected: #{expected}, found: #{value}"
+    value.should be(expected), "Expected: #{hex_byte(expected)}, found: #{hex_byte(value)}"
   end
 end
 
@@ -21,7 +21,16 @@ shared_examples_for 'set y value' do |expected|
     cpu.step
 
     value = cpu.y
-    value.should be(expected), "Expected: #{expected}, found: #{value}"
+    value.should be(expected), "Expected: #{hex_byte(expected)}, found: #{hex_byte(value)}"
+  end
+end
+
+shared_examples_for 'set memory with value' do |position, expected|
+  it do
+    cpu.step
+
+    value = cpu.memory[position]
+    value.should be(expected), "Expected: #{hex_byte(expected)} at address #{hex_word(position)}, found: #{hex_byte(value)}"
   end
 end
 
