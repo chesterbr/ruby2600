@@ -68,7 +68,10 @@ class Cpu
     @opcode_group           = (@opcode & 0b00000011)
     @opcode_addressing_mode = (@opcode & 0b00011100) >> 2
     @opcode_instruction     = (@opcode & 0b11100000) >> 5
-    @param
+
+    @param_lo = memory[@pc + 1]
+    @param_hi = memory[@pc + 2]
+
     @pc += INSTRUCTION_SIZE[@opcode]
   end
 
@@ -100,11 +103,11 @@ class Cpu
   end
 
   def page_boundary_crossed?
-    (@opcode == 0xBE && memory[@pc - 2] + @y > 0xFF) ||  # LDX; Absolute Y
-    (@opcode == 0xB9 && memory[@pc - 2] + @y > 0xFF) ||  # LDA; Absolute Y
+    (@opcode == 0xBE && @param_lo + @y > 0xFF) ||  # LDX; Absolute Y
+    (@opcode == 0xB9 && @param_lo + @y > 0xFF) ||  # LDA; Absolute Y
     (@opcode == 0xB1 && memory[memory[@pc - 1]] + @y > 0xFF) || # LDA; indirect indexed y
-    (@opcode == 0xBD && memory[@pc - 2] + @x > 0xFF) ||  # LDA; Absolute X
-    (@opcode == 0xBC && memory[@pc - 2] + @x > 0xFF)     # LDY; Absolute X
+    (@opcode == 0xBD && @param_lo + @x > 0xFF) ||  # LDA; Absolute X
+    (@opcode == 0xBC && @param_lo + @x > 0xFF)     # LDY; Absolute X
   end
 
   def read_memory
@@ -145,35 +148,35 @@ class Cpu
   # Memory reading for instructions
 
   def immediate_value
-    memory[@pc - 1]
+    @param_lo
   end
 
   def zero_page_value
-    memory[memory[@pc - 1]]
+    memory[@param_lo]
   end
 
   def zero_page_indexed_x_value
-    memory[(memory[@pc - 1] + @x) % 0x100]
+    memory[(@param_lo + @x) % 0x100]
   end
 
   def zero_page_indexed_y_value
-    memory[(memory[@pc - 1] + @y) % 0x100]
+    memory[(@param_lo + @y) % 0x100]
   end
 
   def absolute_value
-    memory[memory[@pc - 1] * 0x100 + memory[@pc - 2]]
+    memory[@param_hi * 0x100 + @param_lo]
   end
 
   def absolute_indexed_x_value
-    memory[(memory[@pc - 1] * 0x100 + memory[@pc - 2] + @x) % 0x10000]
+    memory[(@param_hi * 0x100 + @param_lo + @x) % 0x10000]
   end
 
   def absolute_indexed_y_value
-    memory[(memory[@pc - 1] * 0x100 + memory[@pc - 2] + @y) % 0x10000]
+    memory[(@param_hi * 0x100 + @param_lo + @y) % 0x10000]
   end
 
   def indirect_indexed_y_value
-    memory[(memory[memory[@pc - 1]+1] * 0x100 + memory[memory[@pc - 1]] + @y) % 0x10000]
+    memory[(memory[@param_lo+1] * 0x100 + memory[@param_lo] + @y) % 0x10000]
   end
 
   # Flag management
