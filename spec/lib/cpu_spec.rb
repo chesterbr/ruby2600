@@ -31,11 +31,15 @@ describe Cpu do
       cpu.memory = []
       cpu.memory[0x0002] = 0xFF
       cpu.memory[0x0005] = 0x11
+      cpu.memory[0x0006] = 0x03
       cpu.memory[0x00A3] = 0xF5
       cpu.memory[0x00A4] = 0xFF
       cpu.memory[0x00A5] = 0x33
       cpu.memory[0x00A6] = 0x20
       cpu.memory[0x00B5] = 0x66
+      cpu.memory[0x00B6] = 0x02
+      cpu.memory[0x0266] = 0xA4
+      cpu.memory[0x0311] = 0xB5
       cpu.memory[0x2043] = 0x77
       cpu.memory[0x2103] = 0x88
       cpu.memory[0x1234] = 0x99
@@ -261,14 +265,29 @@ describe Cpu do
         end
 
         context 'crossing memory boundary' do
-          before { cpu.memory[0..1] = 0xB1, 0xA3}  # LDA $A3,Y
+          before { cpu.memory[0..1] = 0xB1, 0xA3}  # LDA ($A3),Y
 
           it_should 'set a value', 0x11
         end
       end
 
       context '(indirect, x)' do
-        pending 'should be tested'
+        before do
+          cpu.memory[0..1] = 0xA1, 0xA5  # 0000: LDA ($A5,X)
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take six cycles'
+
+        it_should 'set a value', 0xA4
+
+        context 'crossing zero-page boundary' do
+          before { cpu.x = 0x60 }
+
+          it_should 'set a value', 0xB5
+        end
       end
     end
 

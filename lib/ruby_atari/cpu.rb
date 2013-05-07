@@ -77,7 +77,7 @@ class Cpu
 
   def execute
     case @opcode
-    when 0xA9, 0xA5, 0xB5, 0xAD, 0xBD, 0xB9, 0xB1 # LDA
+    when 0xA9, 0xA5, 0xB5, 0xAD, 0xBD, 0xB9, 0xB1, 0xA1 # LDA
       @a = read_memory
       update_zn_flags(@a)
     when 0xA2, 0xA6, 0xB6, 0xAE, 0xBE # LDX
@@ -123,8 +123,7 @@ class Cpu
       end
     when 0b01 # ORA, AND, EOR, ADC, STA, LDA, CMP, SBC
       case @opcode_addressing_mode
-      # implement ghte missing ones
-      #when 0b000 then #(zero page,X)
+      when 0b000 then indexed_indirect_x_value
       when 0b001 then zero_page_value
       when 0b010 then immediate_value
       when 0b011 then absolute_value
@@ -176,7 +175,12 @@ class Cpu
   end
 
   def indirect_indexed_y_value
-    memory[(memory[@param_lo+1] * 0x100 + memory[@param_lo] + @y) % 0x10000]
+    memory[(memory[@param_lo + 1] * 0x100 + memory[@param_lo] + @y) % 0x10000]
+  end
+
+  def indexed_indirect_x_value
+    indexed_param = (@param_lo + @x) % 0x100
+    memory[memory[indexed_param + 1] * 0x100 + memory[indexed_param]]
   end
 
   # Flag management
