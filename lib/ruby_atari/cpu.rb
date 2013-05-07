@@ -60,55 +60,34 @@ class Cpu
 
   private
 
+  # According to http://www.llx.com/~nparker/a2/opcodes.html, opcodes
+  # are in form aaaabbbcc, where cc = group, bb = addressing mode, aa=opcode
+
   def fetch
     @opcode = memory[@pc]
+    @opcode_group           = (@opcode & 0b00000011)
+    @opcode_addressing_mode = (@opcode & 0b00011100) >> 2
+    @opcode_instruction     = (@opcode & 0b11100000) >> 5
     @pc += INSTRUCTION_SIZE[@opcode]
   end
 
   def execute
-    # lots of refactorable repetition here, but for now...
     case @opcode
-    when 0xA9 # LDA; immediate
-      @a = immediate_value
-      update_zero_flag(@a)
-      update_negative_flag(@a)
-    when 0xA5 # LDA; Zero Page
-      @a = zero_page_value
-      update_zero_flag(@a)
-      update_negative_flag(@a)
-      #asd
-    when 0xB5 # LDA; Zero Page,X
-      @a = zero_page_indexed_x_value
-      update_zero_flag(@a)
-      update_negative_flag(@a)
-    when 0xAD # LDA; Absolute
-      @a = absolute_value
-      update_zero_flag(@a)
-      update_negative_flag(@a)
-    when 0xBD # LDA; Absolute,X
-      @a = absolute_indexed_x_value
-      update_zero_flag(@a)
-      update_negative_flag(@a)
-    when 0xB9 # LDA; Absolute,Y
-      @a = memory[(memory[@pc - 1] * 0x100 + memory[@pc - 2] + @y) % 0x10000]
-      update_zero_flag(@a)
-      update_negative_flag(@a)
+    when 0xA9, 0xA5, 0xB5, 0xAD, 0xBD, 0xB9 # LDA
+      @a = read_memory
+      update_zn_flags(@a)
     when 0xA2, 0xA6, 0xB6, 0xAE, 0xBE # LDX
       @x = read_memory
-      update_zero_flag(@x)
-      update_negative_flag(@x)
+      update_zn_flags(@x)
     when 0xA0, 0xA4, 0xB4, 0xAC, 0xBC # LDY
       @y = read_memory
-      update_zero_flag(@y)
-      update_negative_flag(@y)
+      update_zn_flags(@y)
     when 0xCA # DEX
       @x = @x == 0 ? 0xFF : @x - 1
-      update_zero_flag(@x)
-      update_negative_flag(@x)
+      update_zn_flags(@x)
     when 0x88 # DEY
       @y = @y == 0 ? 0xFF : @y - 1
-      update_zero_flag(@y)
-      update_negative_flag(@y)
+      update_zn_flags(@y)
     end
     time_in_cycles
   end
@@ -126,16 +105,10 @@ class Cpu
     (@opcode == 0xBC && memory[@pc - 2] + @x > 0xFF)     # LDY; Absolute X
   end
 
-  # http://www.llx.com/~nparker/a2/opcodes.html
-
   def read_memory
-    # aaaabbbcc
-    # cc=10
-    bbb = (@opcode & 0b00011100) >> 2
-    cc  = (@opcode & 0b00000011)
-    case cc
+    case @opcode_group
     when 0b00 # BIT, JMP, STY, LDY, CPY, CPX
-      case bbb
+      case @opcode_addressing_mode
       when 0b000 then immediate_value
       when 0b001 then zero_page_value
       #when 0b010 then accumulator_value
@@ -143,8 +116,20 @@ class Cpu
       when 0b101 then zero_page_indexed_x_value
       when 0b111 then absolute_indexed_x_value
       end
+    when 0b01 # ORA, AND, EOR, ADC, STA, LDA, CMP, SBC
+      case @opcode_addressing_mode
+      # implement ghte missing ones
+      #when 0b000 then #(zero page,X)
+      when 0b001 then zero_page_value
+      when 0b010 then immediate_value
+      when 0b011 then absolute_value
+      #when 0b100 then (zero page),Y
+      when 0b101 then zero_page_indexed_x_value
+      when 0b110 then absolute_indexed_y_value
+      when 0b111 then absolute_indexed_x_value
+      end
     when 0b10 # ASL, ROL, LSR, ROR, STX, LDX, DEC, INC
-      case bbb
+      case @opcode_addressing_mode
       when 0b000 then immediate_value
       when 0b001 then zero_page_value
       #when 0b010 then accumulator_value
@@ -187,11 +172,8 @@ class Cpu
 
   # Flag management
 
-  def update_zero_flag(value)
+  def update_zn_flags(value)
     @flags[:z] = (value == 0)
-  end
-
-  def update_negative_flag(value)
     @flags[:n] = (value & 0b10000000 != 0)
   end
 
