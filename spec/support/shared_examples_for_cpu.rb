@@ -77,12 +77,15 @@ shared_examples_for "take three cycles" do
   it { cpu.step.should == 3 }
 end
 
-shared_examples_for "take four cycles"  do
+shared_examples_for "take four cycles" do
   it { cpu.step.should == 4 }
 end
 
-shared_examples_for "take five cycles"  do
+shared_examples_for "take five cycles" do
   it { cpu.step.should == 5 }
 end
 
+shared_examples_for "take six cycles" do
+  it { cpu.step.should == 6 }
+end
 

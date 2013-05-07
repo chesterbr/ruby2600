@@ -68,12 +68,13 @@ class Cpu
     @opcode_group           = (@opcode & 0b00000011)
     @opcode_addressing_mode = (@opcode & 0b00011100) >> 2
     @opcode_instruction     = (@opcode & 0b11100000) >> 5
+    @param
     @pc += INSTRUCTION_SIZE[@opcode]
   end
 
   def execute
     case @opcode
-    when 0xA9, 0xA5, 0xB5, 0xAD, 0xBD, 0xB9 # LDA
+    when 0xA9, 0xA5, 0xB5, 0xAD, 0xBD, 0xB9, 0xB1 # LDA
       @a = read_memory
       update_zn_flags(@a)
     when 0xA2, 0xA6, 0xB6, 0xAE, 0xBE # LDX
@@ -101,6 +102,7 @@ class Cpu
   def page_boundary_crossed?
     (@opcode == 0xBE && memory[@pc - 2] + @y > 0xFF) ||  # LDX; Absolute Y
     (@opcode == 0xB9 && memory[@pc - 2] + @y > 0xFF) ||  # LDA; Absolute Y
+    (@opcode == 0xB1 && memory[memory[@pc - 1]] + @y > 0xFF) || # LDA; indirect indexed y
     (@opcode == 0xBD && memory[@pc - 2] + @x > 0xFF) ||  # LDA; Absolute X
     (@opcode == 0xBC && memory[@pc - 2] + @x > 0xFF)     # LDY; Absolute X
   end
@@ -123,7 +125,7 @@ class Cpu
       when 0b001 then zero_page_value
       when 0b010 then immediate_value
       when 0b011 then absolute_value
-      #when 0b100 then (zero page),Y
+      when 0b100 then indirect_indexed_y_value
       when 0b101 then zero_page_indexed_x_value
       when 0b110 then absolute_indexed_y_value
       when 0b111 then absolute_indexed_x_value
@@ -168,6 +170,10 @@ class Cpu
 
   def absolute_indexed_y_value
     memory[(memory[@pc - 1] * 0x100 + memory[@pc - 2] + @y) % 0x10000]
+  end
+
+  def indirect_indexed_y_value
+    memory[(memory[memory[@pc - 1]+1] * 0x100 + memory[memory[@pc - 1]] + @y) % 0x10000]
   end
 
   # Flag management
