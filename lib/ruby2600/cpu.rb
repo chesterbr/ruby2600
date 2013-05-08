@@ -1,5 +1,5 @@
 class Cpu
-  attr_accessor :memory, :pc, :x, :y, :a, :flags
+  attr_accessor :memory, :pc, :x, :y, :a, :z, :n
 
   RESET_VECTOR = 0xFFFC
 
@@ -77,14 +77,13 @@ class Cpu
       :accumulator,
       :absolute,
       nil,
-      :zero_page_indexed_y, # LDX only
-      nil,
-      :absolute_indexed_y # LDX only
+      :zero_page_indexed_y, # FIXME: these _y are for LDX
+      nil,                  #        and STX only, will fail
+      :absolute_indexed_y   #        with e.g.  ASL (should be _x)
     ]
   ]
 
   def initialize
-    @flags = {}
     @x = @y = @a = 0
   end
 
@@ -209,8 +208,8 @@ class Cpu
   # Flag management
 
   def update_zn_flags(value)
-    @flags[:z] = (value == 0)
-    @flags[:n] = (value & 0b10000000 != 0)
+    @z = (value == 0)
+    @n = (value & 0b10000000 != 0)
   end
 
 end

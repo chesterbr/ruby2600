@@ -1,4 +1,4 @@
-shared_examples_for 'set a value' do |expected|
+shared_examples_for 'set A value' do |expected|
   it do
     cpu.step
 
@@ -7,7 +7,7 @@ shared_examples_for 'set a value' do |expected|
   end
 end
 
-shared_examples_for 'set x value' do |expected|
+shared_examples_for 'set X value' do |expected|
   it do
     cpu.step
 
@@ -16,7 +16,7 @@ shared_examples_for 'set x value' do |expected|
   end
 end
 
-shared_examples_for 'set y value' do |expected|
+shared_examples_for 'set Y value' do |expected|
   it do
     cpu.step
 
@@ -34,35 +34,35 @@ shared_examples_for 'set memory with value' do |position, expected|
   end
 end
 
-shared_examples_for "set z flag" do
+shared_examples_for "set Z flag" do
   it do
     cpu.step
 
-    cpu.flags[:z].should be_true
+    cpu.z.should be_true
   end
 end
 
-shared_examples_for "reset z flag" do
+shared_examples_for "reset Z flag" do
   it do
     cpu.step
 
-    cpu.flags[:z].should be_false
+    cpu.z.should be_false
   end
 end
 
-shared_examples_for "set n flag" do
+shared_examples_for "set N flag" do
   it do
     cpu.step
 
-    cpu.flags[:n].should be_true
+    cpu.n.should be_true
   end
 end
 
-shared_examples_for "reset n flag" do
+shared_examples_for "reset N flag" do
   it do
     cpu.step
 
-    cpu.flags[:n].should be_false
+    cpu.n.should be_false
   end
 end
 
