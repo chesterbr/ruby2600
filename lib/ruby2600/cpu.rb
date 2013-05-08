@@ -44,6 +44,45 @@ class Cpu
     2, 5, 0, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7
   ]
 
+  # Opcodes are in form aaaabbbcc, where cc = group, bb = mode for group
+  # (see: http://www.llx.com/~nparker/a2/opcodes.html)
+
+  ADDRESSING_MODE = [
+    # group 0b00: BIT, JMP, STY, LDY, CPY, CPX
+    [
+      :immediate,
+      :zero_page,
+      :accumulator,
+      :absolute,
+      nil,
+      :zero_page_indexed_x,
+      nil,
+      :absolute_indexed_x
+    ],
+    # group 0b01: ORA, AND, EOR, ADC, STA, LDA, CMP, SBC
+    [
+      :indexed_indirect_x,
+      :zero_page,
+      :immediate,
+      :absolute,
+      :indirect_indexed_y,
+      :zero_page_indexed_x,
+      :absolute_indexed_y,
+      :absolute_indexed_x,
+    ],
+    # group 0b10: ASL, ROL, LSR, ROR, STX, LDX, DEC, INC
+    [
+      :immediate,
+      :zero_page,
+      :accumulator,
+      :absolute,
+      nil,
+      :zero_page_indexed_y, # LDX only
+      nil,
+      :absolute_indexed_y # LDX only
+    ]
+  ]
+
   def initialize
     @flags = {}
     @x = @y = @a = 0
@@ -60,14 +99,12 @@ class Cpu
 
   private
 
-  # According to http://www.llx.com/~nparker/a2/opcodes.html, opcodes
-  # are in form aaaabbbcc, where cc = group, bb = addressing mode, aa=opcode
-
   def fetch
     @opcode = memory[@pc]
-    @opcode_group           = (@opcode & 0b00000011)
-    @opcode_addressing_mode = (@opcode & 0b00011100) >> 2
-    @opcode_instruction     = (@opcode & 0b11100000) >> 5
+
+    group = (@opcode & 0b00000011)
+    mode  = (@opcode & 0b00011100) >> 2
+    @addressing_mode = ADDRESSING_MODE[group][mode]
 
     @param_lo = memory[@pc + 1]
     @param_hi = memory[@pc + 2]
@@ -78,18 +115,18 @@ class Cpu
   def execute
     case @opcode
     when 0xA9, 0xA5, 0xB5, 0xAD, 0xBD, 0xB9, 0xB1, 0xA1 # LDA
-      @a = read_memory
+      @a = load
       update_zn_flags(@a)
     when 0xA2, 0xA6, 0xB6, 0xAE, 0xBE # LDX
-      @x = read_memory
+      @x = load
       update_zn_flags(@x)
     when 0xA0, 0xA4, 0xB4, 0xAC, 0xBC # LDY
-      @y = read_memory
+      @y = load
       update_zn_flags(@y)
     when 0x85, 0x95, 0x8D, 0x9D, 0x99, 0x81, 0x91 # STA
-      memory[address] = @a
+      store @a
     when 0x86, 0x96, 0x8E # STX
-      memory[address] = @x
+      store @x
     when 0xCA # DEX
       @x = @x == 0 ? 0xFF : @x - 1
       update_zn_flags(@x)
@@ -99,6 +136,24 @@ class Cpu
     end
     time_in_cycles
   end
+
+  def load
+    case @addressing_mode
+    when :immediate   then @param_lo
+    when :accumulator then @a
+    else              memory[self.send(@addressing_mode)]
+    end
+  end
+
+  def store(value)
+    case @addressing_mode
+    when :immediate   then memory[@param_lo] = value
+    when :accumulator then @a = value
+    else              memory[self.send(@addressing_mode)] = value
+    end
+  end
+
+  # Timing
 
   def time_in_cycles
     cycles = CYCLE_COUNT[@opcode]
@@ -114,147 +169,39 @@ class Cpu
     (@opcode == 0xBC && @param_lo + @x > 0xFF)     # LDY; Absolute X
   end
 
-  def address
-    case @opcode_group
-    when 0b00 # BIT, JMP, STY, LDY, CPY, CPX
-      case @opcode_addressing_mode
-      when 0b000 then immediate_address
-      when 0b001 then zero_page_address
-      #when 0b010 then accumulator_address
-      when 0b011 then absolute_address
-      when 0b101 then zero_page_indexed_x_address
-      when 0b111 then absolute_indexed_x_address
-      end
-    when 0b01 # ORA, AND, EOR, ADC, STA, LDA, CMP, SBC
-      case @opcode_addressing_mode
-      when 0b000 then indexed_indirect_x_address
-      when 0b001 then zero_page_address
-      when 0b010 then immediate_address
-      when 0b011 then absolute_address
-      when 0b100 then indirect_indexed_y_address
-      when 0b101 then zero_page_indexed_x_address
-      when 0b110 then absolute_indexed_y_address
-      when 0b111 then absolute_indexed_x_address
-      end
-    when 0b10 # ASL, ROL, LSR, ROR, STX, LDX, DEC, INC
-      case @opcode_addressing_mode
-      when 0b000 then immediate_address
-      when 0b001 then zero_page_address
-      #when 0b010 then accumulator_address
-      when 0b011 then absolute_address
-      when 0b101 then zero_page_indexed_y_address # LDX only
-      when 0b111 then absolute_indexed_y_address # LDX only
-      end
-    end
-  end
+  # Address calculation for memory addressing modes
 
-  def zero_page_address
+  def zero_page
     @param_lo
   end
 
-  def zero_page_indexed_x_address
+  def zero_page_indexed_x
     (@param_lo + @x) % 0x100
   end
 
-  def zero_page_indexed_y_address
+  def zero_page_indexed_y
     (@param_lo + @y) % 0x100
   end
 
-  def absolute_address
+  def absolute
     @param_hi * 0x100 + @param_lo
   end
 
-  def absolute_indexed_x_address
+  def absolute_indexed_x
     (@param_hi * 0x100 + @param_lo + @x) % 0x10000
   end
 
-  def absolute_indexed_y_address
+  def absolute_indexed_y
     (@param_hi * 0x100 + @param_lo + @y) % 0x10000
   end
 
-  def indirect_indexed_y_address
+  def indirect_indexed_y
     (memory[@param_lo + 1] * 0x100 + memory[@param_lo] + @y) % 0x10000
   end
 
-  def indexed_indirect_x_address
+  def indexed_indirect_x
     indexed_param = (@param_lo + @x) % 0x100
     memory[indexed_param + 1] * 0x100 + memory[indexed_param]
-  end
-
-
-
-
-  def read_memory
-    case @opcode_group
-    when 0b00 # BIT, JMP, STY, LDY, CPY, CPX
-      case @opcode_addressing_mode
-      when 0b000 then immediate_value
-      when 0b001 then zero_page_value
-      #when 0b010 then accumulator_value
-      when 0b011 then absolute_value
-      when 0b101 then zero_page_indexed_x_value
-      when 0b111 then absolute_indexed_x_value
-      end
-    when 0b01 # ORA, AND, EOR, ADC, STA, LDA, CMP, SBC
-      case @opcode_addressing_mode
-      when 0b000 then indexed_indirect_x_value
-      when 0b001 then zero_page_value
-      when 0b010 then immediate_value
-      when 0b011 then absolute_value
-      when 0b100 then indirect_indexed_y_value
-      when 0b101 then zero_page_indexed_x_value
-      when 0b110 then absolute_indexed_y_value
-      when 0b111 then absolute_indexed_x_value
-      end
-    when 0b10 # ASL, ROL, LSR, ROR, STX, LDX, DEC, INC
-      case @opcode_addressing_mode
-      when 0b000 then immediate_value
-      when 0b001 then zero_page_value
-      #when 0b010 then accumulator_value
-      when 0b011 then absolute_value
-      when 0b101 then zero_page_indexed_y_value # LDX only
-      when 0b111 then absolute_indexed_y_value # LDX only
-      end
-    end
-  end
-
-  # Memory reading for instructions
-
-  def immediate_value
-    @param_lo
-  end
-
-  def zero_page_value
-    memory[@param_lo]
-  end
-
-  def zero_page_indexed_x_value
-    memory[(@param_lo + @x) % 0x100]
-  end
-
-  def zero_page_indexed_y_value
-    memory[(@param_lo + @y) % 0x100]
-  end
-
-  def absolute_value
-    memory[@param_hi * 0x100 + @param_lo]
-  end
-
-  def absolute_indexed_x_value
-    memory[(@param_hi * 0x100 + @param_lo + @x) % 0x10000]
-  end
-
-  def absolute_indexed_y_value
-    memory[(@param_hi * 0x100 + @param_lo + @y) % 0x10000]
-  end
-
-  def indirect_indexed_y_value
-    memory[(memory[@param_lo + 1] * 0x100 + memory[@param_lo] + @y) % 0x10000]
-  end
-
-  def indexed_indirect_x_value
-    indexed_param = (@param_lo + @x) % 0x100
-    memory[memory[indexed_param + 1] * 0x100 + memory[indexed_param]]
   end
 
   # Flag management
