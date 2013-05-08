@@ -86,6 +86,10 @@ class Cpu
     when 0xA0, 0xA4, 0xB4, 0xAC, 0xBC # LDY
       @y = read_memory
       update_zn_flags(@y)
+    when 0x85, 0x95, 0x8D, 0x9D, 0x99, 0x81, 0x91 # STA
+      memory[address] = @a
+    when 0x86, 0x96, 0x8E # STX
+      memory[address] = @x
     when 0xCA # DEX
       @x = @x == 0 ? 0xFF : @x - 1
       update_zn_flags(@x)
@@ -109,6 +113,76 @@ class Cpu
     (@opcode == 0xBD && @param_lo + @x > 0xFF) ||  # LDA; Absolute X
     (@opcode == 0xBC && @param_lo + @x > 0xFF)     # LDY; Absolute X
   end
+
+  def address
+    case @opcode_group
+    when 0b00 # BIT, JMP, STY, LDY, CPY, CPX
+      case @opcode_addressing_mode
+      when 0b000 then immediate_address
+      when 0b001 then zero_page_address
+      #when 0b010 then accumulator_address
+      when 0b011 then absolute_address
+      when 0b101 then zero_page_indexed_x_address
+      when 0b111 then absolute_indexed_x_address
+      end
+    when 0b01 # ORA, AND, EOR, ADC, STA, LDA, CMP, SBC
+      case @opcode_addressing_mode
+      when 0b000 then indexed_indirect_x_address
+      when 0b001 then zero_page_address
+      when 0b010 then immediate_address
+      when 0b011 then absolute_address
+      when 0b100 then indirect_indexed_y_address
+      when 0b101 then zero_page_indexed_x_address
+      when 0b110 then absolute_indexed_y_address
+      when 0b111 then absolute_indexed_x_address
+      end
+    when 0b10 # ASL, ROL, LSR, ROR, STX, LDX, DEC, INC
+      case @opcode_addressing_mode
+      when 0b000 then immediate_address
+      when 0b001 then zero_page_address
+      #when 0b010 then accumulator_address
+      when 0b011 then absolute_address
+      when 0b101 then zero_page_indexed_y_address # LDX only
+      when 0b111 then absolute_indexed_y_address # LDX only
+      end
+    end
+  end
+
+  def zero_page_address
+    @param_lo
+  end
+
+  def zero_page_indexed_x_address
+    (@param_lo + @x) % 0x100
+  end
+
+  def zero_page_indexed_y_address
+    (@param_lo + @y) % 0x100
+  end
+
+  def absolute_address
+    @param_hi * 0x100 + @param_lo
+  end
+
+  def absolute_indexed_x_address
+    (@param_hi * 0x100 + @param_lo + @x) % 0x10000
+  end
+
+  def absolute_indexed_y_address
+    (@param_hi * 0x100 + @param_lo + @y) % 0x10000
+  end
+
+  def indirect_indexed_y_address
+    (memory[@param_lo + 1] * 0x100 + memory[@param_lo] + @y) % 0x10000
+  end
+
+  def indexed_indirect_x_address
+    indexed_param = (@param_lo + @x) % 0x100
+    memory[indexed_param + 1] * 0x100 + memory[indexed_param]
+  end
+
+
+
 
   def read_memory
     case @opcode_group
