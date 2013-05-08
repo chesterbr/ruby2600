@@ -473,6 +473,51 @@ describe Cpu do
       end
     end
 
+    context 'STA' do
+      before { cpu.a = 0x2F }
+
+      context 'absolute' do
+        before { cpu.memory[0..2] = 0x8D, 0x34, 0x12 } # STA $1234
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set memory with value', 0x1234, 0x2F
+      end
+
+      context 'zero page' do
+        before do
+          cpu.memory[0..1] = 0x85, 0xA5 # STA $A5
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take three cycles'
+
+        it_should 'set memory with value', 0x00A5, 0x2F
+      end
+
+      context 'zero page, x' do
+        before do
+          cpu.memory[0..1] = 0x95, 0xA5 # STA $A5,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take four cycles'
+
+        it_should 'set memory with value', 0x00B5, 0x2F
+
+        context 'crossing zero-page boundary' do
+          before { cpu.x = 0x60 }
+
+          it_should 'set memory with value', 0x0005, 0x2F
+        end
+      end
+    end
+
     context 'STX' do
       before { cpu.x = 0x2F }
 
