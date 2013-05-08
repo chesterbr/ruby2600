@@ -10,9 +10,9 @@ RSpec.configure do |c|
 end
 
 def hex_word(word)
-  sprintf("$%04X", word)
+  sprintf("$%04X", word) rescue "$????"
 end
 
 def hex_byte(byte)
-  sprintf("$%02X", byte)
+  sprintf("$%02X", byte) rescue "$??"
 end

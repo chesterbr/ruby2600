@@ -516,6 +516,92 @@ describe Cpu do
           it_should 'set memory with value', 0x0005, 0x2F
         end
       end
+
+      context 'absolute, x' do
+        before do
+          cpu.memory[0..1] = 0x9D, 0x34, 0x12 # STA $FFF5
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take five cycles'
+
+        it_should 'set memory with value', 0x1244, 0x2F
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..2] = 0x9D, 0xF5, 0xFF } # STA $FFF5,X
+
+          it_should 'set memory with value', 0x0005, 0x2F
+        end
+      end
+
+      context 'absolute, y' do
+        before do
+          cpu.memory[0..1] = 0x99, 0x34, 0x12 # STA $1234
+          cpu.y = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take five cycles'
+
+        it_should 'set memory with value', 0x1244, 0x2F
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..2] = 0x99, 0xF5, 0xFF } # STA $FFF5,Y
+
+          it_should 'set memory with value', 0x0005, 0x2F
+        end
+      end
+
+      context '(indirect), y' do
+        before do
+          cpu.memory[0..1] = 0x91, 0xA5  # 0000: STA ($A5),Y
+          cpu.y = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take six cycles'
+
+        it_should 'set memory with value', 0x2043, 0x2F
+
+        context 'crossing page boundary' do
+          before { cpu.y = 0xD0 }
+
+          it_should 'set memory with value', 0x2103, 0x2F
+
+          it_should 'take six cycles'
+        end
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..1] = 0x91, 0xA3}  # STA ($A3),Y
+
+          it_should 'set memory with value', 0x0005, 0x2F
+        end
+      end
+
+      context '(indirect, x)' do
+        before do
+          cpu.memory[0..1] = 0x81, 0xA5  # STA ($A5,X)
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take six cycles'
+
+        it_should 'set memory with value', 0x0266, 0x2F
+
+        context 'crossing zero-page boundary' do
+          before { cpu.x = 0x60 }
+
+          it_should 'take six cycles'
+
+          it_should 'set memory with value', 0x0311, 0x2F
+        end
+      end
     end
 
     context 'STX' do
