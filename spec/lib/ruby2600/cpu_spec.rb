@@ -476,6 +476,16 @@ describe Cpu do
     context 'STX' do
       before { cpu.x = 0x2F }
 
+      context 'absolute' do
+        before { cpu.memory[0..2] = 0x8E, 0x34, 0x12 } # STX $1234
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set memory with value', 0x1234, 0x2F
+      end
+
       context 'zero page' do
         before do
           cpu.memory[0..1] = 0x86, 0xA5 # STX $A5
@@ -506,15 +516,50 @@ describe Cpu do
           it_should 'set memory with value', 0x0005, 0x2F
         end
       end
+    end
+
+    context 'STY' do
+      before { cpu.y = 0x2F }
 
       context 'absolute' do
-        before { cpu.memory[0..2] = 0x8E, 0x34, 0x12 } # STX $1234
+        before { cpu.memory[0..2] = 0x8C, 0x34, 0x12 } # STY $1234
 
         it_should 'advance PC by three'
 
         it_should 'take four cycles'
 
         it_should 'set memory with value', 0x1234, 0x2F
+      end
+
+      context 'zero page' do
+        before do
+          cpu.memory[0..1] = 0x84, 0xA5 # STY $A5
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take three cycles'
+
+        it_should 'set memory with value', 0x00A5, 0x2F
+      end
+
+      context 'zero page, y' do
+        before do
+          cpu.memory[0..1] = 0x94, 0xA5 # STY $A5,Y
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take four cycles'
+
+        it_should 'set memory with value', 0x00B5, 0x2F
+
+        context 'crossing zero-page boundary' do
+          before { cpu.x = 0x60 }
+
+          it_should 'set memory with value', 0x0005, 0x2F
+        end
       end
     end
   end

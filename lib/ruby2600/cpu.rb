@@ -127,6 +127,8 @@ class Cpu
       store @a
     when 0x86, 0x96, 0x8E # STX
       store @x
+    when 0x84, 0x94, 0x8C # STY
+      store @y
     when 0xCA # DEX
       @x = @x == 0 ? 0xFF : @x - 1
       update_zn_flags(@x)
