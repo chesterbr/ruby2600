@@ -49,6 +49,90 @@ describe Cpu do
       cpu.pc = 0x0000
     end
 
+    context 'ADC' do
+      pending 'not implemented'
+    end
+
+    context 'AND' do
+      pending 'not implemented'
+    end
+
+    context 'ASL' do
+      pending 'not implemented'
+    end
+
+    context 'BCC' do
+      pending 'not implemented'
+    end
+
+    context 'BCS' do
+      pending 'not implemented'
+    end
+
+    context 'BEQ' do
+      pending 'not implemented'
+    end
+
+    context 'BIT' do
+      pending 'not implemented'
+    end
+
+    context 'BMI' do
+      pending 'not implemented'
+    end
+
+    context 'BNE' do
+      pending 'not implemented'
+    end
+
+    context 'BPL' do
+      pending 'not implemented'
+    end
+
+    context 'BRK' do
+      pending 'not implemented'
+    end
+
+    context 'BVC' do
+      pending 'not implemented'
+    end
+
+    context 'BVS' do
+      pending 'not implemented'
+    end
+
+    context 'CLC' do
+      pending 'not implemented'
+    end
+
+    context 'CLD' do
+      pending 'not implemented'
+    end
+
+    context 'CLI' do
+      pending 'not implemented'
+    end
+
+    context 'CLV' do
+      pending 'not implemented'
+    end
+
+    context 'CMP' do
+      pending 'not implemented'
+    end
+
+    context 'CPX' do
+      pending 'not implemented'
+    end
+
+    context 'CPY' do
+      pending 'not implemented'
+    end
+
+    context 'DEC' do
+      pending 'not implemented'
+    end
+
     context 'DEX' do
       before do
         cpu.memory[0] = 0xCA # DEX
@@ -125,6 +209,30 @@ describe Cpu do
 
         it_should 'set N flag'
       end
+    end
+
+    context 'EOR' do
+      pending 'not implemented'
+    end
+
+    context 'INC' do
+      pending 'not implemented'
+    end
+
+    context 'INX' do
+      pending 'not implemented'
+    end
+
+    context 'INY' do
+      pending 'not implemented'
+    end
+
+    context 'JMP' do
+      pending 'not implemented'
+    end
+
+    context 'JSR' do
+      pending 'not implemented'
     end
 
     context 'LDA' do
@@ -473,6 +581,66 @@ describe Cpu do
       end
     end
 
+    context 'LSR' do
+      pending 'not implemented'
+    end
+
+    context 'NOP' do
+      pending 'not implemented'
+    end
+
+    context 'ORA' do
+      pending 'not implemented'
+    end
+
+    context 'PHA' do
+      pending 'not implemented'
+    end
+
+    context 'PHP' do
+      pending 'not implemented'
+    end
+
+    context 'PLA' do
+      pending 'not implemented'
+    end
+
+    context 'PLP' do
+      pending 'not implemented'
+    end
+
+    context 'ROL' do
+      pending 'not implemented'
+    end
+
+    context 'ROR' do
+      pending 'not implemented'
+    end
+
+    context 'RTI' do
+      pending 'not implemented'
+    end
+
+    context 'RTS' do
+      pending 'not implemented'
+    end
+
+    context 'SBC' do
+      pending 'not implemented'
+    end
+
+    context 'SEC' do
+      pending 'not implemented'
+    end
+
+    context 'SED' do
+      pending 'not implemented'
+    end
+
+    context 'SEI' do
+      pending 'not implemented'
+    end
+
     context 'STA' do
       before { cpu.a = 0x2F }
 
@@ -692,6 +860,30 @@ describe Cpu do
           it_should 'set memory with value', 0x0005, 0x2F
         end
       end
+    end
+
+    context 'TAX' do
+      pending 'not implemented'
+    end
+
+    context 'TAY' do
+      pending 'not implemented'
+    end
+
+    context 'TSX' do
+      pending 'not implemented'
+    end
+
+    context 'TXA' do
+      pending 'not implemented'
+    end
+
+    context 'TXS' do
+      pending 'not implemented'
+    end
+
+    context 'TYA' do
+      pending 'not implemented'
     end
   end
 end
