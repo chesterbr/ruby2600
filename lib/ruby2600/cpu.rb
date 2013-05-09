@@ -148,17 +148,21 @@ class Cpu
     when 0x6C # JMP()
       @pc = 0x100 * memory[@param + 1] + memory[@param]
     when 0xAA # TAX
-     @x = @a
-     update_zn_flags @x
+      @x = @a
+      update_zn_flags @x
     when 0xA8 # TAY
-     @y = @a
-     update_zn_flags @y
+      @y = @a
+      update_zn_flags @y
     when 0x8A # TXA
-     @a = @x
-     update_zn_flags @a
+      @a = @x
+      update_zn_flags @a
     when 0x98 # TYA
-     @a = @y
-     update_zn_flags @a
+      @a = @y
+      update_zn_flags @a
+    when 0x18 # CLC
+      @c = false
+    when 0x38 # SEC
+      @c = true
     end
     time_in_cycles
   end

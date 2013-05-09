@@ -43,35 +43,21 @@ shared_examples_for 'set memory with value' do |position, expected|
   end
 end
 
-shared_examples_for "set Z flag" do
-  it do
-    cpu.step
+%w'z c n'.each do |flag|
+  shared_examples_for "set #{flag.upcase} flag" do
+    it do
+      cpu.step
 
-    cpu.z.should be_true
+      cpu.send(flag).should be_true
+    end
   end
-end
 
-shared_examples_for "reset Z flag" do
-  it do
-    cpu.step
+  shared_examples_for "reset #{flag.upcase} flag" do
+    it do
+      cpu.step
 
-    cpu.z.should be_false
-  end
-end
-
-shared_examples_for "set N flag" do
-  it do
-    cpu.step
-
-    cpu.n.should be_true
-  end
-end
-
-shared_examples_for "reset N flag" do
-  it do
-    cpu.step
-
-    cpu.n.should be_false
+      cpu.send(flag).should be_false
+    end
   end
 end
 

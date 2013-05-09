@@ -103,7 +103,12 @@ describe Cpu do
     end
 
     context 'CLC' do
-      pending 'not implemented'
+      before {
+        cpu.memory[0] = 0x18 # SEC
+        cpu.c = true
+      }
+
+      it_should 'reset C flag'
     end
 
     context 'CLD' do
@@ -717,7 +722,12 @@ describe Cpu do
     end
 
     context 'SEC' do
-      pending 'not implemented'
+      before {
+        cpu.memory[0] = 0x38 # SEC
+        cpu.c = false
+      }
+
+      it_should 'set C flag'
     end
 
     context 'SED' do
