@@ -976,11 +976,37 @@ describe Cpu do
     end
 
     context 'TAX' do
-      pending 'not implemented'
+      before do
+        cpu.memory[0] = 0xAA # TAX
+        cpu.a = 0x45
+      end
+
+      it_should 'advance PC by one'
+
+      it_should 'take two cycles'
+
+      it_should 'set X value', 0x45
+
+      it_should 'reset Z flag'
+
+      it_should 'reset N flag'
     end
 
     context 'TAY' do
-      pending 'not implemented'
+      before do
+        cpu.memory[0] = 0xA8 # TAY
+        cpu.a = 0xF5
+      end
+
+      it_should 'advance PC by one'
+
+      it_should 'take two cycles'
+
+      it_should 'set Y value', 0xF5
+
+      it_should 'reset Z flag'
+
+      it_should 'set N flag'
     end
 
     context 'TSX' do
@@ -988,7 +1014,21 @@ describe Cpu do
     end
 
     context 'TXA' do
-      pending 'not implemented'
+      before do
+        cpu.memory[0] = 0x8A # TXA
+        cpu.x = 0x00
+        cpu.a = 0x01 # FIXME remove when we pre-randomize registers
+      end
+
+      it_should 'advance PC by one'
+
+      it_should 'take two cycles'
+
+      it_should 'set A value', 0x00
+
+      it_should 'set Z flag'
+
+      it_should 'reset N flag'
     end
 
     context 'TXS' do
@@ -996,7 +1036,20 @@ describe Cpu do
     end
 
     context 'TYA' do
-      pending 'not implemented'
+      before do
+        cpu.memory[0] = 0x98 # TYA
+        cpu.y = 0xA0
+      end
+
+      it_should 'advance PC by one'
+
+      it_should 'take two cycles'
+
+      it_should 'set A value', 0xA0
+
+      it_should 'reset Z flag'
+
+      it_should 'set N flag'
     end
   end
 end
