@@ -76,7 +76,7 @@ shared_examples_for "reset N flag" do
 end
 
 shared_examples_for "preserve flags" do
-  %w"z n".each do |flag|
+  %w"n v b d i z c".each do |flag|
     it "keeps #{flag} reset" do
       cpu.send("#{flag}=", false)
 

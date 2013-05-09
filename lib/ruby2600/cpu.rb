@@ -1,5 +1,7 @@
 class Cpu
-  attr_accessor :memory, :pc, :x, :y, :a, :z, :n
+  attr_accessor :memory
+  attr_accessor :pc, :a, :x, :y
+  attr_accessor :n, :v, :b, :d, :i, :z, :c    # Flags (P) bits (P=nv-bdizc)
 
   RESET_VECTOR = 0xFFFC
 
@@ -143,7 +145,7 @@ class Cpu
       update_zn_flags @y
     when 0x4C # JMP
       @pc = @param
-    when 0x6c # JMP()
+    when 0x6C # JMP()
       @pc = 0x100 * memory[@param + 1] + memory[@param]
     end
     time_in_cycles
