@@ -667,7 +667,13 @@ describe Cpu do
     end
 
     context 'NOP' do
-      pending 'not implemented'
+      before { cpu.memory[0] = 0xEA }
+
+      it_should 'advance PC by one'
+
+      it_should 'take two cycles'
+
+      it_should 'preserve flags'
     end
 
     context 'ORA' do
