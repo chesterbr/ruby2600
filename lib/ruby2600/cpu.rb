@@ -163,6 +163,10 @@ class Cpu
       @c = false
     when 0x38 # SEC
       @c = true
+    when 0x58 # CLI
+      @i = false
+    when 0x78 # SEI
+      @i = true
     end
     time_in_cycles
   end

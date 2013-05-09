@@ -62,6 +62,16 @@ describe Cpu do
       end
     end
 
+    it 'should run a instruction from anywhere (on a 2600 cart, at least)' do
+      0xFFFF.downto 0xF000 do |position|
+        cpu.memory[position] = 0xEA # NOP
+        cpu.pc = position
+        cpu.step
+
+        cpu.pc.should == position + 1
+      end
+    end
+
     context 'ADC' do
       pending 'not implemented'
     end
@@ -128,7 +138,12 @@ describe Cpu do
     end
 
     context 'CLI' do
-      pending 'not implemented'
+      before {
+        cpu.memory[0] = 0x58 # CLI
+        cpu.i = true
+      }
+
+      it_should 'reset I flag'
     end
 
     context 'CLV' do
@@ -161,9 +176,7 @@ describe Cpu do
 
       it_should 'take two cycles'
 
-      it 'should decrease value' do
-        expect { cpu.step }.to change { cpu.x }.by(-1)
-      end
+      it_should 'set X value', 0x06
 
       it_should 'reset Z flag'
 
@@ -180,9 +193,7 @@ describe Cpu do
       context 'negative result' do
         before { cpu.x = 0x00 }
 
-        it "should wrap around to two's complement" do
-          expect { cpu.step }.to change { cpu.x }.to(0xFF)
-        end
+        it_should 'set X value', 0xFF
 
         it_should 'reset Z flag'
 
@@ -200,9 +211,7 @@ describe Cpu do
 
       it_should 'take two cycles'
 
-      it 'should decrease value' do
-        expect { cpu.step }.to change { cpu.y }.by(-1)
-      end
+      it_should 'set Y value', 0x06
 
       it_should 'reset Z flag'
 
@@ -219,9 +228,7 @@ describe Cpu do
       context 'negative result' do
         before { cpu.y = 0x00 }
 
-        it "should wrap around to two's complement" do
-          expect { cpu.step }.to change { cpu.y }.to(0xFF)
-        end
+        it_should 'set Y value', 0xFF
 
         it_should 'reset Z flag'
 
@@ -747,7 +754,12 @@ describe Cpu do
     end
 
     context 'SEI' do
-      pending 'not implemented'
+      before {
+        cpu.memory[0] = 0x78 # SEI
+        cpu.i = false
+      }
+
+      it_should 'set I flag'
     end
 
     context 'STA' do
