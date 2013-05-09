@@ -27,8 +27,15 @@ describe Cpu do
 
   describe '#step' do
     before do
-      # Some positions to play with
+      # Most examples will run a single opcode from here
+      cpu.pc = 0x0000
+
+      # Catch unexpected side effects
+      randomize :a, :x, :y, :n, :v, :i, :z, :c
+
+      # Examples wil refer to these values. Add, but don't change!
       cpu.memory = []
+      cpu.memory[0x0001] = 0xFE
       cpu.memory[0x0002] = 0xFF
       cpu.memory[0x0005] = 0x11
       cpu.memory[0x0006] = 0x03
@@ -46,8 +53,13 @@ describe Cpu do
       cpu.memory[0x1235] = 0xAA
       cpu.memory[0x1244] = 0xCC
       cpu.memory[0x1304] = 0xFF
-      # Most examples will start at the top
-      cpu.pc = 0x0000
+    end
+
+    def randomize(*attrs)
+      attrs.each do |attr|
+        value = attr =~ /[axy]/ ? rand(256) : [true, false].sample
+        cpu.send "#{attr}=", value
+      end
     end
 
     context 'ADC' do
