@@ -48,11 +48,11 @@ class Cpu
   # (see: http://www.llx.com/~nparker/a2/opcodes.html)
 
   ADDRESSING_MODE = [
-    # group 0b00: BIT, JMP, STY, LDY, CPY, CPX
+    # group 0b00: BIT, JMP, JMP(), STY, LDY, CPY, CPX
     [
       :immediate,
       :zero_page,
-      :accumulator,
+      nil,
       :absolute,
       nil,
       :zero_page_indexed_x,
@@ -105,8 +105,9 @@ class Cpu
     mode  = (@opcode & 0b00011100) >> 2
     @addressing_mode = ADDRESSING_MODE[group][mode]
 
-    @param_lo = memory[@pc + 1]
-    @param_hi = memory[@pc + 2]
+    @param_lo = memory[@pc + 1] || 0
+    @param_hi = memory[@pc + 2] || 0
+    @param    = @param_hi * 0x100 + @param_lo
 
     @pc += INSTRUCTION_SIZE[@opcode]
   end
@@ -115,25 +116,35 @@ class Cpu
     case @opcode
     when 0xA9, 0xA5, 0xB5, 0xAD, 0xBD, 0xB9, 0xB1, 0xA1 # LDA
       @a = load
-      update_zn_flags(@a)
+      update_zn_flags @a
     when 0xA2, 0xA6, 0xB6, 0xAE, 0xBE # LDX
       @x = load
-      update_zn_flags(@x)
+      update_zn_flags @x
     when 0xA0, 0xA4, 0xB4, 0xAC, 0xBC # LDY
       @y = load
-      update_zn_flags(@y)
+      update_zn_flags @y
     when 0x85, 0x95, 0x8D, 0x9D, 0x99, 0x81, 0x91 # STA
       store @a
     when 0x86, 0x96, 0x8E # STX
       store @x
     when 0x84, 0x94, 0x8C # STY
       store @y
+    when 0xE8 # INX
+      @x = (@x + 1) & 0xFF
+      update_zn_flags @x
+    when 0xC8 # INY
+      @y = (@y + 1) & 0xFF
+      update_zn_flags @y
     when 0xCA # DEX
       @x = @x == 0 ? 0xFF : @x - 1
-      update_zn_flags(@x)
+      update_zn_flags @x
     when 0x88 # DEY
       @y = @y == 0 ? 0xFF : @y - 1
-      update_zn_flags(@y)
+      update_zn_flags @y
+    when 0x4C # JMP
+      @pc = @param
+    when 0x6c # JMP()
+      @pc = 0x100 * memory[@param + 1] + memory[@param]
     end
     time_in_cycles
   end
@@ -170,7 +181,7 @@ class Cpu
     (@opcode == 0xBC && @param_lo + @x > 0xFF)     # LDY; Absolute X
   end
 
-  # Address calculation for memory addressing modes
+  # Formulae for (most) memory addressing modes
 
   def zero_page
     @param_lo
@@ -185,15 +196,15 @@ class Cpu
   end
 
   def absolute
-    @param_hi * 0x100 + @param_lo
+    @param
   end
 
   def absolute_indexed_x
-    (@param_hi * 0x100 + @param_lo + @x) % 0x10000
+    (@param + @x) % 0x10000
   end
 
   def absolute_indexed_y
-    (@param_hi * 0x100 + @param_lo + @y) % 0x10000
+    (@param + @y) % 0x10000
   end
 
   def indirect_indexed_y

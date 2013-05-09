@@ -43,6 +43,7 @@ describe Cpu do
       cpu.memory[0x2043] = 0x77
       cpu.memory[0x2103] = 0x88
       cpu.memory[0x1234] = 0x99
+      cpu.memory[0x1235] = 0xAA
       cpu.memory[0x1244] = 0xCC
       cpu.memory[0x1304] = 0xFF
       # Most examples will start at the top
@@ -220,15 +221,95 @@ describe Cpu do
     end
 
     context 'INX' do
-      pending 'not implemented'
+      before do
+        cpu.memory[0] = 0xE8 # INX
+        cpu.x = 0x07
+      end
+
+      it_should 'advance PC by one'
+
+      it_should 'take two cycles'
+
+      it_should 'set X value', 0x08
+
+      it_should 'reset Z flag'
+
+      it_should 'reset N flag'
+
+      context 'zero result' do
+        before { cpu.x = 0xFF }
+
+        it_should 'set Z flag'
+
+        it_should 'reset N flag'
+
+        it_should 'set X value', 0x00
+      end
+
+      context 'negative result' do
+        before { cpu.x = 0xA0 }
+
+        it_should 'reset Z flag'
+
+        it_should 'set N flag'
+      end
     end
 
     context 'INY' do
-      pending 'not implemented'
+      before do
+        cpu.memory[0] = 0xC8 # INX
+        cpu.y = 0x07
+      end
+
+      it_should 'advance PC by one'
+
+      it_should 'take two cycles'
+
+      it_should 'set Y value', 0x08
+
+      it_should 'reset Z flag'
+
+      it_should 'reset N flag'
+
+      context 'zero result' do
+        before { cpu.y = 0xFF }
+
+        it_should 'set Z flag'
+
+        it_should 'reset N flag'
+
+        it_should 'set Y value', 0x00
+      end
+
+      context 'negative result' do
+        before { cpu.y = 0xA0 }
+
+        it_should 'reset Z flag'
+
+        it_should 'set N flag'
+      end
     end
 
     context 'JMP' do
-      pending 'not implemented'
+      context 'immediate' do
+        before { cpu.memory[0..2] = 0x4C, 0x34, 0x12 } # JMP (1234)
+
+        it_should 'set PC value', 0x1234
+
+        it_should 'preserve flags'
+      end
+
+      context 'indirect' do
+        before { cpu.memory[0..2] = 0x6C, 0x34, 0x12 } # JMP ($1234)
+
+        it_should 'set PC value', 0xAA99
+
+        it_should 'preserve flags'
+      end
+
+      context 'indirect mode bug' do
+        pending 'not sure if will support'
+      end
     end
 
     context 'JSR' do
@@ -652,6 +733,8 @@ describe Cpu do
         it_should 'take four cycles'
 
         it_should 'set memory with value', 0x1234, 0x2F
+
+        it_should 'preserve flags'
       end
 
       context 'zero page' do
@@ -664,6 +747,8 @@ describe Cpu do
         it_should 'take three cycles'
 
         it_should 'set memory with value', 0x00A5, 0x2F
+
+        it_should 'preserve flags'
       end
 
       context 'zero page, x' do
@@ -677,6 +762,8 @@ describe Cpu do
         it_should 'take four cycles'
 
         it_should 'set memory with value', 0x00B5, 0x2F
+
+        it_should 'preserve flags'
 
         context 'crossing zero-page boundary' do
           before { cpu.x = 0x60 }
@@ -697,6 +784,8 @@ describe Cpu do
 
         it_should 'set memory with value', 0x1244, 0x2F
 
+        it_should 'preserve flags'
+
         context 'crossing memory boundary' do
           before { cpu.memory[0..2] = 0x9D, 0xF5, 0xFF } # STA $FFF5,X
 
@@ -716,6 +805,8 @@ describe Cpu do
 
         it_should 'set memory with value', 0x1244, 0x2F
 
+        it_should 'preserve flags'
+
         context 'crossing memory boundary' do
           before { cpu.memory[0..2] = 0x99, 0xF5, 0xFF } # STA $FFF5,Y
 
@@ -734,6 +825,8 @@ describe Cpu do
         it_should 'take six cycles'
 
         it_should 'set memory with value', 0x2043, 0x2F
+
+        it_should 'preserve flags'
 
         context 'crossing page boundary' do
           before { cpu.y = 0xD0 }
@@ -762,6 +855,8 @@ describe Cpu do
 
         it_should 'set memory with value', 0x0266, 0x2F
 
+        it_should 'preserve flags'
+
         context 'crossing zero-page boundary' do
           before { cpu.x = 0x60 }
 
@@ -783,6 +878,8 @@ describe Cpu do
         it_should 'take four cycles'
 
         it_should 'set memory with value', 0x1234, 0x2F
+
+        it_should 'preserve flags'
       end
 
       context 'zero page' do
@@ -795,6 +892,8 @@ describe Cpu do
         it_should 'take three cycles'
 
         it_should 'set memory with value', 0x00A5, 0x2F
+
+        it_should 'preserve flags'
       end
 
       context 'zero page, y' do
@@ -808,6 +907,8 @@ describe Cpu do
         it_should 'take four cycles'
 
         it_should 'set memory with value', 0x00B5, 0x2F
+
+        it_should 'preserve flags'
 
         context 'crossing zero-page boundary' do
           before { cpu.y = 0x60 }
@@ -828,6 +929,8 @@ describe Cpu do
         it_should 'take four cycles'
 
         it_should 'set memory with value', 0x1234, 0x2F
+
+        it_should 'preserve flags'
       end
 
       context 'zero page' do
@@ -840,6 +943,8 @@ describe Cpu do
         it_should 'take three cycles'
 
         it_should 'set memory with value', 0x00A5, 0x2F
+
+        it_should 'preserve flags'
       end
 
       context 'zero page, y' do
@@ -853,6 +958,8 @@ describe Cpu do
         it_should 'take four cycles'
 
         it_should 'set memory with value', 0x00B5, 0x2F
+
+        it_should 'preserve flags'
 
         context 'crossing zero-page boundary' do
           before { cpu.x = 0x60 }

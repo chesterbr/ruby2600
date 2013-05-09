@@ -25,6 +25,15 @@ shared_examples_for 'set Y value' do |expected|
   end
 end
 
+shared_examples_for 'set PC value' do |expected|
+  it do
+    cpu.step
+
+    value = cpu.pc
+    value.should be(expected), "Expected: #{hex_word(expected)}, found: #{hex_word(value)}"
+  end
+end
+
 shared_examples_for 'set memory with value' do |position, expected|
   it do
     cpu.step
@@ -63,6 +72,26 @@ shared_examples_for "reset N flag" do
     cpu.step
 
     cpu.n.should be_false
+  end
+end
+
+shared_examples_for "preserve flags" do
+  %w"z n".each do |flag|
+    it "keeps #{flag} reset" do
+      cpu.send("#{flag}=", false)
+
+      cpu.step
+
+      cpu.send(flag).should be_false
+    end
+
+    it "keeps #{flag} reset" do
+      cpu.send("#{flag}=", true)
+
+      cpu.step
+
+      cpu.send(flag).should be_true
+    end
   end
 end
 
