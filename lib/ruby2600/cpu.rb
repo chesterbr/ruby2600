@@ -85,6 +85,8 @@ class Cpu
     ]
   ]
 
+  BRANCH_FLAGS = [:@n, :@v, :@c, :@z]
+
   def initialize
     @x = @y = @a = 0
   end
@@ -107,11 +109,22 @@ class Cpu
     mode  = (@opcode & 0b00011100) >> 2
     @addressing_mode = ADDRESSING_MODE[group][mode]
 
+    @triggered_branch = triggered_branch?
+
     @param_lo = memory[@pc + 1] || 0
     @param_hi = memory[@pc + 2] || 0
     @param    = @param_hi * 0x100 + @param_lo
 
     @pc += INSTRUCTION_SIZE[@opcode]
+  end
+
+  def triggered_branch?
+    # Branch opcodes are xxy100000, where  xx = flag and y = trigger value
+    return false unless (@opcode & 0b00011111) == 0b00010000
+    flag     =  (@opcode & 0b11000000) >> 6
+    expected = !(@opcode & 0b00100000).zero?
+    actual   = instance_variable_get(BRANCH_FLAGS[flag])
+    !(expected ^ actual)
   end
 
   def execute
@@ -167,12 +180,11 @@ class Cpu
       @i = false
     when 0x78 # SEI
       @i = true
-    when 0xB0 # BCS
+    end
+    # BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ
+    if @triggered_branch
       @old_pc = @pc
-      @pc += numeric_value(@param_lo) if c
-    when 0xD0 # BNE
-      @old_pc = @pc
-      @pc += numeric_value(@param_lo) unless z
+      @pc += numeric_value(@param_lo)
     end
     time_in_cycles
   end
@@ -216,13 +228,11 @@ class Cpu
   end
 
   def branch_to_same_page?
-    (@opcode == 0xB0 &&  @c && (@old_pc & 0xFF00) == (@pc & 0xFF00)) || # BCS
-    (@opcode == 0xD0 && !@z && (@old_pc & 0xFF00) == (@pc & 0xFF00))    # BNE
+    @triggered_branch && (@old_pc & 0xFF00) == (@pc & 0xFF00)
   end
 
   def branch_to_other_page?
-    (@opcode == 0xB0 &&  @c && (@old_pc & 0xFF00) != (@pc & 0xFF00)) || # BCS
-    (@opcode == 0xD0 && !@z && (@old_pc & 0xFF00) != (@pc & 0xFF00))    # BNE
+    @triggered_branch && (@old_pc & 0xFF00) != (@pc & 0xFF00)
   end
 
   # Formulae for (most) memory addressing modes

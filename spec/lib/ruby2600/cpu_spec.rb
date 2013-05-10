@@ -85,7 +85,11 @@ describe Cpu do
     end
 
     context 'BCC' do
-      pending 'not implemented'
+      it_should_behave_like 'a branch instruction' do
+        let(:opcode) { 0x90 }
+        let(:flag) { :c }
+        let(:branch_state) { false }
+      end
     end
 
     context 'BCS' do
@@ -97,7 +101,11 @@ describe Cpu do
     end
 
     context 'BEQ' do
-      pending 'not implemented'
+      it_should_behave_like 'a branch instruction' do
+        let(:opcode) { 0xF0 }
+        let(:flag) { :z }
+        let(:branch_state) { true }
+      end
     end
 
     context 'BIT' do
@@ -105,7 +113,11 @@ describe Cpu do
     end
 
     context 'BMI' do
-      pending 'not implemented'
+      it_should_behave_like 'a branch instruction' do
+        let(:opcode) { 0x30 }
+        let(:flag) { :n }
+        let(:branch_state) { true }
+      end
     end
 
     context 'BNE' do
@@ -117,7 +129,11 @@ describe Cpu do
     end
 
     context 'BPL' do
-      pending 'not implemented'
+      it_should_behave_like 'a branch instruction' do
+        let(:opcode) { 0x10 }
+        let(:flag) { :n }
+        let(:branch_state) { false }
+      end
     end
 
     context 'BRK' do
@@ -125,11 +141,19 @@ describe Cpu do
     end
 
     context 'BVC' do
-      pending 'not implemented'
+      it_should_behave_like 'a branch instruction' do
+        let(:opcode) { 0x50 }
+        let(:flag) { :v }
+        let(:branch_state) { false }
+      end
     end
 
     context 'BVS' do
-      pending 'not implemented'
+      it_should_behave_like 'a branch instruction' do
+        let(:opcode) { 0x70 }
+        let(:flag) { :v }
+        let(:branch_state) { true }
+      end
     end
 
     context 'CLC' do
