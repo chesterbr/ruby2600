@@ -5,8 +5,6 @@ class Cpu
 
   RESET_VECTOR = 0xFFFC
 
-  # Tables from http://visual6502.org/wiki/index.php?title=6502_all_256_Opcodes
-
   INSTRUCTION_SIZE = [
     0, 2, 0, 2, 2, 2, 2, 2, 1, 2, 1, 2, 3, 3, 3, 3,
     2, 2, 0, 2, 2, 2, 2, 2, 1, 3, 1, 3, 3, 3, 3, 3,
