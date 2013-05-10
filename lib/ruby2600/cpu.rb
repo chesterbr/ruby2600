@@ -1,12 +1,11 @@
 class Cpu
   attr_accessor :memory
   attr_accessor :pc, :a, :x, :y
-  attr_accessor :n, :v, :b, :d, :i, :z, :c    # Flags (P) bits (P=nv-bdizc)
+  attr_accessor :n, :v, :b, :d, :i, :z, :c    # Flags (P register): nv-bdizc
 
   RESET_VECTOR = 0xFFFC
 
-  # FIXME tables generated from CPU simuulator, may be inaccurate. See:
-  #       http://visual6502.org/wiki/index.php?title=6502_all_256_Opcodes
+  # Tables from http://visual6502.org/wiki/index.php?title=6502_all_256_Opcodes
 
   INSTRUCTION_SIZE = [
     0, 2, 0, 2, 2, 2, 2, 2, 1, 2, 1, 2, 3, 3, 3, 3,
@@ -46,7 +45,7 @@ class Cpu
     2, 5, 0, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7
   ]
 
-  # Opcodes are in form aaaabbbcc, where cc = group, bb = mode for group
+  # Opcodes = aaaabbbcc, where cc = group, bb = mode, aa = opcode
   # (see: http://www.llx.com/~nparker/a2/opcodes.html)
 
   ADDRESSING_MODE = [
@@ -119,10 +118,10 @@ class Cpu
   end
 
   def triggered_branch?
-    # Branch opcodes are xxy100000, where  xx = flag and y = trigger value
+    # Branch opcodes=xxy100000, where xx = flag and y = trigger value
     return false unless (@opcode & 0b00011111) == 0b00010000
-    flag     =  (@opcode & 0b11000000) >> 6
-    expected = !(@opcode & 0b00100000).zero?
+    flag     = (@opcode & 0b11000000) >> 6
+    expected = (@opcode & 0b00100000) != 0
     actual   = instance_variable_get(BRANCH_FLAGS[flag])
     !(expected ^ actual)
   end
@@ -183,15 +182,14 @@ class Cpu
     end
     # BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ
     if @triggered_branch
-      @old_pc = @pc
+      old_pc = pc
       @pc += numeric_value(@param_lo)
+      @to_same_page = (old_pc & 0xFF00) == (@pc & 0xFF00)
     end
     time_in_cycles
   end
 
-  def numeric_value(signed_byte)
-    signed_byte > 0x7F ? -(signed_byte ^ 0xFF) - 1 : signed_byte
-  end
+  # Read/write memory for (most) addressing modes
 
   def load
     case @addressing_mode
@@ -208,34 +206,6 @@ class Cpu
     else              memory[self.send(@addressing_mode)] = value
     end
   end
-
-  # Timing
-
-  def time_in_cycles
-    cycles = CYCLE_COUNT[@opcode]
-    cycles += 1 if page_boundary_crossed?
-    cycles += 1 if branch_to_same_page?
-    cycles += 2 if branch_to_other_page?
-    cycles
-  end
-
-  def page_boundary_crossed?
-    (@opcode == 0xBE && @param_lo + @y > 0xFF) ||  # LDX; Absolute Y
-    (@opcode == 0xB9 && @param_lo + @y > 0xFF) ||  # LDA; Absolute Y
-    (@opcode == 0xB1 && memory[memory[@pc - 1]] + @y > 0xFF) || # LDA; indirect indexed y
-    (@opcode == 0xBD && @param_lo + @x > 0xFF) ||  # LDA; Absolute X
-    (@opcode == 0xBC && @param_lo + @x > 0xFF)     # LDY; Absolute X
-  end
-
-  def branch_to_same_page?
-    @triggered_branch && (@old_pc & 0xFF00) == (@pc & 0xFF00)
-  end
-
-  def branch_to_other_page?
-    @triggered_branch && (@old_pc & 0xFF00) != (@pc & 0xFF00)
-  end
-
-  # Formulae for (most) memory addressing modes
 
   def zero_page
     @param_lo
@@ -270,6 +240,24 @@ class Cpu
     memory[indexed_param + 1] * 0x100 + memory[indexed_param]
   end
 
+  # Timing
+
+  def time_in_cycles
+    cycles = CYCLE_COUNT[@opcode]
+    cycles += 1 if page_boundary_crossed?
+    cycles += 1 if @triggered_branch &&  @to_same_page
+    cycles += 2 if @triggered_branch && !@to_same_page
+    cycles
+  end
+
+  def page_boundary_crossed?
+    (@opcode == 0xBE && @param_lo + @y > 0xFF) ||  # LDX; Absolute Y
+    (@opcode == 0xB9 && @param_lo + @y > 0xFF) ||  # LDA; Absolute Y
+    (@opcode == 0xB1 && memory[memory[@pc - 1]] + @y > 0xFF) || # LDA; indirect indexed y
+    (@opcode == 0xBD && @param_lo + @x > 0xFF) ||  # LDA; Absolute X
+    (@opcode == 0xBC && @param_lo + @x > 0xFF)     # LDY; Absolute X
+  end
+
   # Flag management
 
   def update_zn_flags(value)
@@ -277,4 +265,9 @@ class Cpu
     @n = (value & 0b10000000 != 0)
   end
 
+  # Other calculations
+
+  def numeric_value(signed_byte)
+    signed_byte > 0x7F ? signed_byte - 0x100 : signed_byte
+  end
 end
