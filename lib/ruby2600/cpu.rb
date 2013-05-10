@@ -101,7 +101,7 @@ class Cpu
   private
 
   def fetch
-    @opcode = memory[@pc]
+    @opcode = memory[@pc] || 0
 
     group = (@opcode & 0b00000011)
     mode  = (@opcode & 0b00011100) >> 2
@@ -167,8 +167,15 @@ class Cpu
       @i = false
     when 0x78 # SEI
       @i = true
+    when 0xB0 # BCS
+      @old_pc = @pc
+      @pc += numeric_value(@param_lo) if c
     end
     time_in_cycles
+  end
+
+  def numeric_value(signed_byte)
+    signed_byte > 0x7F ? -(signed_byte ^ 0xFF) - 1 : signed_byte
   end
 
   def load
@@ -192,6 +199,8 @@ class Cpu
   def time_in_cycles
     cycles = CYCLE_COUNT[@opcode]
     cycles += 1 if page_boundary_crossed?
+    cycles += 1 if branch_to_same_page?
+    cycles += 2 if branch_to_other_page?
     cycles
   end
 
@@ -201,6 +210,14 @@ class Cpu
     (@opcode == 0xB1 && memory[memory[@pc - 1]] + @y > 0xFF) || # LDA; indirect indexed y
     (@opcode == 0xBD && @param_lo + @x > 0xFF) ||  # LDA; Absolute X
     (@opcode == 0xBC && @param_lo + @x > 0xFF)     # LDY; Absolute X
+  end
+
+  def branch_to_same_page?
+    (@opcode == 0xB0 && @c && (@old_pc & 0xFF00) == (@pc & 0xFF00))
+  end
+
+  def branch_to_other_page?
+    (@opcode == 0xB0 && @c && (@old_pc & 0xFF00) != (@pc & 0xFF00))
   end
 
   # Formulae for (most) memory addressing modes
