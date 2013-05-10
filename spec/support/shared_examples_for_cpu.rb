@@ -115,3 +115,66 @@ shared_examples_for "take six cycles" do
   it { cpu.step.should == 6 }
 end
 
+shared_examples_for "a branch instruction" do
+  before { cpu.pc = 0x0510 }
+
+  context 'no branch' do
+    before do
+      cpu.memory[0x0510..0x0511] = opcode, 0x02  # B?? $0514
+      cpu.send("#{flag}=", !branch_state)
+    end
+
+    it_should 'take two cycles'
+
+    it_should 'advance PC by two'
+
+    it_should 'preserve flags'
+  end
+
+  context 'branch' do
+    before { cpu.send("#{flag}=", branch_state) }
+
+    context 'forward on same page' do
+      before { cpu.memory[0x0510..0x0511] = opcode, 0x02 }  # B?? $0514
+
+      it_should 'take three cycles'
+
+      it_should 'set PC value', 0x0514
+
+      it_should 'preserve flags'
+    end
+
+    context 'backward on same page' do
+      before { cpu.memory[0x0510..0x0511] = opcode, 0xFC }  # B?? $050E
+
+      it_should 'take three cycles'
+
+      it_should 'set PC value', 0x050E
+
+      it_should 'preserve flags'
+    end
+
+    context 'forward on another page' do
+      before do
+        cpu.pc = 0x0590
+        cpu.memory[0x0590..0x0591] = opcode, 0x7F # B?? $0611
+      end
+
+      it_should 'take four cycles'
+
+      it_should 'set PC value', 0x0611
+
+      it_should 'preserve flags'
+    end
+
+    context 'backward on another page' do
+      before { cpu.memory[0x0510..0x0511] = opcode, 0x80 }  # B?? $0492
+
+      it_should 'take four cycles'
+
+      it_should 'set PC value', 0x0492
+
+      it_should 'preserve flags'
+    end
+  end
+end

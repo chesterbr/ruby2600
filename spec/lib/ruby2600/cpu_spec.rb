@@ -89,75 +89,11 @@ describe Cpu do
     end
 
     context 'BCS' do
-      before { cpu.pc = 0x0510 }
-
-      context 'no branch' do
-        before do
-          cpu.memory[0x0510..0x0511] = 0xB0, 0x02  # BCS $0514
-          cpu.c = false
-        end
-
-        it_should 'take two cycles'
-
-        it_should 'advance PC by two'
-
-        it_should 'preserve flags'
+      it_should_behave_like 'a branch instruction' do
+        let(:opcode) { 0xB0 }
+        let(:flag) { :c }
+        let(:branch_state) { true }
       end
-
-      context 'branch' do
-        before { cpu.c = true }
-
-        context 'forward on same page' do
-          before { cpu.memory[0x0510..0x0511] = 0xB0, 0x02 }  # BCS $0514
-
-          it_should 'take three cycles'
-
-          it_should 'set PC value', 0x0514
-
-          it_should 'preserve flags'
-        end
-
-        context 'backward on same page' do
-          before { cpu.memory[0x0510..0x0511] = 0xB0, 0xFC }  # BCS $050E
-
-          it_should 'take three cycles'
-
-          it_should 'set PC value', 0x050E
-
-          it_should 'preserve flags'
-        end
-
-        context 'forward on another page' do
-          before do
-            cpu.pc = 0x0590
-            cpu.memory[0x0590..0x0591] = 0xB0, 0x7F # BCS $0611
-          end
-
-          it_should 'take four cycles'
-
-          it_should 'set PC value', 0x0611
-
-          it_should 'preserve flags'
-        end
-
-        context 'backward on another page' do
-          before { cpu.memory[0x0510..0x0511] = 0xB0, 0x80 }  # BCS $0492
-
-          it_should 'take four cycles'
-
-          it_should 'set PC value', 0x0492
-
-          it_should 'preserve flags'
-        end
-
-
-      end
-
-      context 'branch on a different page' do
-
-      end
-
-      pending 'not implemented'
     end
 
     context 'BEQ' do
@@ -173,7 +109,11 @@ describe Cpu do
     end
 
     context 'BNE' do
-      pending 'not implemented'
+      it_should_behave_like 'a branch instruction' do
+        let(:opcode) { 0xD0 }
+        let(:flag) { :z }
+        let(:branch_state) { false }
+      end
     end
 
     context 'BPL' do
