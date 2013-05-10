@@ -1,3 +1,5 @@
+CPU_FLAGS = %w'n v b d i z c'
+
 shared_examples_for 'set A value' do |expected|
   it do
     cpu.step
@@ -43,7 +45,7 @@ shared_examples_for 'set memory with value' do |position, expected|
   end
 end
 
-%w'n v b d i z c'.each do |flag|
+CPU_FLAGS.each do |flag|
   shared_examples_for "set #{flag.upcase} flag" do
     it do
       cpu.step
@@ -62,7 +64,7 @@ end
 end
 
 shared_examples_for "preserve flags" do
-  %w"n v b d i z c".each do |flag|
+  CPU_FLAGS.each do |flag|
     it "keeps #{flag} reset" do
       cpu.send("#{flag}=", false)
 

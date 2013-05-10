@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Cpu do
   subject(:cpu) { Cpu.new }
 
-  %w'z n'.each do |flag|
+  CPU_FLAGS.each do |flag|
     it 'should initialize with a readable #{flag} flag' do
       expect { cpu.send(flag) }.to_not raise_error
     end
