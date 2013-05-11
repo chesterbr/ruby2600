@@ -5,7 +5,7 @@ class Cpu
 
   RESET_VECTOR = 0xFFFC
 
-  INSTRUCTION_SIZE = [
+  OPCODE_INSTRUCTION_SIZES = [
     0, 2, 0, 2, 2, 2, 2, 2, 1, 2, 1, 2, 3, 3, 3, 3,
     2, 2, 0, 2, 2, 2, 2, 2, 1, 3, 1, 3, 3, 3, 3, 3,
     3, 2, 0, 2, 2, 2, 2, 2, 1, 2, 1, 2, 3, 3, 3, 3,
@@ -24,7 +24,7 @@ class Cpu
     2, 2, 0, 2, 2, 2, 2, 2, 1, 3, 1, 3, 3, 3, 3, 3
   ]
 
-  CYCLE_COUNT = [
+  OPCODE_CYCLE_COUNTS = [
     0, 6, 0, 8, 3, 3, 5, 5, 3, 2, 2, 2, 4, 4, 6, 6,
     2, 5, 0, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7,
     6, 6, 0, 8, 3, 3, 5, 5, 4, 2, 2, 2, 4, 4, 6, 6,
@@ -43,49 +43,29 @@ class Cpu
     2, 5, 0, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7
   ]
 
-  # Opcodes = aaaabbbcc, where cc = group, bb = mode, aa = opcode
-  # (see: http://www.llx.com/~nparker/a2/opcodes.html)
+  # Opcodes that map to the same mnemonic instruction (in different access
+  # modes) have bit patterns (http://www.llx.com/~nparker/a2/opcodes.html)
+  # used by the constants below to simplify identification
 
-  ADDRESSING_MODE = [
-    # group 0b00: BIT, JMP, JMP(), STY, LDY, CPY, CPX
-    [
-      :immediate,
-      :zero_page,
-      nil,
-      :absolute,
-      nil,
-      :zero_page_indexed_x,
-      nil,
-      :absolute_indexed_x
-    ],
-    # group 0b01: ORA, AND, EOR, ADC, STA, LDA, CMP, SBC
-    [
-      :indexed_indirect_x,
-      :zero_page,
-      :immediate,
-      :absolute,
-      :indirect_indexed_y,
-      :zero_page_indexed_x,
-      :absolute_indexed_y,
-      :absolute_indexed_x,
-    ],
-    # group 0b10: ASL, ROL, LSR, ROR, STX, LDX, DEC, INC
-    [
-      :immediate,
-      :zero_page,
-      :accumulator,
-      :absolute,
-      nil,
-      :zero_page_indexed_x_or_y,
-      nil,
-      :absolute_indexed_x_or_y
-    ]
+  INSTRUCTION_GROUPS = [
+    %w'xxx BIT JMP xxx STY LDY CPY CPX',
+    %w'ORA AND EOR ADC STA LDA CMP SBC',
+    %w'ASL ROL LSR ROR STX LDX DEC INC'
+  ]
+
+  INSTRUCTION_GROUPS.each_with_index do |names, cc|
+    names.each_with_index do |name, aaa|
+      const_set name, (aaa << 5) + cc unless name == 'xxx'
+    end
+  end
+
+  ADDRESSING_MODE_GROUPS = [
+    [ :immediate, :zero_page, nil, :absolute, nil, :zero_page_indexed_x, nil, :absolute_indexed_x ],
+    [ :indexed_indirect_x, :zero_page, :immediate, :absolute, :indirect_indexed_y, :zero_page_indexed_x, :absolute_indexed_y, :absolute_indexed_x ],
+    [ :immediate, :zero_page, :accumulator, :absolute, nil, :zero_page_indexed_x_or_y, nil, :absolute_indexed_x_or_y ]
   ]
 
   BRANCH_FLAGS = [:@n, :@v, :@c, :@z]
-
-  LDX = 0b10100010
-  STX = 0b10000010
 
   def initialize
     @x = @y = @a = 0
@@ -108,20 +88,21 @@ class Cpu
 
     group = (@opcode & 0b00000011)
     mode  = (@opcode & 0b00011100) >> 2
-    @addressing_mode = ADDRESSING_MODE[group][mode]
+    @addressing_mode = ADDRESSING_MODE_GROUPS[group][mode]
 
+    @is_branch = (@opcode & 0b00011111) == 0b00010000
     @triggered_branch = triggered_branch?
 
     @param_lo = memory[@pc + 1] || 0
     @param_hi = memory[@pc + 2] || 0
     @param    = @param_hi * 0x100 + @param_lo
 
-    @pc += INSTRUCTION_SIZE[@opcode]
+    @pc += OPCODE_INSTRUCTION_SIZES[@opcode]
   end
 
   def triggered_branch?
     # Branch opcodes=xxy100000, where xx = flag and y = trigger value
-    return false unless (@opcode & 0b00011111) == 0b00010000
+    return false unless @is_branch
     flag     = (@opcode & 0b11000000) >> 6
     expected = (@opcode & 0b00100000) != 0
     actual   = instance_variable_get(BRANCH_FLAGS[flag])
@@ -130,21 +111,6 @@ class Cpu
 
   def execute
     case @opcode
-    when 0xA9, 0xA5, 0xB5, 0xAD, 0xBD, 0xB9, 0xB1, 0xA1 # LDA
-      @a = load
-      update_zn_flags @a
-    when 0xA2, 0xA6, 0xB6, 0xAE, 0xBE # LDX
-      @x = load
-      update_zn_flags @x
-    when 0xA0, 0xA4, 0xB4, 0xAC, 0xBC # LDY
-      @y = load
-      update_zn_flags @y
-    when 0x85, 0x95, 0x8D, 0x9D, 0x99, 0x81, 0x91 # STA
-      store @a
-    when 0x86, 0x96, 0x8E # STX
-      store @x
-    when 0x84, 0x94, 0x8C # STY
-      store @y
     when 0xE8 # INX
       @x = (@x + 1) & 0xFF
       update_zn_flags @x
@@ -181,11 +147,31 @@ class Cpu
       @i = false
     when 0x78 # SEI
       @i = true
-    when 0x4A, 0x46, 0x4E, 0x56, 0x5E # LSR
-      byte = load
-      @c = byte.odd?
-      store byte >> 1
-      update_zn_flags byte
+    else
+      unless @is_branch
+        case @instruction
+        when LDA
+          @a = load
+          update_zn_flags @a
+        when LDX
+          @x = load
+          update_zn_flags @x
+        when LDY
+          @y = load
+          update_zn_flags @y
+        when STA
+          store @a
+        when STX
+          store @x
+        when STY
+          store @y
+        when LSR
+          byte = load
+          @c = byte.odd?
+          store byte >> 1
+          update_zn_flags byte
+        end
+      end
     end
     # BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ
     if @triggered_branch
@@ -258,7 +244,7 @@ class Cpu
   # Timing
 
   def time_in_cycles
-    cycles = CYCLE_COUNT[@opcode]
+    cycles = OPCODE_CYCLE_COUNTS[@opcode]
     cycles += 1 if page_boundary_crossed?
     cycles += 1 if @triggered_branch &&  @to_same_page
     cycles += 2 if @triggered_branch && !@to_same_page
