@@ -1,4 +1,5 @@
 require 'rubygems'
+require 'humanize'
 
 require 'ruby2600'
 require 'support/shared_examples_for_memory.rb'

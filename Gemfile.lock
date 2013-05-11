@@ -16,6 +16,7 @@ GEM
     guard-rspec (2.5.4)
       guard (>= 1.1)
       rspec (~> 2.11)
+    humanize (1.1.0)
     listen (0.4.7)
       rb-fchange (~> 0.0.5)
       rb-fsevent (~> 0.9.1)
@@ -50,5 +51,6 @@ DEPENDENCIES
   growl
   guard-bundler
   guard-rspec
+  humanize
   listen (= 0.4.7)
   rubygems-bundler
