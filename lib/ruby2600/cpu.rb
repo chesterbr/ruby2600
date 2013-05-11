@@ -5,7 +5,7 @@ class Cpu
 
   RESET_VECTOR = 0xFFFC
 
-  OPCODE_INSTRUCTION_SIZES = [
+  OPCODE_SIZES = [
     0, 2, 0, 2, 2, 2, 2, 2, 1, 2, 1, 2, 3, 3, 3, 3,
     2, 2, 0, 2, 2, 2, 2, 2, 1, 3, 1, 3, 3, 3, 3, 3,
     3, 2, 0, 2, 2, 2, 2, 2, 1, 2, 1, 2, 3, 3, 3, 3,
@@ -91,7 +91,6 @@ class Cpu
 
     if (@opcode & 0b00011111) == BXX
       @instruction = BXX
-      puts :BXX
     else
       group = (@opcode & 0b00000011)
       mode  = (@opcode & 0b00011100) >> 2
@@ -103,7 +102,7 @@ class Cpu
     @param_hi = memory[@pc + 2] || 0
     @param    = @param_hi * 0x100 + @param_lo
 
-    @pc += OPCODE_INSTRUCTION_SIZES[@opcode]
+    @pc += OPCODE_SIZES[@opcode]
   end
 
   def execute
@@ -177,6 +176,16 @@ class Cpu
       @c = byte.odd?
       store byte >> 1
       update_zn_flags byte
+    when CPX
+      # FIXME not sure if this is dealing with signed
+      byte = load
+      update_zn_flags @x - byte
+      @c = @x >= byte
+    when CPY
+      # FIXME not sure if this is dealing with signed
+      byte = load
+      update_zn_flags @y - byte
+      @c = @y >= byte
     when BXX # BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ
       if should_branch?
         old_pc = pc
@@ -268,7 +277,7 @@ class Cpu
   def page_boundary_crossed?
     (@opcode == 0xBE && @param_lo + @y > 0xFF) ||  # LDX; Absolute Y
     (@opcode == 0xB9 && @param_lo + @y > 0xFF) ||  # LDA; Absolute Y
-    (@opcode == 0xB1 && memory[memory[@pc - 1]] + @y > 0xFF) || # LDA; indirect indexed y
+    (@opcode == 0xB1 && memory[@param_lo] + @y > 0xFF) || # LDA; indirect indexed y
     (@opcode == 0xBD && @param_lo + @x > 0xFF) ||  # LDA; Absolute X
     (@opcode == 0xBC && @param_lo + @x > 0xFF)     # LDY; Absolute X
   end
@@ -280,9 +289,13 @@ class Cpu
     @n = (value & 0b10000000 != 0)
   end
 
-  # Other calculations
+  # Two's complement conversion
 
   def numeric_value(signed_byte)
     signed_byte > 0x7F ? signed_byte - 0x100 : signed_byte
+  end
+
+  def signed_byte(value)
+    value < 0 ? 0x100 + value  : value
   end
 end

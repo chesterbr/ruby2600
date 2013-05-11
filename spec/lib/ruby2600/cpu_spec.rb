@@ -188,11 +188,67 @@ describe Cpu do
     end
 
     context 'CPX' do
-      pending 'not implemented'
+      context 'immediate' do
+        before { cpu.memory[0..1] = 0xE0, 0xA5 } # CPX #$A5
+
+        it_should 'advance PC by two'
+
+        it_should 'take two cycles'
+
+        it_should 'compare and set flags', :x, 0xA5
+      end
+
+      context 'zero page' do
+        before { cpu.memory[0..1] = 0xE4, 0xA5 } # CPX $A5
+
+        it_should 'advance PC by two'
+
+        it_should 'take three cycles'
+
+        it_should 'compare and set flags', :x, 0x33
+      end
+
+      context 'absolute' do
+        before { cpu.memory[0..2] = 0xEC, 0x34, 0x12 } # CPX $1234
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'compare and set flags', :x, 0x99
+      end
     end
 
     context 'CPY' do
-      pending 'not implemented'
+      context 'immediate' do
+        before { cpu.memory[0..1] = 0xC0, 0xA3 } # CPY #$A3
+
+        it_should 'advance PC by two'
+
+        it_should 'take two cycles'
+
+        it_should 'compare and set flags', :y, 0xA3
+      end
+
+      context 'zero page' do
+        before { cpu.memory[0..1] = 0xC4, 0xA3 } # CPY $A3
+
+        it_should 'advance PC by two'
+
+        it_should 'take three cycles'
+
+        it_should 'compare and set flags', :y, 0xF5
+      end
+
+      context 'absolute' do
+        before { cpu.memory[0..2] = 0xCC, 0x44, 0x12 } # CPY $1234
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'compare and set flags', :y, 0xCC
+      end
     end
 
     context 'DEC' do

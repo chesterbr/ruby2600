@@ -158,4 +158,36 @@ shared_examples_for "a branch instruction" do
       it_should 'preserve flags'
     end
   end
+
+  shared_examples_for 'compare and set flags' do |register, value|
+    context 'register < value' do
+      before { cpu.send("#{register}=", value - 1) }
+
+      it_should 'set N flag'
+
+      it_should 'reset C flag'
+
+      it_should 'reset Z flag'
+    end
+
+    context 'register = value' do
+      before { cpu.send("#{register}=", value) }
+
+      it_should 'reset N flag'
+
+      it_should 'set C flag'
+
+      it_should 'set Z flag'
+    end
+
+    context 'register > value' do
+      before { cpu.send("#{register}=", value + 1) }
+
+      it_should 'reset N flag'
+
+      it_should 'set C flag'
+
+      it_should 'reset Z flag'
+    end
+  end
 end
