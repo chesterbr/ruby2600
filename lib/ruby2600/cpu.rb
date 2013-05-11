@@ -72,7 +72,7 @@ class Cpu
   BRANCH_FLAGS = [:@n, :@v, :@c, :@z]
 
   def initialize
-    @x = @y = @a = 0
+    @pc = @x = @y = @a = 0
   end
 
   def reset
@@ -297,5 +297,11 @@ class Cpu
 
   def signed_byte(value)
     value < 0 ? 0x100 + value  : value
+  end
+
+  # Debug tools
+
+  def to_s
+    "PC=#{sprintf("$%04X", @pc)} A=#{sprintf("$%02X", @a)} X=#{sprintf("$%02X", @x)} Y=#{sprintf("$%02X", @y)}"
   end
 end
