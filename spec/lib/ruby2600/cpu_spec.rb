@@ -63,15 +63,24 @@ describe Cpu do
       end
     end
 
-    it 'should run a instruction from anywhere (on a 2600 cart, at least)' do
-      0xFFFF.downto 0xF000 do |position|
-        cpu.memory[position] = 0xEA # NOP
-        cpu.pc = position
-        cpu.step
+    # Ensuring we deal well with page crossing and memory wraping
 
-        cpu.pc.should == position + 1
-      end
+    it_should 'work on any memory position' do
+      let(:code) { [0xEA] } # NOP
+      let(:expected_a) { nil }
     end
+
+    it_should 'work on any memory position' do
+      let(:code) { [0xA9, 0x03] } # LDA #$03
+      let(:expected_a) { 0x03 }
+    end
+
+    it_should 'work on any memory position' do
+      let(:code) { [0xAD, 0x34, 0x12] } # LDA $1234
+      let(:expected_a) { 0x99 }
+    end
+
+    # Full 650x instruction set
 
     context 'ADC' do
       pending 'not implemented'

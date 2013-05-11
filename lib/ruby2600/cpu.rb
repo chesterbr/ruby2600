@@ -98,11 +98,11 @@ class Cpu
       @instruction = (@opcode & 0b11100011)
     end
 
-    @param_lo = memory[@pc + 1] || 0
-    @param_hi = memory[@pc + 2] || 0
+    @param_lo = memory[word(@pc + 1)] || 0
+    @param_hi = memory[word(@pc + 2)] || 0
     @param    = @param_hi * 0x100 + @param_lo
 
-    @pc += OPCODE_SIZES[@opcode]
+    @pc = word(@pc + OPCODE_SIZES[@opcode])
   end
 
   def execute
@@ -113,10 +113,10 @@ class Cpu
   def execute_opcode
     case @opcode
     when 0xE8 # INX
-      @x = (@x + 1) & 0xFF
+      @x = byte(@x + 1)
       update_zn_flags @x
     when 0xC8 # INY
-      @y = (@y + 1) & 0xFF
+      @y = byte(@y + 1)
       update_zn_flags @y
     when 0xCA # DEX
       @x = @x == 0 ? 0xFF : @x - 1
@@ -189,7 +189,7 @@ class Cpu
     when BXX # BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ
       if should_branch?
         old_pc = pc
-        @pc += numeric_value(@param_lo)
+        @pc = word(@pc + numeric_value(@param_lo))
         @branched_same_page  = (old_pc & 0xFF00) == (@pc & 0xFF00)
         @branched_other_page = !@branched_same_page
       else
@@ -289,14 +289,24 @@ class Cpu
     @n = (value & 0b10000000 != 0)
   end
 
-  # Two's complement conversion
+  # Two's complement conversion for byte values
 
   def numeric_value(signed_byte)
     signed_byte > 0x7F ? signed_byte - 0x100 : signed_byte
   end
 
-  def signed_byte(value)
-    value < 0 ? 0x100 + value  : value
+  def signed_byte(numeric_value)
+    numeric_value < 0 ? 0x100 + numeric_value  : numeric_value
+  end
+
+  # Keeping values within their bit sizes (due to lack of byte/word types)
+
+  def byte(value)
+    (value || 0) & 0xFF
+  end
+
+  def word(value)
+    (value || 0) & 0xFFFF
   end
 
   # Debug tools

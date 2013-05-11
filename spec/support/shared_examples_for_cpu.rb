@@ -156,6 +156,19 @@ shared_examples_for "a branch instruction" do
 
       it_should 'preserve flags'
     end
+
+    context 'forward wrapping around memory' do
+      before do
+        cpu.pc = 0xFF90
+        cpu.memory[0xFF90..0xFF91] = opcode, 0x7F # B?? $0611
+      end
+
+      it_should 'take four cycles'
+
+      it_should 'set PC value', 0x0011
+
+      it_should 'preserve flags'
+    end
   end
 
   shared_examples_for 'compare and set flags' do |register, value|
@@ -189,4 +202,39 @@ shared_examples_for "a branch instruction" do
       it_should 'reset Z flag'
     end
   end
+end
+
+
+shared_examples_for 'work on any memory position' do
+  it 'works on lower 1KB' do
+    0x1000.downto 0x0000 do |position|
+      step_and_check(code, position)
+    end
+  end
+
+  it 'works on 2600 cart region' do |position|
+    0xFFFF.downto 0xF000 do |position|
+      step_and_check(code, position)
+    end
+  end
+
+  def step_and_check(code, position)
+    store_in_64KB_memory code, position
+    expected_pc = position + code.size & 0xFFFF
+    randomize :a
+
+    cpu.pc = position
+    cpu.step
+
+    cpu.pc.should eq(expected_pc)
+    cpu.a.should  eq(expected_a), "for position=#{hex_word(position)}" if expected_a
+  end
+
+  def store_in_64KB_memory(code, position)
+    code.each do |byte|
+      cpu.memory[position] = byte
+      position = (position + 1) & 0xFFFF
+    end
+  end
+
 end
