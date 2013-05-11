@@ -90,7 +90,6 @@ end
 end
 
 2.upto 7 do |number|
-  puts "take #{number.humanize} cycles"
   shared_examples_for "take #{number.humanize} cycles" do
     it { cpu.step.should == number }
   end

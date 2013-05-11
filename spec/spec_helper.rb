@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'humanize'
+require 'timeout'
 
 require 'ruby2600'
 require 'support/shared_examples_for_memory.rb'
