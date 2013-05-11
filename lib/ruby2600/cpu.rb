@@ -65,6 +65,10 @@ class Cpu
     [ :immediate, :zero_page, :accumulator, :absolute, nil, :zero_page_indexed_x_or_y, nil, :absolute_indexed_x_or_y ]
   ]
 
+  # Conditional branches also follow a pattern (which tells what flag should have
+  # which value in order to trigger the branch). We'll treat them all as "BXX"
+
+  BXX = 0b00010000
   BRANCH_FLAGS = [:@n, :@v, :@c, :@z]
 
   def initialize
@@ -84,14 +88,16 @@ class Cpu
 
   def fetch
     @opcode = memory[@pc] || 0
-    @instruction = (@opcode & 0b11100011)
 
-    group = (@opcode & 0b00000011)
-    mode  = (@opcode & 0b00011100) >> 2
-    @addressing_mode = ADDRESSING_MODE_GROUPS[group][mode]
-
-    @is_branch = (@opcode & 0b00011111) == 0b00010000
-    @triggered_branch = triggered_branch?
+    if (@opcode & 0b00011111) == BXX
+      @instruction = BXX
+      puts :BXX
+    else
+      group = (@opcode & 0b00000011)
+      mode  = (@opcode & 0b00011100) >> 2
+      @addressing_mode = ADDRESSING_MODE_GROUPS[group][mode]
+      @instruction = (@opcode & 0b11100011)
+    end
 
     @param_lo = memory[@pc + 1] || 0
     @param_hi = memory[@pc + 2] || 0
@@ -100,16 +106,12 @@ class Cpu
     @pc += OPCODE_INSTRUCTION_SIZES[@opcode]
   end
 
-  def triggered_branch?
-    # Branch opcodes=xxy100000, where xx = flag and y = trigger value
-    return false unless @is_branch
-    flag     = (@opcode & 0b11000000) >> 6
-    expected = (@opcode & 0b00100000) != 0
-    actual   = instance_variable_get(BRANCH_FLAGS[flag])
-    !(expected ^ actual)
+  def execute
+    execute_instruction unless execute_opcode
+    time_in_cycles
   end
 
-  def execute
+  def execute_opcode
     case @opcode
     when 0xE8 # INX
       @x = (@x + 1) & 0xFF
@@ -148,38 +150,50 @@ class Cpu
     when 0x78 # SEI
       @i = true
     else
-      unless @is_branch
-        case @instruction
-        when LDA
-          @a = load
-          update_zn_flags @a
-        when LDX
-          @x = load
-          update_zn_flags @x
-        when LDY
-          @y = load
-          update_zn_flags @y
-        when STA
-          store @a
-        when STX
-          store @x
-        when STY
-          store @y
-        when LSR
-          byte = load
-          @c = byte.odd?
-          store byte >> 1
-          update_zn_flags byte
-        end
+      return false
+    end
+    true
+  end
+
+  def execute_instruction
+    case @instruction
+    when LDA
+      @a = load
+      update_zn_flags @a
+    when LDX
+      @x = load
+      update_zn_flags @x
+    when LDY
+      @y = load
+      update_zn_flags @y
+    when STA
+      store @a
+    when STX
+      store @x
+    when STY
+      store @y
+    when LSR
+      byte = load
+      @c = byte.odd?
+      store byte >> 1
+      update_zn_flags byte
+    when BXX # BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ
+      if should_branch?
+        old_pc = pc
+        @pc += numeric_value(@param_lo)
+        @branched_same_page  = (old_pc & 0xFF00) == (@pc & 0xFF00)
+        @branched_other_page = !@branched_same_page
+      else
+        @branched_same_page = @branched_other_page = false
       end
     end
-    # BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ
-    if @triggered_branch
-      old_pc = pc
-      @pc += numeric_value(@param_lo)
-      @to_same_page = (old_pc & 0xFF00) == (@pc & 0xFF00)
-    end
-    time_in_cycles
+  end
+
+  def should_branch?
+    flag     = (@opcode & 0b11000000) >> 6
+    expected = (@opcode & 0b00100000) != 0
+    actual   = instance_variable_get(BRANCH_FLAGS[flag])
+    !(expected ^ actual)
   end
 
   # Read/write memory for (most) addressing modes
@@ -246,8 +260,8 @@ class Cpu
   def time_in_cycles
     cycles = OPCODE_CYCLE_COUNTS[@opcode]
     cycles += 1 if page_boundary_crossed?
-    cycles += 1 if @triggered_branch &&  @to_same_page
-    cycles += 2 if @triggered_branch && !@to_same_page
+    cycles += 1 if @branched_same_page
+    cycles += 2 if @branched_other_page
     cycles
   end
 
