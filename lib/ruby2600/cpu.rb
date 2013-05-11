@@ -76,13 +76,16 @@ class Cpu
       :accumulator,
       :absolute,
       nil,
-      :zero_page_indexed_y, # FIXME: these _y are for LDX
-      nil,                  #        and STX only, will fail
-      :absolute_indexed_y   #        with e.g.  ASL (should be _x)
+      :zero_page_indexed_x_or_y,
+      nil,
+      :absolute_indexed_x_or_y
     ]
   ]
 
   BRANCH_FLAGS = [:@n, :@v, :@c, :@z]
+
+  LDX = 0b10100010
+  STX = 0b10000010
 
   def initialize
     @x = @y = @a = 0
@@ -101,6 +104,7 @@ class Cpu
 
   def fetch
     @opcode = memory[@pc] || 0
+    @instruction = (@opcode & 0b11100011)
 
     group = (@opcode & 0b00000011)
     mode  = (@opcode & 0b00011100) >> 2
@@ -177,6 +181,11 @@ class Cpu
       @i = false
     when 0x78 # SEI
       @i = true
+    when 0x4A, 0x46, 0x4E, 0x56, 0x5E # LSR
+      byte = load
+      @c = byte.odd?
+      store byte >> 1
+      update_zn_flags byte
     end
     # BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ
     if @triggered_branch
@@ -193,7 +202,7 @@ class Cpu
     case @addressing_mode
     when :immediate   then @param_lo
     when :accumulator then @a
-    else              memory[self.send(@addressing_mode)]
+    else              memory[self.send(@addressing_mode)] || 0
     end
   end
 
@@ -217,6 +226,10 @@ class Cpu
     (@param_lo + @y) % 0x100
   end
 
+  def zero_page_indexed_x_or_y
+    [LDX, STX].include?(@instruction) ? zero_page_indexed_y : zero_page_indexed_x
+  end
+
   def absolute
     @param
   end
@@ -227,6 +240,10 @@ class Cpu
 
   def absolute_indexed_y
     (@param + @y) % 0x10000
+  end
+
+  def absolute_indexed_x_or_y
+    [LDX, STX].include?(@instruction) ? absolute_indexed_y : absolute_indexed_x
   end
 
   def indirect_indexed_y

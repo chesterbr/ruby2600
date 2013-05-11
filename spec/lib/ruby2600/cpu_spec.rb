@@ -53,6 +53,7 @@ describe Cpu do
       cpu.memory[0x1235] = 0xAA
       cpu.memory[0x1244] = 0xCC
       cpu.memory[0x1304] = 0xFF
+      cpu.memory[0x1314] = 0x00
     end
 
     def randomize(*attrs)
@@ -719,7 +720,74 @@ describe Cpu do
     end
 
     context 'LSR' do
-      pending 'not implemented'
+      context 'accumulator' do
+        before do
+          cpu.memory[0] = 0x4A # LSR A
+          cpu.a = 0b11101110
+        end
+
+        it_should 'advance PC by one'
+
+        it_should 'take two cycles'
+
+        it_should 'set A value', 0b01110111
+
+        it_should 'reset C flag'
+      end
+
+      context 'zero page' do
+        before { cpu.memory[0..1] = 0x46, 0xA5 } # LSR $A5
+
+        it_should 'advance PC by two'
+
+        it_should 'take five cycles'
+
+        it_should 'set memory with value', 0x00A5, 0x19
+
+        it_should 'set C flag'
+      end
+
+      context 'zero page, x' do
+        before do
+          cpu.memory[0..1] = 0x56, 0xA5  # LSR $A5,X
+          cpu.x = 0x11
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take six cycles'
+
+        it_should 'set memory with value', 0x00B6, 0x01
+
+        it_should 'reset C flag'
+      end
+
+      context 'absolute' do
+        before { cpu.memory[0..2] = 0x4E, 0x04, 0x13 } # LSR $1304
+
+        it_should 'advance PC by three'
+
+        it_should 'take six cycles'
+
+        it_should 'set memory with value', 0x1304, 0x7F
+
+        it_should 'set C flag'
+      end
+
+      context 'absolute, x' do
+        before do
+          cpu.memory[0..2] = 0x5E, 0x04, 0x13 # LSR $1304,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take seven cycles'
+
+        it_should 'set memory with value', 0x1314, 0x00
+
+        it_should 'reset C flag'
+      end
     end
 
     context 'NOP' do
