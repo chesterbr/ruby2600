@@ -1,5 +1,5 @@
 module Ruby2600
-  class Cpu
+  class CPU
     attr_accessor :memory
     attr_accessor :pc, :a, :x, :y
     attr_accessor :n, :v, :b, :d, :i, :z, :c    # Flags (P register): nv-bdizc

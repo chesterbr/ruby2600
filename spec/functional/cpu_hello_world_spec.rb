@@ -213,7 +213,7 @@ describe 'cpu hello world' do
     memory
   end
 
-  subject(:cpu) { Ruby2600::Cpu.new }
+  subject(:cpu) { Ruby2600::CPU.new }
 
   before do
     cpu.memory = memory_with_hello_world_cart

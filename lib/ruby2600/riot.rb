@@ -1,5 +1,5 @@
 module Ruby2600
-  class Riot
+  class RIOT
     def initialize
       @ram = Array.new(128)
     end
