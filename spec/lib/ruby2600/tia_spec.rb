@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe Ruby2600::Tia do
+describe Ruby2600::TIA do
 
-  subject(:tia) { Ruby2600::Tia.new }
+  subject(:tia) { Ruby2600::TIA.new }
   describe '#scanline' do
     before do
       tia.colupf = 0x12

@@ -1,5 +1,5 @@
 module Ruby2600
-  class Tia
+  class TIA
     attr_accessor :pf0, :pf1, :pf2, :colubk, :colupf
 
     def scanline
