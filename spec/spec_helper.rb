@@ -3,7 +3,7 @@ require 'humanize'
 require 'timeout'
 
 require 'ruby2600'
-require 'support/shared_examples_for_memory.rb'
+require 'support/shared_examples_for_bus.rb'
 require 'support/shared_examples_for_cpu.rb'
 
 RSpec.configure do |c|

@@ -1,9 +1,12 @@
 module Ruby2600
-  class Memory
-    def initialize(riot, cart, tia)
-      @riot = riot
-      @cart = cart
+  class Bus
+    def initialize(cpu, tia, cart, riot)
+      @cpu = cpu
       @tia  = tia
+      @cart = cart
+      @riot = riot
+
+      @cpu.memory = self
     end
 
     def [](address)
