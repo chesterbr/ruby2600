@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Riot do
+describe Ruby2600::Riot do
   it 'should store values on the RAM range' do
     (0x80..0xFF).each do |position|
       value = Random.rand(256)

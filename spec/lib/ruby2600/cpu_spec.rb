@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe Cpu do
-  subject(:cpu) { Cpu.new }
+describe Ruby2600::Cpu do
+  subject(:cpu) { Ruby2600::Cpu.new }
 
   CPU_FLAGS.each do |flag|
     it 'should initialize with a readable #{flag} flag' do
