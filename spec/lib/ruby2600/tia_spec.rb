@@ -1,24 +1,25 @@
 require 'spec_helper'
+include Ruby2600::Constants
 
 describe Ruby2600::TIA do
 
   subject(:tia) { Ruby2600::TIA.new }
   describe '#scanline' do
     before do
-      tia.colupf = 0x12
-      tia.colubk = 0x34
+      tia[COLUBK] = 0xBB
+      tia[COLUPF] = 0xFF
     end
     context 'all-zeros playfield' do
-      before { tia.pf0 = tia.pf1 = tia.pf2 = 0x00 }
+      before { tia[PF0] = tia[PF1] = tia[PF2] = 0x00 }
       it 'should generate a fullscanline with background color' do
-        tia.scanline.should == Array.new(160, tia.colubk)
+        tia.scanline.should == Array.new(160, 0xBB)
       end
     end
 
     context 'all-ones playfield' do
-      before { tia.pf0 = tia.pf1 = tia.pf2 = 0xFF }
+      before { tia[PF0] = tia[PF1] = tia[PF2] = 0xFF }
       it 'should generate a fullscanline with foreground color' do
-        tia.scanline.should == Array.new(160, tia.colupf)
+        tia.scanline.should == Array.new(160, 0xFF)
       end
     end
 
