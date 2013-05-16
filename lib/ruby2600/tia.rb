@@ -19,10 +19,11 @@ module Ruby2600
     end
 
     def scanline
+      @reg[WSYNC] = nil
       pf_reset
       (0..227).each do |tia_clock|
         @cpu_credits += 1 if tia_clock % 3 == 0
-        @cpu_credits -= @cpu.step if @cpu_credits > 0 #&& !@cpu_suspended # may be suspended by sta wsync
+        @cpu_credits -= @cpu.step if @cpu_credits > 0 && !@reg[WSYNC]
         if tia_clock > 67
           @pixel = tia_clock - 68
           @scanline[@pixel] = pf_bit.nonzero? ? @reg[COLUPF] : @reg[COLUBK]
