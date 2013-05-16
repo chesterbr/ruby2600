@@ -21,7 +21,16 @@ describe Ruby2600::Bus do
   describe '#read' do
     it_should 'read address range from tia',  0x0000..0x000D
     it_should 'read address range from riot', 0x0080..0x00FF
-    it_should 'read address range from cart', 0xFF00..0xFFFF
+
+    it "should translate reads on address range $F000-FFFF to lower 4K range on cart" do
+      (0..4095).each do |address|
+        value = Random.rand(256)
+        cart.stub(:[]).with(address).and_return(value)
+
+        bus[0xF000 + address].should == value
+      end
+    end
+
   end
 
   describe '#write' do

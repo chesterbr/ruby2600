@@ -13,7 +13,7 @@ module Ruby2600
       case address
       when 0x0000..0x000D then @tia[address]
       when 0x0080..0x00FF then @riot[address]
-      when 0xF000..0xFFFF then @cart[address]
+      when 0xF000..0xFFFF then @cart[address - 0xF000]
       end
     end
 
