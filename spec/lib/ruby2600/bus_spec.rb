@@ -2,21 +2,29 @@ require 'spec_helper'
 
 describe Ruby2600::Bus do
 
-  let(:cpu)  { double('cpu', :memory= => nil) }
-  let(:tia)  { double('tia', :cpu= => nil)    }
+  let(:cpu)  { double('cpu', :memory= => nil, :reset => nil) }
+  let(:tia)  { double('tia', :cpu= => nil) }
   let(:cart) { double('cart') }
   let(:riot) { double('riot') }
 
   subject(:bus) { Ruby2600::Bus.new(cpu, tia, cart, riot) }
 
-  it 'should wire itself as a memory proxy for CPU' do
-    cpu.should_receive(:memory=).with(bus)
-  end
+  context 'initialization' do
+    it 'should wire itself as a memory proxy for CPU' do
+      cpu.should_receive(:memory=).with(bus)
+    end
 
-  it 'should wire TIA to CPU' do
-    tia.should_receive(:cpu=).with(cpu)
+    it 'should wire TIA to CPU' do
+      tia.should_receive(:cpu=).with(cpu)
 
-    bus
+      bus
+    end
+
+    it 'should reset CPU' do
+      cpu.should_receive(:reset)
+
+      bus
+    end
   end
 
   describe '#read' do

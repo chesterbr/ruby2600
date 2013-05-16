@@ -8,6 +8,7 @@ module Ruby2600
 
       @cpu.memory = self
       @tia.cpu = cpu
+      cpu.reset
     end
 
     def [](address)
