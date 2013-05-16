@@ -1,10 +1,13 @@
 module Ruby2600
   class TIA
+    attr_accessor :cpu
+
     include Constants
 
     def initialize
       @reg = Array.new(32)
       @scanline = Array.new(160)
+      @cpu_credits = 0
     end
 
     def [](position)
@@ -17,10 +20,14 @@ module Ruby2600
 
     def scanline
       pf_reset
-      (0..159).each do |pixel|
-        @pixel = pixel
-        @scanline[pixel] = pf_bit.nonzero? ? @reg[COLUPF] : @reg[COLUBK]
-        pf_fetch
+      (0..227).each do |tia_clock|
+        @cpu_credits += 1 if tia_clock % 3 == 0
+        @cpu_credits -= @cpu.step if @cpu_credits > 0 #&& !@cpu_suspended # may be suspended by sta wsync
+        if tia_clock > 67
+          @pixel = tia_clock - 68
+          @scanline[@pixel] = pf_bit.nonzero? ? @reg[COLUPF] : @reg[COLUBK]
+          pf_fetch
+        end
       end
       @scanline
     end
