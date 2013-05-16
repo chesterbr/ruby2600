@@ -7,6 +7,7 @@ module Ruby2600
       @riot = riot
 
       @cpu.memory = self
+      @tia.cpu = cpu
     end
 
     def [](address)
