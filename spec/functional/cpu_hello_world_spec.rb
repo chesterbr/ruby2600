@@ -1,92 +1,107 @@
 require 'spec_helper'
 
-describe 'cpu hello world' do
-
-  PF1    = 0x0E
-  VBLANK = 0x01
+describe 'hello world with CPU, TIA and Bus' do
 
   FRAME_END_VBLANK_VALUE = 0b01000010
+  CART_FILE = 'spec/fixtures/files/hello.bin'
 
-  let(:cart_file) { 'spec/fixtures/files/hello.bin' }
+  let(:cart) { File.open(CART_FILE, "rb") { |f| f.read }.unpack('C*') }
+  let(:tia)  { Ruby2600::TIA.new }
+  let(:cpu)  { Ruby2600::CPU.new }
+  let!(:bus) { Ruby2600::Bus.new(cpu, tia, cart, nil) }
+
+  it 'generates a frame with hello world' do
+    # FIXME should really wait for VBLANK, or use a higher-level frame
+    # generation from TIA (better)
+    frame = ''
+    1.upto(40)  { tia.scanline } # skip VBLANK/VSYNC
+    1.upto(176) { frame << as_text(tia.scanline) }
+    frame.should == hello_world_frame
+  end
+
+  def as_text(scanline)
+    scanline.map{ |c| c == 0 ? " " : "X" }.join.rstrip << "\n"
+  end
+
 
   let :hello_world_frame do
-    <<-END.gsub(/^ {5}/, '')
+    <<-END
 
 
-      X    X
-      X    X
-      XXXXXX
-      XXXXXX
-      X    X
-      X    X
-      X    X
-      X    X
-      X    X
-      X    X
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXXXXXXXXXXXXXXXXXXXXXX                                                        XXXXXXXXXXXXXXXXXXXXXXXX
+                    XXXXXXXXXXXXXXXXXXXXXXXX                                                        XXXXXXXXXXXXXXXXXXXXXXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
 
 
 
 
-      XXXXXX
-      XXXXXX
-      X
-      X
-      XXXXX
-      XXXXX
-      X
-      X
-      X
-      X
-      XXXXXX
-      XXXXXX
+                    XXXXXXXXXXXXXXXXXXXXXXXX                                                        XXXXXXXXXXXXXXXXXXXXXXXX
+                    XXXXXXXXXXXXXXXXXXXXXXXX                                                        XXXXXXXXXXXXXXXXXXXXXXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXXXXXXXXXXXXXXXXXX                                                            XXXXXXXXXXXXXXXXXXXX
+                    XXXXXXXXXXXXXXXXXXXX                                                            XXXXXXXXXXXXXXXXXXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXXXXXXXXXXXXXXXXXXXXXX                                                        XXXXXXXXXXXXXXXXXXXXXXXX
+                    XXXXXXXXXXXXXXXXXXXXXXXX                                                        XXXXXXXXXXXXXXXXXXXXXXXX
 
 
 
 
-      X
-      X
-      X
-      X
-      X
-      X
-      X
-      X
-      X
-      X
-      XXXXXX
-      XXXXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXXXXXXXXXXXXXXXXXXXXXX                                                        XXXXXXXXXXXXXXXXXXXXXXXX
+                    XXXXXXXXXXXXXXXXXXXXXXXX                                                        XXXXXXXXXXXXXXXXXXXXXXXX
 
 
 
 
-      X
-      X
-      X
-      X
-      X
-      X
-      X
-      X
-      X
-      X
-      XXXXXX
-      XXXXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXXXXXXXXXXXXXXXXXXXXXX                                                        XXXXXXXXXXXXXXXXXXXXXXXX
+                    XXXXXXXXXXXXXXXXXXXXXXXX                                                        XXXXXXXXXXXXXXXXXXXXXXXX
 
 
 
 
-       XXXX
-       XXXX
-      X    X
-      X    X
-      X    X
-      X    X
-      X    X
-      X    X
-      X    X
-      X    X
-       XXXX
-       XXXX
+                        XXXXXXXXXXXXXXXX                                                                XXXXXXXXXXXXXXXX
+                        XXXXXXXXXXXXXXXX                                                                XXXXXXXXXXXXXXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                        XXXXXXXXXXXXXXXX                                                                XXXXXXXXXXXXXXXX
+                        XXXXXXXXXXXXXXXX                                                                XXXXXXXXXXXXXXXX
 
 
 
@@ -107,141 +122,86 @@ describe 'cpu hello world' do
 
 
 
-      X    X
-      X    X
-      X    X
-      X    X
-      X    X
-      X    X
-      X    X
-      X    X
-      X XX X
-      X XX X
-       X  X
-       X  X
-
-
-
-
-       XXXX
-       XXXX
-      X    X
-      X    X
-      X    X
-      X    X
-      X    X
-      X    X
-      X    X
-      X    X
-       XXXX
-       XXXX
-
-
-
-
-      XXXXX
-      XXXXX
-      X    X
-      X    X
-      X    X
-      X    X
-      XXXXX
-      XXXXX
-      X   X
-      X   X
-      X    X
-      X    X
-
-
-
-
-      X
-      X
-      X
-      X
-      X
-      X
-      X
-      X
-      X
-      X
-      XXXXXX
-      XXXXXX
-
-
-
-
-      XXXX
-      XXXX
-      X   X
-      X   X
-      X    X
-      X    X
-      X    X
-      X    X
-      X   X
-      X   X
-      XXXX
-      XXXX
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX    XXXXXXXX    XXXX                                                        XXXX    XXXXXXXX    XXXX
+                    XXXX    XXXXXXXX    XXXX                                                        XXXX    XXXXXXXX    XXXX
+                        XXXX        XXXX                                                                XXXX        XXXX
+                        XXXX        XXXX                                                                XXXX        XXXX
+
+
+
+
+                        XXXXXXXXXXXXXXXX                                                                XXXXXXXXXXXXXXXX
+                        XXXXXXXXXXXXXXXX                                                                XXXXXXXXXXXXXXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                        XXXXXXXXXXXXXXXX                                                                XXXXXXXXXXXXXXXX
+                        XXXXXXXXXXXXXXXX                                                                XXXXXXXXXXXXXXXX
+
+
+
+
+                    XXXXXXXXXXXXXXXXXXXX                                                            XXXXXXXXXXXXXXXXXXXX
+                    XXXXXXXXXXXXXXXXXXXX                                                            XXXXXXXXXXXXXXXXXXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXXXXXXXXXXXXXXXXXX                                                            XXXXXXXXXXXXXXXXXXXX
+                    XXXXXXXXXXXXXXXXXXXX                                                            XXXXXXXXXXXXXXXXXXXX
+                    XXXX            XXXX                                                            XXXX            XXXX
+                    XXXX            XXXX                                                            XXXX            XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+
+
+
+
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXX                                                                            XXXX
+                    XXXXXXXXXXXXXXXXXXXXXXXX                                                        XXXXXXXXXXXXXXXXXXXXXXXX
+                    XXXXXXXXXXXXXXXXXXXXXXXX                                                        XXXXXXXXXXXXXXXXXXXXXXXX
+
+
+
+
+                    XXXXXXXXXXXXXXXX                                                                XXXXXXXXXXXXXXXX
+                    XXXXXXXXXXXXXXXX                                                                XXXXXXXXXXXXXXXX
+                    XXXX            XXXX                                                            XXXX            XXXX
+                    XXXX            XXXX                                                            XXXX            XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX                XXXX                                                        XXXX                XXXX
+                    XXXX            XXXX                                                            XXXX            XXXX
+                    XXXX            XXXX                                                            XXXX            XXXX
+                    XXXXXXXXXXXXXXXX                                                                XXXXXXXXXXXXXXXX
+                    XXXXXXXXXXXXXXXX                                                                XXXXXXXXXXXXXXXX
 
 
 
 
     END
   end
-
-  let :memory_with_hello_world_cart do
-    cart = File.open(cart_file, "rb") { |f| f.read }
-    memory = []
-    memory[0xF000..0xFFFF] = cart.unpack('C*')
-    memory
-  end
-
-  subject(:cpu) { Ruby2600::CPU.new }
-
-  before do
-    cpu.memory = memory_with_hello_world_cart
-    cpu.reset
-    cpu.x = 0
-  end
-
-  it 'generates a frame with hello world' do
-    run_one_frame_with_time_limit
-    @frame.should == hello_world_frame
-  end
-
-  def run_one_frame_with_time_limit
-    Timeout::timeout(1) { run_one_frame }
-  end
-
-  def run_one_frame
-    @frame = ''
-    @frame << scanline while cpu.memory[VBLANK] != FRAME_END_VBLANK_VALUE
-  end
-
-  def scanline
-    # Could count WSYNCs, but it's easier to track X
-    # (aka: the Hello World cart line counter: http://pastebin.com/abBRfUjd)
-    x = cpu.x
-    cpu.step while cpu.x == x
-    line = sprintf("%08b", cpu.memory[PF1])
-    line.gsub(/0/, ' ').gsub(/1/,'X').rstrip << "\n"
-  end
-
 end

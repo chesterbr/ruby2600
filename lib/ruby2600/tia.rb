@@ -8,6 +8,7 @@ module Ruby2600
       @reg = Array.new(32)
       @scanline = Array.new(160)
       @cpu_credits = 0
+      @reg[PF0] = @reg[PF1] = @reg[PF2] = 1 # FIXME should randomize all but wsync & test
     end
 
     def [](position)
