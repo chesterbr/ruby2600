@@ -57,8 +57,6 @@ describe Ruby2600::TIA do
     end
 
     describe 'cpu integration' do
-      before { tia[PF0] = tia[PF1] = tia[PF2] = rand(256) }
-
       def write_to_wsync_on_6th_call
         @step_counter ||= 0
         @step_counter += 1
