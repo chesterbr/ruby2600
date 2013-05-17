@@ -25,7 +25,11 @@ module Ruby2600
         sync_cpu_with color_clock
         if color_clock >= WBLANK_WIDTH
           @pixel = color_clock - WBLANK_WIDTH
-          @scanline[@pixel] = pf_bit.nonzero? ? @reg[COLUPF] : @reg[COLUBK]
+          if vertical_blank?
+            @scanline[@pixel] = 0
+          else
+            @scanline[@pixel] = pf_bit.nonzero? ? @reg[COLUPF] : @reg[COLUBK]
+          end
           pf_fetch
         end
       end
@@ -43,6 +47,10 @@ module Ruby2600
     def sync_cpu_with(color_clock)
       @cpu_credits += 1 if color_clock % 3 == 0
       @cpu_credits -= @cpu.step if @cpu_credits > 0 && !@reg[WSYNC]
+    end
+
+    def vertical_blank?
+      @reg[VBLANK] & 0b00000010 != 0
     end
 
     # Playfield
