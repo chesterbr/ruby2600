@@ -90,6 +90,16 @@ describe Ruby2600::TIA do
       end
     end
 
+    context 'CTRLPF' do
+      it 'should reflect if bit 0 is set'
+
+      it 'should use player colors if bit 1 is set (score mode)'
+
+      it 'should get its color ahead of players/missiles if bit 2 is set (priority'
+
+      it 'should contorl ball size (bits 4 and 5)'
+    end
+
     context 'WSYNC' do
       def write_to_wsync_on_6th_call
         @step_counter ||= 0
