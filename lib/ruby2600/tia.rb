@@ -6,7 +6,6 @@ module Ruby2600
 
     def initialize
       @reg = Array.new(32)
-      @scanline = Array.new(160)
       @cpu_credits = 0
       @reg[PF0] = @reg[PF1] = @reg[PF2] = 1 # FIXME should randomize all but wsync & test
     end
@@ -20,13 +19,11 @@ module Ruby2600
     end
 
     def scanline
-      @reg[WSYNC] = nil
-      pf_reset
-      (0..227).each do |tia_clock|
-        @cpu_credits += 1 if tia_clock % 3 == 0
-        @cpu_credits -= @cpu.step if @cpu_credits > 0 && !@reg[WSYNC]
-        if tia_clock > 67
-          @pixel = tia_clock - 68
+      reset_beam
+      (0..227).each do |color_clock|
+        sync_cpu_with color_clock
+        if color_clock > 67
+          @pixel = color_clock - 68
           @scanline[@pixel] = pf_bit.nonzero? ? @reg[COLUPF] : @reg[COLUBK]
           pf_fetch
         end
@@ -35,6 +32,17 @@ module Ruby2600
     end
 
     private
+
+    def reset_beam
+      @reg[WSYNC] = nil
+      pf_reset
+      @scanline = Array.new(160)
+    end
+
+    def sync_cpu_with(color_clock)
+      @cpu_credits += 1 if color_clock % 3 == 0
+      @cpu_credits -= @cpu.step if @cpu_credits > 0 && !@reg[WSYNC]
+    end
 
     # Playfield
 
