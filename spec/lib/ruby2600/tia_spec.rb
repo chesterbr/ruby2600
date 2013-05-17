@@ -9,9 +9,18 @@ describe Ruby2600::TIA do
     tia
   end
 
-  let(:write_to_WSYNC_on_6th_call) do
-    Proc.new do
+  describe '#initialize' do
+    it 'should initialize with random values on registers' do
+      registers1 = Ruby2600::TIA.new.instance_variable_get(:@reg)
+      registers2 = tia.instance_variable_get(:@reg)
 
+      registers1.should_not == registers2
+    end
+
+    it "should initialize with valid (byte-size) values on registers" do
+      tia.instance_variable_get(:@reg).each do |register_value|
+        (0..255).should cover register_value
+      end
     end
   end
 

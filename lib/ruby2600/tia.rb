@@ -4,10 +4,11 @@ module Ruby2600
 
     include Constants
 
+    WBLANK_WIDTH = 68
+
     def initialize
-      @reg = Array.new(32)
+      @reg = Array.new(32) { rand(256) }
       @cpu_credits = 0
-      @reg[PF0] = @reg[PF1] = @reg[PF2] = 1 # FIXME should randomize all but wsync & test
     end
 
     def [](position)
@@ -22,8 +23,8 @@ module Ruby2600
       reset_beam
       (0..227).each do |color_clock|
         sync_cpu_with color_clock
-        if color_clock > 67
-          @pixel = color_clock - 68
+        if color_clock >= WBLANK_WIDTH
+          @pixel = color_clock - WBLANK_WIDTH
           @scanline[@pixel] = pf_bit.nonzero? ? @reg[COLUPF] : @reg[COLUBK]
           pf_fetch
         end
