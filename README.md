@@ -15,8 +15,8 @@ Speed and sound are lowest-priority goals ([Stella](http://stella.sourceforge.ne
 ## Current status
 
 - 650x CPU emulation covers about 65% of the instruction set, [cloc](http://cloc.sourceforge.net/)-ing just about 260 lines of code.
-- TIA emulation covers basic *SYNC and PF* registers and CPU sync, being able to generate an entire scanline or even a full frame (in Atari colors)
-- Every single aspect of the emulated code is covered by specs.
+- TIA emulation covers basic VSYNC/VBLANK, playfield registers and CPU sync (including WSYNC), being able to generate an entire scanline or even a full frame (in Atari colors)
+- Every single aspect of the emulated code is spec-ed.
 - Rudimentary [Gosu](http://www.libgosu.org/)-based command-line interface allows running a [Hello World ROM](http://pastebin.com/abBRfUjd), which is also included on a functional test.
 
 ## Installation
@@ -29,9 +29,9 @@ For now, clone the project and `bundle install` the dependencies.
 
 ## Usage
 
-You can use then `bundle exec rspec` or `bundle exec guard` to run the tests.
+You can use then `bundle exec rspec` or `bundle exec guard` to run the tests, or go wild on `irb`/`pry` (disassembler/debug tools will come soon).
 
-Command line is pretty minimal now, and most likely only the Hello World cart will run (with funky colors). You can run straight from a clone/fork with:
+Command line is pretty minimal now, and most likely only runs the Hello World cart (with funky colors). You can run straight from a clone/fork with:
 
     $ bundle exec ruby -Ilib bin/ruby2600 spec/fixtures/files/hello.bin
 
