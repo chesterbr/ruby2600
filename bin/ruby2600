@@ -1,2 +1,68 @@
 #!/usr/bin/env ruby
+require 'gosu'
+require 'texplay'
+require 'ruby2600'
+
+# http://www.libgosu.org/cgi-bin/mwf/topic_show.pl?tid=196
+# EmptyImageStub is based on an idea Julian Raschke suggested in #gosu
+# on IRC. It provides empty RMagic::Image-like objects which, when
+# passed to Gosu::Image's constructor, have their to_blob method called,
+# to provide RGBA data. This allows the easy creation of new Gosu::Image
+# objects without accessing the filesystem, which can then be drawn into
+# with TexPlay.
+class EmptyImageStub
+  def initialize(w,h)
+    @w, @h = w, h;
+  end
+
+  def to_blob
+    "\0" * @w * @h * 4
+  end
+
+  def rows
+    @h
+  end
+
+  def columns
+    @w
+  end
+end
+
+class GameWindow < Gosu::Window
+  def initialize
+    super 640, 480, false
+    stub = EmptyImageStub.new(160,280)
+    @canvas = Gosu::Image.new(self, stub, true)
+    self.caption = "Ruby2600"
+  end
+
+  def load_cart(filename)
+    @bus = Ruby2600::Bus.new(Ruby2600::CPU.new,
+                             Ruby2600::TIA.new,
+                             Ruby2600::Cart.new(filename),
+                             nil)
+  end
+
+  def update
+    frame = @bus.tia.frame
+    @canvas.paint do
+      frame.each_index do |y|
+        frame[y].each_index do |x|
+          # FIXME do some color translation; ignore invisible top/bottom
+          pixel x, y, :color => 0xFF000000 + frame[y][x]
+        end
+      end
+    end
+  end
+
+  def draw
+    @canvas.draw(0, 0, 0)
+  end
+end
+
+window = GameWindow.new
+window.load_cart ARGV[0]
+window.show
+
+
 puts "ohai"

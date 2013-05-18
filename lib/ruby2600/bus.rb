@@ -1,5 +1,8 @@
 module Ruby2600
   class Bus
+    # FIXME make a better structure (classes?) for frame-to-whatever conversions
+    attr_accessor :tia
+
     def initialize(cpu, tia, cart, riot)
       @cpu = cpu
       @tia  = tia

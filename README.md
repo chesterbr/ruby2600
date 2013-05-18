@@ -10,15 +10,17 @@ So far, it is going well: the 650x CPU emulation covers about 65% of the instruc
 
 ## Installation
 
-I'm inclined to make Ruby2600 a gem, unless I find some better way to distribute it. If so, you'll probably be able to install it with:
+Once this gem is published), you can just install it:
 
     $ gem install ruby2600
 
+For now, you'll have to install it from the cloned source
+
+    FIXME add command
+
 ## Usage
 
-Currently you'll have to use the console. See `spec/functional\cpu_hello_world_spec` for an example on how to load an Atari cart on an array and "run" it.
-
-At some point I'll most likely add a script, so you will be able to go like
+The command line is pretty minimal now:
 
     $ ruby2600 enduro.bin
 

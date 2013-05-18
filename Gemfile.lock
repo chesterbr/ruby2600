@@ -2,6 +2,8 @@ PATH
   remote: .
   specs:
     ruby2600 (0.0.1)
+      gosu
+      texplay
 
 GEM
   remote: https://rubygems.org/
@@ -9,6 +11,7 @@ GEM
     coderay (1.0.9)
     diff-lcs (1.2.4)
     ffi (1.8.1)
+    gosu (0.7.47.1)
     growl (1.0.3)
     guard (1.5.4)
       listen (>= 0.4.2)
@@ -48,6 +51,8 @@ GEM
     rspec-mocks (2.13.1)
     rubygems-bundler (1.1.1)
     slop (3.4.4)
+    texplay (0.4.3)
+      gosu (>= 0.7.25)
     thor (0.18.1)
 
 PLATFORMS
