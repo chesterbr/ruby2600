@@ -126,13 +126,13 @@ describe Ruby2600::TIA do
       end
 
       it 'should generate a black scanline when "blanking" bit is set' do
-        tia[VBLANK] = 0b00000010 | rand(256)
+        tia[VBLANK] = rand_with_bit(1, :set)
 
         tia.scanline.should == Array.new(160, 0x00)
       end
 
-      it 'should generate a normal scanline when "blanking" bit is reset' do
-        tia[VBLANK] = 0b11111101 & rand(256)
+      it 'should generate a normal scanline when "blanking" bit is clear' do
+        tia[VBLANK] = rand_with_bit(1, :clear)
 
         tia.scanline.should == Array.new(160, 0xFF)
       end
@@ -141,13 +141,30 @@ describe Ruby2600::TIA do
     end
   end
 
-  describe '#frame' do
-    it 'should be reset (initiated) by a VSYNC'
+  # The "ideal" NTSC frame has 259 scanlines (+3 of vsync, which we don't return),
+  # but we should allow some leeway (we won't emulate "screen roll" that TVs do
+  # with irregular frames)
 
-    # The "ideal" NTSC frame has 262 scanlines, but we should allow some leeway
-    # (we won't emulate "screen roll" that some TVs do when you exceed 262)
-    (261..263).each do |count|
-      it "should be generated with #{count} scanlines"
+  describe '#frame' do
+    def build_frame(lines)
+      @counter ||= -10 # Start on the "previous" frame
+      @counter += 1
+      case @counter
+      when 0, lines + 3 then tia[VSYNC] = rand_with_bit(1, :set)   # Begin frame
+      when 3            then tia[VSYNC] = rand_with_bit(1, :clear) # End frame
+      end
+      tia[WSYNC] = 255 # Finish scanline
+      2
+    end
+
+    258.upto(260).each do |lines|
+      it "should generate a frame with #{lines} scanlines" do
+      tia.cpu.stub(:step) { build_frame(lines) }
+
+      tia[VSYNC] = rand_with_bit 1, :clear
+      tia.frame
+      tia.frame.size.should == lines
+      end
     end
   end
 end

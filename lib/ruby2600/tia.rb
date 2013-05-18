@@ -36,6 +36,13 @@ module Ruby2600
       @scanline
     end
 
+    def frame
+      buffer = []
+      scanline while vertical_sync?
+      buffer << scanline until vertical_sync?
+      buffer
+    end
+
     private
 
     def reset_beam
@@ -51,6 +58,10 @@ module Ruby2600
 
     def vertical_blank?
       @reg[VBLANK] & 0b00000010 != 0
+    end
+
+    def vertical_sync?
+      @reg[VSYNC] & 0b00000010 != 0
     end
 
     # Playfield

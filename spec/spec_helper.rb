@@ -20,3 +20,9 @@ end
 def hex_byte(byte)
   sprintf("$%02X", byte) rescue "$??"
 end
+
+def rand_with_bit(bit, status)
+  mask = 1 << bit
+  status == :set ? mask | rand(256) : (0xFF ^ mask) & rand(256)
+end
+
