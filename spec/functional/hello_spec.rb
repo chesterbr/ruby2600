@@ -10,23 +10,33 @@ describe 'hello world with CPU, TIA and Bus' do
   let(:cpu)  { Ruby2600::CPU.new }
   let!(:bus) { Ruby2600::Bus.new(cpu, tia, cart, nil) }
 
-  it 'generates a frame with hello world' do
-    # FIXME should really wait for VBLANK, or use a higher-level frame
-    # generation from TIA (better)
-    frame = ''
-    1.upto(40)  { tia.scanline } # skip VBLANK/VSYNC
-    1.upto(176) { frame << as_text(tia.scanline) }
-    frame.should == hello_world_frame
+  before do
+    2.times { tia.frame } # discard the first one, most likely won't sync right
   end
 
-  def as_text(scanline)
-    scanline.map{ |c| c == 0 ? " " : "X" }.join.rstrip << "\n"
+  it 'generates a series of frames with hello world' do
+    5.times do
+      text_in(tia.frame).should == hello_world_text
+    end
+  end
+
+  def text_in(frame)
+    trim_blank_lines( frame.inject('') do |text_frame, scanline|
+      text_frame << scanline.map{ |c| c == 0 ? " " : "X" }.join.rstrip << "\n"
+    end)
+  end
+
+  def trim_blank_lines(text)
+    2.times do
+      text.chomp! until text.chomp == text
+      text.reverse!
+    end
+    text
   end
 
 
-  let :hello_world_frame do
-    <<-END
-
+  let :hello_world_text do
+    trim_blank_lines <<-END
 
                     XXXX                XXXX                                                        XXXX                XXXX
                     XXXX                XXXX                                                        XXXX                XXXX
@@ -198,9 +208,6 @@ describe 'hello world with CPU, TIA and Bus' do
                     XXXX            XXXX                                                            XXXX            XXXX
                     XXXXXXXXXXXXXXXX                                                                XXXXXXXXXXXXXXXX
                     XXXXXXXXXXXXXXXX                                                                XXXXXXXXXXXXXXXX
-
-
-
 
     END
   end
