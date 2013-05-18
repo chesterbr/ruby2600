@@ -1,31 +1,46 @@
 # Ruby2600
 
-A (work-in-progress) Atari 2600 emulator 100% written in Ruby
+A (work-in-progress) Atari 2600 emulator, 100% written in Ruby.
 
-## Rationale
+## Motivation
 
-Emulator development and the "Ruby way" of writing code were two areas that I wanted to get more experience, and this project allowed me to do both. Speed is **not** a concern (Stella does that very well), but I wanted to end up with n emulator with high test coverage and easy to understand/modify code.
+Emulator development and the "Ruby way" of writing code were two areas that I wanted to explore, and this project allowed me to do both.
 
-So far, it is going well: the 650x CPU emulation covers about 65% of the instruction set and (cloc)[http://cloc.sourceforge.net/]s only 260 lines of code, and every instruction is tested for expected effects (and a few unexpected ones).
+The main focus is to avoid "writing C in Ruby". Instead, the code is geared towards clarity and compatibility, by means of means of strict, RSpec-based TDD.
+
+This will (hopefully) result in specs that can  used in other contexts (e.g., testing other 650x CPU emulators, or using the current one in other projects).
+
+Speed and sound are lowest-priority goals ([Stella](http://stella.sourceforge.net/) or [z26](http://www.whimsey.com/z26/) can suit most needs in those respects right now). Once (and if) it reaches reasonable compatibility with general games we can look at those aspects.
+
+## Current status
+
+- 650x CPU emulation covers about 65% of the instruction set ((cloc)[http://cloc.sourceforge.net/]-ing  only 260 lines of code)
+- TIA emulation covers basic *SYNC and PF* registers and CPU sync-ing, being able to generate an entire scanline or even a full frame (in Atari colors)
+- Every single aspect of the emulated code is covered by specs.
+- Rudimentary [Gosu](http://www.libgosu.org/)-based command-line interface allows running a [Hello World ROM](http://pastebin.com/abBRfUjd), which is also included on a functional test.
 
 ## Installation
 
-Once this gem is published), you can just install it:
+Once this gem is published), you'll be able to just install it:
 
     $ gem install ruby2600
 
-For now, you'll have to install it from the cloned source
-
-    FIXME add command
+For now, clone the project and `bundle install` the dependencies.
 
 ## Usage
 
-The command line is pretty minimal now:
+You can use then `bundle exec rspec` or `bundle exec guard` to run the tests.
 
-    $ ruby2600 enduro.bin
+Command line is pretty minimal now, and most likely only the Hello World cart will run (with funky colors). You can run straight from a clone/fork with:
+
+    $ bundle exec ruby -Ilib bin/ruby2600 spec/fixtures/files/hello.bin
 
 ## License
 
+If you can see this repository, it means I gave you a sneak preview. Play with it as you wish, but please don't share until it is released - ping me if you have any need otherwise!
+
+Once released (planned for [RubyConf BR 2013](http://cfp.rubyconf.com.br/)), this software will be distributed under the terms of the [MIT License](http://opensource.org/licenses/MIT). If you have access right now, it me
+
 Copyright (c) 2013 Carlos Duarte do Nascimento (Chester) <cd@pobox.com>
 
-See the file license.txt for copying permission.
+See the file LICENSE.txt for copying permission.
