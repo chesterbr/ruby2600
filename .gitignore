@@ -2,8 +2,12 @@
 *.rbc
 .bundle
 .config
-coverage
+.yardoc
+Gemfile.lock
 InstalledFiles
+_yardoc
+coverage
+doc/
 lib/bundler/man
 pkg
 rdoc
@@ -11,5 +15,4 @@ spec/reports
 test/tmp
 test/version_tmp
 tmp
-personal_notes.txt
 .DS_Store
