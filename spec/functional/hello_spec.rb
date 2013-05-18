@@ -1,17 +1,14 @@
 require 'spec_helper'
 
-describe 'hello world with CPU, TIA and Bus' do
+describe 'hello world with CPU, TIA, Cart and Bus' do
 
-  FRAME_END_VBLANK_VALUE = 0b01000010
-  CART_FILE = 'spec/fixtures/files/hello.bin'
-
-  let(:cart) { File.open(CART_FILE, "rb") { |f| f.read }.unpack('C*') }
+  let(:cart) { Ruby2600::Cart.new(path_for_ROM :hello) }
   let(:tia)  { Ruby2600::TIA.new }
   let(:cpu)  { Ruby2600::CPU.new }
   let!(:bus) { Ruby2600::Bus.new(cpu, tia, cart, nil) }
 
   before do
-    2.times { tia.frame } # discard the first one, most likely won't sync right
+    2.times { tia.frame } # discard the first few, most likely won't sync right
   end
 
   it 'generates a series of frames with hello world' do

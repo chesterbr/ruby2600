@@ -26,3 +26,7 @@ def rand_with_bit(bit, status)
   status == :set ? mask | rand(256) : (0xFF ^ mask) & rand(256)
 end
 
+def path_for_ROM(name)
+  "spec/fixtures/files/#{name}.bin"
+end
+
