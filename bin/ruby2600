@@ -3,6 +3,11 @@ require 'gosu'
 require 'texplay'
 require 'ruby2600'
 
+# This is a first hack just to see the emulator runing.
+# Will probably make some system of "pluggable" outputs to TIA,
+# which would enable different outputs (including fun stuff like
+# outputing to a text screen, a la Text Mode Quake II)
+
 # http://www.libgosu.org/cgi-bin/mwf/topic_show.pl?tid=196
 # EmptyImageStub is based on an idea Julian Raschke suggested in #gosu
 # on IRC. It provides empty RMagic::Image-like objects which, when
