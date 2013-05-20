@@ -130,6 +130,8 @@ describe Ruby2600::CPU do
           before { cpu.x = 0x60 }
 
           it_should 'set A value', 0x00
+
+          it_should 'set Z flag'
         end
       end
 
