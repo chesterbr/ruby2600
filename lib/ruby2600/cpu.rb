@@ -89,7 +89,7 @@ module Ruby2600
 
     private
 
-    # Decode of instructions, parameters and opcodes
+    # Decode of instructions, parameters, addressing modes and opcodes
 
     def fetch
       @opcode = memory[@pc] || 0
@@ -97,9 +97,9 @@ module Ruby2600
       if (@opcode & 0b00011111) == BXX
         @instruction = BXX
       else
-        group = (@opcode & 0b00000011)
-        mode  = (@opcode & 0b00011100) >> 2
-        @addressing_mode = ADDRESSING_MODE_GROUPS[group][mode]
+        @instruction_group  = (@opcode & 0b00000011)
+        mode_in_group       = (@opcode & 0b00011100) >> 2
+        @addressing_mode = ADDRESSING_MODE_GROUPS[@instruction_group][mode_in_group]
         @instruction = (@opcode & 0b11100011)
       end
 
@@ -200,10 +200,10 @@ module Ruby2600
         if should_branch?
           old_pc = pc
           @pc = word(@pc + numeric_value(@param_lo))
-          @branched_same_page  = (old_pc & 0xFF00) == (@pc & 0xFF00)
-          @branched_other_page = !@branched_same_page
+          @branched_to_same_page  = (old_pc & 0xFF00) == (@pc & 0xFF00)
+          @branched_to_other_page = !@branched_to_same_page
         else
-          @branched_same_page = @branched_other_page = false
+          @branched_to_same_page = @branched_to_other_page = false
         end
       end
     end
@@ -281,17 +281,22 @@ module Ruby2600
     def time_in_cycles
       cycles = OPCODE_CYCLE_COUNTS[@opcode]
       cycles += 1 if page_boundary_crossed?
-      cycles += 1 if @branched_same_page
-      cycles += 2 if @branched_other_page
+      cycles += 1 if @branched_to_same_page
+      cycles += 2 if @branched_to_other_page
       cycles
     end
 
     def page_boundary_crossed?
-      (@opcode == 0xBE && @param_lo + @y > 0xFF) ||  # LDX; Absolute Y
-      ((@opcode == 0xB9 || @opcode == 0x39) && @param_lo + @y > 0xFF) ||  # LDA/AND; Absolute Y
-      ((@opcode == 0xB1 || @opcode == 0x31) && memory[@param_lo] + @y > 0xFF) || # LDA/AND; indirect indexed y
-      ((@opcode == 0xBD || @opcode == 0x3D) && @param_lo + @x > 0xFF) ||  # LDA/AND; Absolute X
-      (@opcode == 0xBC && @param_lo + @x > 0xFF)     # LDY; Absolute X
+      if @instruction_group == 1 && @instruction != STA # Why not STA? See: http://bit.ly/10JNkOR
+        return case @addressing_mode
+               when :absolute_indexed_y then @param_lo + @y > 0xFF
+               when :indirect_indexed_y then memory[@param_lo] + @y > 0xFF
+               when :absolute_indexed_x then @param_lo + @x > 0xFF
+               end
+      else
+        (@opcode == 0xBE && @param_lo + @y > 0xFF) ||  # LDX; Absolute Y
+        (@opcode == 0xBC && @param_lo + @x > 0xFF)     # LDY; Absolute X
+      end
     end
 
     # Two's complement conversion for byte values
