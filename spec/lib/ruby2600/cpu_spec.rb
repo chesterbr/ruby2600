@@ -39,6 +39,8 @@ describe Ruby2600::CPU do
       cpu.memory[0x0002] = 0xFF
       cpu.memory[0x0005] = 0x11
       cpu.memory[0x0006] = 0x03
+      cpu.memory[0x0010] = 0x53
+      cpu.memory[0x0011] = 0xA4
       cpu.memory[0x00A3] = 0xF5
       cpu.memory[0x00A4] = 0xFF
       cpu.memory[0x00A5] = 0x33
@@ -47,14 +49,15 @@ describe Ruby2600::CPU do
       cpu.memory[0x00B6] = 0x02
       cpu.memory[0x0266] = 0xA4
       cpu.memory[0x0311] = 0xB5
-      cpu.memory[0x2043] = 0x77
-      cpu.memory[0x2103] = 0x88
+      cpu.memory[0x1122] = 0x07
       cpu.memory[0x1234] = 0x99
       cpu.memory[0x1235] = 0xAA
       cpu.memory[0x1244] = 0xCC
       cpu.memory[0x1304] = 0xFF
       cpu.memory[0x1314] = 0x00
       cpu.memory[0x1315] = 0xFF
+      cpu.memory[0x2043] = 0x77
+      cpu.memory[0x2103] = 0x88
     end
 
     def randomize(*attrs)
@@ -280,7 +283,54 @@ describe Ruby2600::CPU do
     end
 
     context 'BIT' do
-      pending 'not implemented'
+      before { cpu.a = 0b10101100 } # #$AC
+
+      context 'zero page' do
+        before { cpu.memory[0..1] = 0x24, 0x11 } # BIT $11
+
+        it_should 'advance PC by two'
+
+        it_should 'take three cycles'
+
+        it_should 'set N flag'
+
+        it_should 'reset Z flag'
+
+        it_should 'reset V flag'
+
+        it { expect{ cpu.step }.to_not change{ cpu.a } }
+
+        context 'resulting in bit 6 set' do
+          before do
+            cpu.memory[0..1] = 0x24, 0xA4 # BIT $A4
+            cpu.a = 0x70
+          end
+
+          it_should 'set V flag'
+        end
+
+        context 'resulting in zero' do
+          before do
+            cpu.memory[0..1] = 0x24, 0x10 # BIT $10
+          end
+
+          it_should 'set Z flag'
+        end
+      end
+
+      context 'absolute' do
+        before { cpu.memory[0..2] = 0x2C, 0x22, 0x11 } # BIT $1122
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'reset N flag'
+
+        it_should 'reset V flag'
+
+        it_should 'reset Z flag'
+      end
     end
 
     context 'BMI' do

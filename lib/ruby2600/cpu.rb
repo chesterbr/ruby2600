@@ -128,6 +128,11 @@ module Ruby2600
       @c = value >= 0
     end
 
+    def flag_nzv(value)
+      flag_nz value
+      @v = (value & 0b01000000 != 0)
+    end
+
     # Core execution (try individual opcodes first, then instructions)
 
     def execute
@@ -176,6 +181,8 @@ module Ruby2600
       case @instruction
       when AND
         flag_nz @a = @a & load
+      when BIT
+        flag_nzv (@a & load)
       when LDA
         flag_nz @a = load
       when LDX
