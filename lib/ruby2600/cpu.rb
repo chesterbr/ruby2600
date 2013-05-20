@@ -169,6 +169,8 @@ module Ruby2600
 
     def execute_instruction
       case @instruction
+      when AND
+        flag_nz @a = @a & load
       when LDA
         flag_nz @a = load
       when LDX
@@ -286,9 +288,9 @@ module Ruby2600
 
     def page_boundary_crossed?
       (@opcode == 0xBE && @param_lo + @y > 0xFF) ||  # LDX; Absolute Y
-      (@opcode == 0xB9 && @param_lo + @y > 0xFF) ||  # LDA; Absolute Y
-      (@opcode == 0xB1 && memory[@param_lo] + @y > 0xFF) || # LDA; indirect indexed y
-      (@opcode == 0xBD && @param_lo + @x > 0xFF) ||  # LDA; Absolute X
+      ((@opcode == 0xB9 || @opcode == 0x39) && @param_lo + @y > 0xFF) ||  # LDA/AND; Absolute Y
+      ((@opcode == 0xB1 || @opcode == 0x31) && memory[@param_lo] + @y > 0xFF) || # LDA/AND; indirect indexed y
+      ((@opcode == 0xBD || @opcode == 0x3D) && @param_lo + @x > 0xFF) ||  # LDA/AND; Absolute X
       (@opcode == 0xBC && @param_lo + @x > 0xFF)     # LDY; Absolute X
     end
 

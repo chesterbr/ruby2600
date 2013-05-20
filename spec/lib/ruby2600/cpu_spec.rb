@@ -88,7 +88,165 @@ describe Ruby2600::CPU do
     end
 
     context 'AND' do
-      pending 'not implemented'
+      before { cpu.a = 0b10101100 } # #$AC
+
+      context 'immediate' do
+        before { cpu.memory[0..1] = 0x29, 0x22 } # AND #$22
+
+        it_should 'advance PC by two'
+
+        it_should 'take two cycles'
+
+        it_should 'set A value', 0x20
+
+        it_should 'reset Z flag'
+
+        it_should 'reset N flag'
+      end
+
+      context 'zero page' do
+        before { cpu.memory[0..1] = 0x25, 0xA4 } # AND $A4
+
+        it_should 'advance PC by two'
+
+        it_should 'take three cycles'
+
+        it_should 'set A value', 0xAC
+      end
+
+      context 'zero page, x' do
+        before do
+          cpu.memory[0..1] = 0x35, 0xA5 # AND $A5,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take four cycles'
+
+        it_should 'set A value', 0x24
+
+        context 'crossing zero-page boundary' do
+          before { cpu.x = 0x60 }
+
+          it_should 'set A value', 0x00
+        end
+      end
+
+      context 'absolute' do
+        before do
+          cpu.memory[0..2] = 0x2D, 0x34, 0x12 # AND $1234
+          cpu.n = false
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set A value', 0x88
+
+        it_should 'set N flag'
+      end
+
+      context 'absolute, x' do
+        before do
+          cpu.memory[0..2] = 0x3D, 0x34, 0x12  # AND $1234,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set A value', 0x8C
+
+        context 'crossing page boundary' do
+          before { cpu.x = 0xD0 }
+
+          it_should 'set A value', 0xAC
+
+          it_should 'take five cycles'
+        end
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..2] = 0x3D, 0xF5, 0xFF } # AND $FFF5,X
+
+          it_should 'set A value', 0x00
+        end
+      end
+
+      context 'absolute, y' do
+        before do
+          cpu.memory[0..2] = 0x39, 0x34, 0x12  # AND $1234,Y
+          cpu.y = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set A value', 0x8C
+
+        context 'crossing page boundary' do
+          before { cpu.y = 0xD0 }
+
+          it_should 'set A value', 0xAC
+
+          it_should 'take five cycles'
+        end
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..2] = 0x39, 0xF5, 0xFF } # AND $FFF5,Y
+
+          it_should 'set A value', 0x0
+        end
+      end
+
+      context '(indirect, x)' do
+        before do
+          cpu.memory[0..1] = 0x21, 0xA5  # AND ($A5,X)
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take six cycles'
+
+        it_should 'set A value', 0xA4
+
+        context 'crossing zero-page boundary' do
+          before { cpu.x = 0x60 }
+
+          it_should 'set A value', 0xA4
+        end
+      end
+
+      context '(indirect), y' do
+        before do
+          cpu.memory[0..1] = 0x31, 0xA5  # AND ($A5),Y
+          cpu.y = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take five cycles'
+
+        it_should 'set A value', 0x24
+
+        context 'crossing page boundary' do
+          before { cpu.y = 0xD0 }
+
+          it_should 'set A value', 0x88
+
+          it_should 'take six cycles'
+        end
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..1] = 0x31, 0xA3}  # AND ($A3),Y
+
+          it_should 'set A value', 0x00
+        end
+      end
     end
 
     context 'ASL' do
