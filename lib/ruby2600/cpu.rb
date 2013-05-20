@@ -74,6 +74,11 @@ module Ruby2600
     BXX = 0b00010000
     BRANCH_FLAGS = [:@n, :@v, :@c, :@z]
 
+    # Some instructions take an extra cycle if memory access crosses a page boundery
+    # Wondering why not STA/STX/STY? See http://bit.ly/10JNkOR
+
+    INSTRUCTIONS_WITH_PAGE_PENALTY = [ORA, AND, EOR, ADC, LDA, CMP, SBC, LDX, LDY]
+
     def initialize
       @pc = @x = @y = @a = 0
     end
@@ -280,23 +285,22 @@ module Ruby2600
 
     def time_in_cycles
       cycles = OPCODE_CYCLE_COUNTS[@opcode]
-      cycles += 1 if page_boundary_crossed?
+      cycles += 1 if penalize_for_page_boundary_cross?
       cycles += 1 if @branched_to_same_page
       cycles += 2 if @branched_to_other_page
       cycles
     end
 
-    def page_boundary_crossed?
-      if @instruction_group == 1 && @instruction != STA # Why not STA? See: http://bit.ly/10JNkOR
-        return case @addressing_mode
-               when :absolute_indexed_y then @param_lo + @y > 0xFF
-               when :indirect_indexed_y then memory[@param_lo] + @y > 0xFF
-               when :absolute_indexed_x then @param_lo + @x > 0xFF
-               end
-      else
-        (@opcode == 0xBE && @param_lo + @y > 0xFF) ||  # LDX; Absolute Y
-        (@opcode == 0xBC && @param_lo + @x > 0xFF)     # LDY; Absolute X
-      end
+    def penalize_for_page_boundary_cross?
+      return false unless INSTRUCTIONS_WITH_PAGE_PENALTY.include? @instruction
+      delta = case @addressing_mode
+              when :absolute_indexed_y then @param_lo + @y
+              when :indirect_indexed_y then memory[@param_lo] + @y
+              when :absolute_indexed_x then @param_lo + @x
+              when :absolute_indexed_x_or_y then @param_lo + (@instruction == LDX ? @y : @x)
+              else 0
+              end
+      delta > 0xFF
     end
 
     # Two's complement conversion for byte values
