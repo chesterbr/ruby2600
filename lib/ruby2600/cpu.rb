@@ -46,7 +46,8 @@ module Ruby2600
 
     # Opcodes that map to the same mnemonic instruction (in different access
     # modes) have bit patterns (http://www.llx.com/~nparker/a2/opcodes.html)
-    # used by the constants below to simplify identification
+    # that follow the table below. The loop generates the constants used
+    # in execute_instruction
 
     INSTRUCTION_GROUPS = [
       %w'xxx BIT JMP xxx STY LDY CPY CPX',
@@ -66,8 +67,9 @@ module Ruby2600
       [ :immediate, :zero_page, :accumulator, :absolute, nil, :zero_page_indexed_x_or_y, nil, :absolute_indexed_x_or_y ]
     ]
 
-    # Conditional branches also follow a pattern (which tells what flag should have
+    # Conditional branches also follow a pattern (telling what flag should have
     # which value in order to trigger the branch). We'll treat them all as "BXX"
+    # and should_branch will decode this information.
 
     BXX = 0b00010000
     BRANCH_FLAGS = [:@n, :@v, :@c, :@z]
@@ -86,6 +88,8 @@ module Ruby2600
     end
 
     private
+
+    # Decode of instructions, parameters and opcodes
 
     def fetch
       @opcode = memory[@pc] || 0
@@ -106,6 +110,21 @@ module Ruby2600
       @pc = word(@pc + OPCODE_SIZES[@opcode])
     end
 
+    # These helpers allow us to "mark" most operations
+    # with the flags that should reflect their values
+
+    def flag_nz(value)
+      @z = (value == 0)
+      @n = (value & 0b10000000 != 0)
+    end
+
+    def flag_nzc(value)
+      flag_nz value
+      @c = value >= 0
+    end
+
+    # Core execution (try individual opcodes first, then instructions)
+
     def execute
       execute_instruction unless execute_opcode
       time_in_cycles
@@ -115,33 +134,25 @@ module Ruby2600
       case @opcode
       when 0xEA # NOP
       when 0xE8 # INX
-        @x = byte(@x + 1)
-        update_zn_flags @x
+        flag_nz @x = byte(@x + 1)
       when 0xC8 # INY
-        @y = byte(@y + 1)
-        update_zn_flags @y
+        flag_nz @y = byte(@y + 1)
       when 0xCA # DEX
-        @x = @x == 0 ? 0xFF : @x - 1
-        update_zn_flags @x
+        flag_nz @x = byte(@x - 1)
       when 0x88 # DEY
-        @y = @y == 0 ? 0xFF : @y - 1
-        update_zn_flags @y
+        flag_nz @y = byte(@y - 1)
       when 0x4C # JMP
         @pc = @param
       when 0x6C # JMP()
         @pc = 0x100 * memory[@param + 1] + memory[@param]
       when 0xAA # TAX
-        @x = @a
-        update_zn_flags @x
+        flag_nz @x = @a
       when 0xA8 # TAY
-        @y = @a
-        update_zn_flags @y
+        flag_nz @y = @a
       when 0x8A # TXA
-        @a = @x
-        update_zn_flags @a
+        flag_nz @a = @x
       when 0x98 # TYA
-        @a = @y
-        update_zn_flags @a
+        flag_nz @a = @y
       when 0x18 # CLC
         @c = false
       when 0x38 # SEC
@@ -159,17 +170,13 @@ module Ruby2600
     def execute_instruction
       case @instruction
       when LDA
-        @a = load
-        update_zn_flags @a
+        flag_nz @a = load
       when LDX
-        @x = load
-        update_zn_flags @x
+        flag_nz @x = load
       when LDY
-        @y = load
-        update_zn_flags @y
+        flag_nz @y = load
       when INC
-        store byte(load + 1)
-        update_zn_flags(load)
+        flag_nz store byte(load + 1)
       when STA
         store @a
       when STX
@@ -180,17 +187,13 @@ module Ruby2600
         byte = load
         @c = byte.odd?
         store byte >> 1
-        update_zn_flags byte
+        flag_nz byte
       when CPX
         # FIXME not sure if this is dealing with signed
-        byte = load
-        update_zn_flags @x - byte
-        @c = @x >= byte
+        flag_nzc @x - load
       when CPY
         # FIXME not sure if this is dealing with signed
-        byte = load
-        update_zn_flags @y - byte
-        @c = @y >= byte
+        flag_nzc @y - load
       when BXX # BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ
         if should_branch?
           old_pc = pc
@@ -210,7 +213,8 @@ module Ruby2600
       !(expected ^ actual)
     end
 
-    # Read/write memory for (most) addressing modes
+    # Read/write memory/A for (most) addressing modes. load and save
+    # load and save can be prefixed with flag_* to update P flags
 
     def load
       case @addressing_mode
@@ -226,6 +230,7 @@ module Ruby2600
       when :accumulator then @a = value
       else              memory[self.send(@addressing_mode)] = value
       end
+      value
     end
 
     def zero_page
@@ -285,13 +290,6 @@ module Ruby2600
       (@opcode == 0xB1 && memory[@param_lo] + @y > 0xFF) || # LDA; indirect indexed y
       (@opcode == 0xBD && @param_lo + @x > 0xFF) ||  # LDA; Absolute X
       (@opcode == 0xBC && @param_lo + @x > 0xFF)     # LDY; Absolute X
-    end
-
-    # Flag management
-
-    def update_zn_flags(value)
-      @z = (value == 0)
-      @n = (value & 0b10000000 != 0)
     end
 
     # Two's complement conversion for byte values
