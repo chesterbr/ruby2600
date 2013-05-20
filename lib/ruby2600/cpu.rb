@@ -113,6 +113,7 @@ module Ruby2600
 
     def execute_opcode
       case @opcode
+      when 0xEA # NOP
       when 0xE8 # INX
         @x = byte(@x + 1)
         update_zn_flags @x
@@ -166,6 +167,9 @@ module Ruby2600
       when LDY
         @y = load
         update_zn_flags @y
+      when INC
+        store byte(load + 1)
+        update_zn_flags(load)
       when STA
         store @a
       when STX

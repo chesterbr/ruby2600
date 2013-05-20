@@ -54,6 +54,7 @@ describe Ruby2600::CPU do
       cpu.memory[0x1244] = 0xCC
       cpu.memory[0x1304] = 0xFF
       cpu.memory[0x1314] = 0x00
+      cpu.memory[0x1315] = 0xFF
     end
 
     def randomize(*attrs)
@@ -339,7 +340,78 @@ describe Ruby2600::CPU do
     end
 
     context 'INC' do
-      pending 'not implemented'
+
+      context 'zero page' do
+        before { cpu.memory[0..1] = 0xE6, 0xA5 } # INC $A5
+
+        it_should 'advance PC by two'
+
+        it_should 'take five cycles'
+
+        it_should 'set memory with value', 0xA5, 0x34
+      end
+
+      context 'zero page, x' do
+        before do
+          cpu.memory[0..1] = 0xF6, 0xA5 # INC $A5,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take six cycles'
+
+        it_should 'set memory with value', 0xB5, 0x67
+
+        context 'crossing zero-page boundary' do
+          before { cpu.x = 0x60 }
+
+          it_should 'set memory with value', 0x05, 0x12
+        end
+      end
+
+      context 'absolute' do
+        before do
+          cpu.memory[0..2] = 0xEE, 0x34, 0x12 # INC $1234
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take six cycles'
+
+        it_should 'set memory with value', 0x1234, 0x9A
+      end
+
+      context 'absolute, x' do
+        before do
+          cpu.memory[0..2] = 0xFE, 0x34, 0x12  # INC $1234,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take seven cycles'
+
+        it_should 'set memory with value', 0x1244, 0xCD
+
+        it_should 'set N flag'
+
+        context 'crossing page boundary' do
+          before { cpu.x = 0xE1 }
+
+          it_should 'set memory with value', 0x1315, 0x00
+
+          it_should 'take seven cycles'
+
+          it_should 'set Z flag'
+        end
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..2] = 0xFE, 0xF5, 0xFF } # INC $FFF5,X
+
+          it_should 'set memory with value', 0x0005, 0x12
+        end
+      end
     end
 
     context 'INX' do
