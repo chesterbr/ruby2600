@@ -9,7 +9,7 @@ describe Ruby2600::CPU do
     end
   end
 
-  %w'x y a'.each do |register|
+  %w'x y a s'.each do |register|
     it "should initialize with a byte-size #{register} register" do
       (0..255).should cover(cpu.send(register))
     end
@@ -1152,7 +1152,27 @@ describe Ruby2600::CPU do
     end
 
     context 'PHA' do
-      pending 'not implemented'
+      before do
+        cpu.memory[0] = 0x48
+        cpu.a = 0xA5
+        cpu.s = 0x7F
+      end
+
+      it_should 'advance PC by one'
+
+      it_should 'take three cycles'
+
+      it_should 'set memory with value', 0x017F, 0xA5
+
+      it_should 'set S value', 0x7E
+
+      it_should 'preserve flags'
+
+      context 'wrap' do
+        before { cpu.s = 0x00 }
+
+        it_should 'set S value', 0xFF
+      end
     end
 
     context 'PHP' do
@@ -1160,7 +1180,29 @@ describe Ruby2600::CPU do
     end
 
     context 'PLA' do
-      pending 'not implemented'
+      before do
+        cpu.memory[0] = 0x68
+        cpu.s = 0x50
+        cpu.memory[0x0151] = 0xB7
+      end
+
+      it_should 'advance PC by one'
+
+      it_should 'take four cycles'
+
+      it_should 'set A value', 0xB7
+
+      it_should 'set S value', 0x51
+
+      it_should 'reset Z flag'
+
+      it_should 'set N flag'
+
+      context 'wrap' do
+        before { cpu.s = 0xFF }
+
+        it_should 'set S value', 0x00
+      end
     end
 
     context 'PLP' do

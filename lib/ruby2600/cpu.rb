@@ -1,7 +1,7 @@
 module Ruby2600
   class CPU
     attr_accessor :memory
-    attr_accessor :pc, :a, :x, :y
+    attr_accessor :pc, :a, :x, :y, :s
     attr_accessor :n, :v, :b, :d, :i, :z, :c    # Flags (P register): nv-bdizc
 
     RESET_VECTOR = 0xFFFC
@@ -80,7 +80,7 @@ module Ruby2600
     INSTRUCTIONS_WITH_PAGE_PENALTY = [ORA, AND, EOR, ADC, LDA, CMP, SBC, LDX, LDY]
 
     def initialize
-      @pc = @x = @y = @a = 0
+      @pc = @x = @y = @a = @s = 0
     end
 
     def reset
@@ -171,6 +171,12 @@ module Ruby2600
         @i = false
       when 0x78 # SEI
         @i = true
+      when 0x48 # PHA
+        memory[0x100 + @s] = @a
+        @s = byte(@s - 1)
+      when 0x68 # PLA
+        @s = byte(@s + 1)
+        flag_nz @a = memory[0x100 + @s]
       else
         return false
       end

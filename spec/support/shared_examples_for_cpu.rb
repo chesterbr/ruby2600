@@ -1,29 +1,13 @@
 CPU_FLAGS = %w'n v b d i z c'
 
-shared_examples_for 'set A value' do |expected|
-  it do
-    cpu.step
+%w'a x y s'.each do |register|
+  shared_examples_for "set #{register.upcase} value" do |expected|
+    it do
+      cpu.step
 
-    value = cpu.a
-    value.should be(expected), "Expected: #{hex_byte(expected)}, found: #{hex_byte(value)}"
-  end
-end
-
-shared_examples_for 'set X value' do |expected|
-  it do
-    cpu.step
-
-    value = cpu.x
-    value.should be(expected), "Expected: #{hex_byte(expected)}, found: #{hex_byte(value)}"
-  end
-end
-
-shared_examples_for 'set Y value' do |expected|
-  it do
-    cpu.step
-
-    value = cpu.y
-    value.should be(expected), "Expected: #{hex_byte(expected)}, found: #{hex_byte(value)}"
+      value = cpu.send(register)
+      value.should be(expected), "Expected: #{hex_byte(expected)}, found: #{hex_byte(value)}"
+    end
   end
 end
 
