@@ -19,9 +19,12 @@ module Ruby2600
       @reg[position] = value
     end
 
+    # A scanline "lasts" 228 "color clocks", of which 68 (WBLANK_WIDTH) are
+    # the initial blank period, and each of the remaining 160 is a pixel
+
     def scanline
       reset_beam
-      (0..227).each do |color_clock|
+      0.upto 227 do |color_clock|
         sync_cpu_with color_clock
         if color_clock >= WBLANK_WIDTH
           @pixel = color_clock - WBLANK_WIDTH
@@ -46,14 +49,26 @@ module Ruby2600
     private
 
     def reset_beam
-      @reg[WSYNC] = nil
+      reset_cpu_sync
       pf_reset
       @scanline = Array.new(160)
     end
 
+    # The 2600 hardware wiring ensures that we have three color clocks
+    # for each CPU clock, but "freezes" the CPU if WSYNC is set on TIA.
+    #
+    # To keep them in sync, we'll compute a "credit" for each color
+    # clock, and "use" this credit when we have any of it
+
     def sync_cpu_with(color_clock)
+      return if @reg[WSYNC]
       @cpu_credits += 1 if color_clock % 3 == 0
-      @cpu_credits -= @cpu.step if @cpu_credits > 0 && !@reg[WSYNC]
+      @cpu_credits -= @cpu.step while @cpu_credits > 0
+    end
+
+    def reset_cpu_sync
+      @cpu_credits = 0 if @reg[WSYNC]
+      @reg[WSYNC] = nil
     end
 
     def vertical_blank?
