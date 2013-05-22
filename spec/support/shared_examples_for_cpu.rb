@@ -1,6 +1,7 @@
+CPU_8_BIT_REGISTERS = %w'a x y s'
 CPU_FLAGS = %w'n v b d i z c'
 
-%w'a x y s'.each do |register|
+CPU_8_BIT_REGISTERS.each do |register|
   shared_examples_for "set #{register.upcase} value" do |expected|
     it do
       cpu.step
@@ -8,24 +9,6 @@ CPU_FLAGS = %w'n v b d i z c'
       value = cpu.send(register)
       value.should be(expected), "Expected: #{hex_byte(expected)}, found: #{hex_byte(value)}"
     end
-  end
-end
-
-shared_examples_for 'set PC value' do |expected|
-  it do
-    cpu.step
-
-    value = cpu.pc
-    value.should be(expected), "Expected: #{hex_word(expected)}, found: #{hex_word(value)}"
-  end
-end
-
-shared_examples_for 'set memory with value' do |position, expected|
-  it do
-    cpu.step
-
-    value = cpu.memory[position]
-    value.should be(expected), "Expected: #{hex_byte(expected)} at address #{hex_word(position)}, found: #{hex_byte(value)}"
   end
 end
 
@@ -64,6 +47,24 @@ shared_examples_for "preserve flags" do
 
       cpu.send(flag).should be_true
     end
+  end
+end
+
+shared_examples_for 'set PC value' do |expected|
+  it do
+    cpu.step
+
+    value = cpu.pc
+    value.should be(expected), "Expected: #{hex_word(expected)}, found: #{hex_word(value)}"
+  end
+end
+
+shared_examples_for 'set memory with value' do |position, expected|
+  it do
+    cpu.step
+
+    value = cpu.memory[position]
+    value.should be(expected), "Expected: #{hex_byte(expected)} at address #{hex_word(position)}, found: #{hex_byte(value)}"
   end
 end
 
