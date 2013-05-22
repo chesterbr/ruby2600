@@ -31,7 +31,7 @@ describe Ruby2600::CPU do
       cpu.pc = 0x0000
 
       # Catch unexpected side effects
-      randomize :a, :x, :y, :n, :v, :i, :z, :c
+      randomize :a, :x, :y, :s, :n, :v, :i, :z, :c
 
       # Examples wil refer to these values. Add, but don't change!
       cpu.memory = []
@@ -63,7 +63,7 @@ describe Ruby2600::CPU do
 
     def randomize(*attrs)
       attrs.each do |attr|
-        value = attr =~ /[axy]/ ? rand(256) : [true, false].sample
+        value = attr =~ /[axys]/ ? rand(256) : [true, false].sample
         cpu.send "#{attr}=", value
       end
     end
