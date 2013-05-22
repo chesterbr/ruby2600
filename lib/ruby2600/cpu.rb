@@ -176,11 +176,15 @@ module Ruby2600
       when 0x78 # SEI
         @i = true
       when 0x48 # PHA
-        memory[0x100 + @s] = @a
-        @s = byte(@s - 1)
+        push @a
       when 0x68 # PLA
         @s = byte(@s + 1)
         flag_nz @a = memory[0x100 + @s]
+      when 0x20 # JSR
+        @pc = @pc - 1
+        push @pc / 0x0100
+        push byte(@pc)
+        @pc = @param
       else
         return false
       end
@@ -296,6 +300,13 @@ module Ruby2600
     def indexed_indirect_x
       indexed_param = (@param_lo + @x) % 0x100
       memory[indexed_param + 1] * 0x100 + memory[indexed_param]
+    end
+
+    # Stack
+
+    def push(value)
+      memory[0x100 + @s] = value
+      @s = byte(@s - 1)
     end
 
     # Timing

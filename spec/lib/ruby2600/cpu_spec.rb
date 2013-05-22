@@ -718,7 +718,23 @@ describe Ruby2600::CPU do
     end
 
     context 'JSR' do
-      pending 'not implemented'
+      before do
+        cpu.pc = 0x02FF
+        cpu.memory[0x02FF..0x0301] = 0x20, 0x34, 0x12 # 02FF: JSR $1234
+        cpu.s = 0xF0
+      end
+
+      it_should 'take six cycles'
+
+      it_should 'preserve flags'
+
+      it_should 'set PC value', 0x1234
+
+      it_should 'set S value', 0xEE
+
+      it_should 'set memory with value', 0x01F0, 0x03
+
+      it_should 'set memory with value', 0x01EF, 0x01
     end
 
     context 'LDA' do
@@ -1182,7 +1198,7 @@ describe Ruby2600::CPU do
 
     context 'PLA' do
       before do
-        cpu.memory[0] = 0x68
+        cpu.memory[0] = 0x68 # PLA
         cpu.s = 0x50
       end
 
