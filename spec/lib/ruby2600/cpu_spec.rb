@@ -47,6 +47,7 @@ describe Ruby2600::CPU do
       cpu.memory[0x00A6] = 0x20
       cpu.memory[0x00B5] = 0x66
       cpu.memory[0x00B6] = 0x02
+      cpu.memory[0x0151] = 0xB7
       cpu.memory[0x0266] = 0xA4
       cpu.memory[0x0311] = 0xB5
       cpu.memory[0x1122] = 0x07
@@ -1183,7 +1184,6 @@ describe Ruby2600::CPU do
       before do
         cpu.memory[0] = 0x68
         cpu.s = 0x50
-        cpu.memory[0x0151] = 0xB7
       end
 
       it_should 'advance PC by one'
@@ -1533,14 +1533,26 @@ describe Ruby2600::CPU do
     end
 
     context 'TSX' do
-      pending 'not implemented'
+      before do
+        cpu.memory[0] = 0xBA # TSX
+        cpu.s = 0xFC
+      end
+
+      it_should 'advance PC by one'
+
+      it_should 'take two cycles'
+
+      it_should 'set X value', 0xFC
+
+      it_should 'reset Z flag'
+
+      it_should 'set N flag'
     end
 
     context 'TXA' do
       before do
         cpu.memory[0] = 0x8A # TXA
         cpu.x = 0x00
-        cpu.a = 0x01 # FIXME remove when we pre-randomize registers
       end
 
       it_should 'advance PC by one'
@@ -1555,7 +1567,18 @@ describe Ruby2600::CPU do
     end
 
     context 'TXS' do
-      pending 'not implemented'
+      before do
+        cpu.memory[0] = 0x9A # TXS
+        cpu.x = 0xFF
+      end
+
+      it_should 'advance PC by one'
+
+      it_should 'take two cycles'
+
+      it_should 'set S value', 0xFF
+
+      it_should 'preserve flags'
     end
 
     context 'TYA' do
