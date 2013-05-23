@@ -213,8 +213,7 @@ module Ruby2600
       when LSR
         byte = load
         @c = byte.odd?
-        store byte >> 1
-        flag_nz byte
+        flag_nz store byte >> 1
       when CPX
         # FIXME not sure if this is dealing with signed
         flag_nzc @x - load

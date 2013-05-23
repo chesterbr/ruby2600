@@ -45,6 +45,7 @@ describe Ruby2600::CPU do
       cpu.memory[0x00A4] = 0xFF
       cpu.memory[0x00A5] = 0x33
       cpu.memory[0x00A6] = 0x20
+      cpu.memory[0x00A7] = 0x01
       cpu.memory[0x00B5] = 0x66
       cpu.memory[0x00B6] = 0x02
       cpu.memory[0x0151] = 0xB7
@@ -1098,19 +1099,25 @@ describe Ruby2600::CPU do
 
         it_should 'set A value', 0b01110111
 
+        it_should 'reset Z flag'
+
         it_should 'reset C flag'
+
+        it_should 'reset N flag'
       end
 
       context 'zero page' do
-        before { cpu.memory[0..1] = 0x46, 0xA5 } # LSR $A5
+        before { cpu.memory[0..1] = 0x46, 0xA7 } # LSR $A7
 
         it_should 'advance PC by two'
 
         it_should 'take five cycles'
 
-        it_should 'set memory with value', 0x00A5, 0x19
+        it_should 'set memory with value', 0x00A7, 0x00
 
         it_should 'set C flag'
+
+        it_should 'set Z flag'
       end
 
       context 'zero page, x' do
