@@ -44,10 +44,8 @@ module Ruby2600
       2, 5, 0, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7
     ]
 
-    # Opcodes that map to the same mnemonic instruction (in different access
-    # modes) have bit patterns (http://www.llx.com/~nparker/a2/opcodes.html)
-    # that follow the table below. The loop generates the constants used
-    # in execute_instruction
+    # Instructions that have different opcodes for each access mode follow a bit pattern
+    # represented on the tables below (see http://www.llx.com/~nparker/a2/opcodes.html)
 
     INSTRUCTION_GROUPS = [
       %w'xxx BIT JMP xxx STY LDY CPY CPX',
@@ -55,27 +53,28 @@ module Ruby2600
       %w'ASL ROL LSR ROR STX LDX DEC INC'
     ]
 
-    INSTRUCTION_GROUPS.each_with_index do |names, cc|
-      names.each_with_index do |name, aaa|
-        const_set name, (aaa << 5) + cc unless name == 'xxx'
-      end
-    end
-
     ADDRESSING_MODE_GROUPS = [
       [ :immediate, :zero_page, nil, :absolute, nil, :zero_page_indexed_x, nil, :absolute_indexed_x ],
       [ :indexed_indirect_x, :zero_page, :immediate, :absolute, :indirect_indexed_y, :zero_page_indexed_x, :absolute_indexed_y, :absolute_indexed_x ],
       [ :immediate, :zero_page, :accumulator, :absolute, nil, :zero_page_indexed_x_or_y, nil, :absolute_indexed_x_or_y ]
     ]
 
-    # Conditional branches also follow a pattern (telling what flag should have
-    # which value in order to trigger the branch). We'll treat them all as "BXX"
-    # and should_branch will decode this information.
+    # Generate constants for instructions above for easy matching upon execution
+
+    INSTRUCTION_GROUPS.each_with_index do |names, cc|
+      names.each_with_index do |name, aaa|
+        const_set name, (aaa << 5) + cc unless name == 'xxx'
+      end
+    end
+
+    # Conditional branches (BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ) also follow a bit
+    # pattern for target flag and expected value, so we'll generalize them as "BXX"
 
     BXX = 0b00010000
     BRANCH_FLAGS = [:@n, :@v, :@c, :@z]
 
-    # Some instructions take an extra cycle if memory access crosses a page boundery
-    # Wondering why not STA/STX/STY? See http://bit.ly/10JNkOR
+    # Some instructions take an extra cycle if memory access crosses a page boundary.
+    # STA/STX/STY are notable exceptions, here is the reason: http://bit.ly/10JNkOR
 
     INSTRUCTIONS_WITH_PAGE_PENALTY = [ORA, AND, EOR, ADC, LDA, CMP, SBC, LDX, LDY]
 
@@ -94,7 +93,7 @@ module Ruby2600
 
     private
 
-    # Decode instructions, parameters, addressing modes and opcodes
+    # Decodes instruction, parameter, addressing mode, opcode and next PC
 
     def fetch
       @opcode = memory[@pc] || 0
@@ -111,6 +110,8 @@ module Ruby2600
       @param_lo = memory[word(@pc + 1)] || 0
       @param_hi = memory[word(@pc + 2)] || 0
       @param    = @param_hi * 0x100 + @param_lo
+
+      @branch_cost = 0
 
       @pc = word(@pc + OPCODE_SIZES[@opcode])
     end
@@ -224,14 +225,11 @@ module Ruby2600
       when CPY
         # FIXME not sure if this is dealing with signed
         flag_nzc @y - load
-      when BXX # BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ
+      when BXX
         if should_branch?
           old_pc = pc
           @pc = word(@pc + numeric_value(@param_lo))
-          @branched_to_same_page  = (old_pc & 0xFF00) == (@pc & 0xFF00)
-          @branched_to_other_page = !@branched_to_same_page
-        else
-          @branched_to_same_page = @branched_to_other_page = false
+          @branch_cost = (old_pc & 0xFF00) == (@pc & 0xFF00) ? 1 : 2
         end
       end
     end
@@ -328,10 +326,8 @@ module Ruby2600
     # Timing
 
     def time_in_cycles
-      cycles = OPCODE_CYCLE_COUNTS[@opcode]
+      cycles = OPCODE_CYCLE_COUNTS[@opcode] + @branch_cost
       cycles += 1 if penalize_for_page_boundary_cross?
-      cycles += 1 if @branched_to_same_page
-      cycles += 2 if @branched_to_other_page
       cycles
     end
 
