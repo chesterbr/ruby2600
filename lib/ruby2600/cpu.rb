@@ -94,7 +94,7 @@ module Ruby2600
 
     private
 
-    # Decode of instructions, parameters, addressing modes and opcodes
+    # Decode instructions, parameters, addressing modes and opcodes
 
     def fetch
       @opcode = memory[@pc] || 0
@@ -210,10 +210,14 @@ module Ruby2600
         store @x
       when STY
         store @y
+      when ASL
+        _ = load
+        @c = _[7].nonzero?
+        flag_nz store byte(_ << 1)
       when LSR
-        byte = load
-        @c = byte.odd?
-        flag_nz store byte >> 1
+        _ = load
+        @c = _[0].nonzero?
+        flag_nz store _ >> 1
       when CPX
         # FIXME not sure if this is dealing with signed
         flag_nzc @x - load
