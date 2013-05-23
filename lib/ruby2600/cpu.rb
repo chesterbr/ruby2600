@@ -178,19 +178,14 @@ module Ruby2600
       when 0x48 # PHA
         push @a
       when 0x68 # PLA
-        @s = byte(@s + 1)
-        flag_nz @a = memory[0x100 + @s]
+        flag_nz @a = pop
       when 0x20 # JSR
         @pc = @pc - 1
         push @pc / 0x0100
         push byte(@pc)
         @pc = @param
       when 0x60 # RTS
-        @s = byte(@s + 1)
-        l = memory[0x100 + @s]
-        @s = byte(@s + 1)
-        h = memory[0x100 + @s] * 0x100
-        @pc = word((h | l) + 1)
+        @pc = word(pop + (0x100 * pop) + 1)
       else
         return false
       end
@@ -313,6 +308,11 @@ module Ruby2600
     def push(value)
       memory[0x100 + @s] = value
       @s = byte(@s - 1)
+    end
+
+    def pop
+      @s = byte(@s + 1)
+      memory[0x100 + @s]
     end
 
     # Timing
