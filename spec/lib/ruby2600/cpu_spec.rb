@@ -48,6 +48,8 @@ describe Ruby2600::CPU do
       cpu.memory[0x00B5] = 0x66
       cpu.memory[0x00B6] = 0x02
       cpu.memory[0x0151] = 0xB7
+      cpu.memory[0x0160] = 0xFF
+      cpu.memory[0x0161] = 0x77
       cpu.memory[0x0266] = 0xA4
       cpu.memory[0x0311] = 0xB5
       cpu.memory[0x1122] = 0x07
@@ -1238,7 +1240,16 @@ describe Ruby2600::CPU do
     end
 
     context 'RTS' do
-      pending 'not implemented'
+      before do
+        cpu.memory[0] = 0x60 # RTS
+        cpu.s = 0x5F
+      end
+
+      it_should 'take six cycles'
+
+      it_should 'set PC value', 0x7800
+
+      it_should 'preserve flags'
     end
 
     context 'SBC' do

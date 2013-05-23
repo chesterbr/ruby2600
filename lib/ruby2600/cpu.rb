@@ -185,6 +185,12 @@ module Ruby2600
         push @pc / 0x0100
         push byte(@pc)
         @pc = @param
+      when 0x60 # RTS
+        @s = byte(@s + 1)
+        l = memory[0x100 + @s]
+        @s = byte(@s + 1)
+        h = memory[0x100 + @s] * 0x100
+        @pc = word((h | l) + 1)
       else
         return false
       end
