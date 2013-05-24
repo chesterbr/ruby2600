@@ -39,6 +39,7 @@ describe Ruby2600::CPU do
       cpu.memory[0x0002] = 0xFF
       cpu.memory[0x0005] = 0x11
       cpu.memory[0x0006] = 0x03
+      cpu.memory[0x0007] = 0x54
       cpu.memory[0x0010] = 0x53
       cpu.memory[0x0011] = 0xA4
       cpu.memory[0x00A3] = 0xF5
@@ -92,7 +93,194 @@ describe Ruby2600::CPU do
     # Full 650x instruction set
 
     context 'ADC' do
-      pending 'not implemented'
+      pending 'decimal mode'
+
+      before do
+        cpu.a = 0xAC
+        cpu.c = false
+      end
+
+      context 'immediate' do
+        before { cpu.memory[0..1] = 0x69, 0x22 } # ADC #$22
+
+        it_should 'advance PC by two'
+
+        it_should 'take two cycles'
+
+        it_should 'set A value', 0xCE
+
+        it_should 'reset Z flag'
+
+        it_should 'set N flag'
+
+        it_should 'reset C flag'
+
+        it_should 'set V flag'
+
+        context 'with_carry' do
+          before { cpu.c = true }
+
+          it_should 'set A value', 0xCF
+
+          it_should 'reset C flag'
+        end
+      end
+
+      context 'zero page' do
+        before { cpu.memory[0..1] = 0x65, 0xA4 } # ADC $A4
+
+        it_should 'advance PC by two'
+
+        it_should 'take three cycles'
+
+        it_should 'set A value', 0xAB
+
+        it_should 'set N flag'
+
+        it_should 'set C flag'
+
+        it_should 'set V flag'
+      end
+
+      context 'zero page, x' do
+        before do
+          cpu.memory[0..1] = 0x75, 0xA5 # ADC $A5,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take four cycles'
+
+        it_should 'set A value', 0x12
+
+        it_should 'set C flag'
+
+        context 'wrapping zero-page boundary' do
+          before { cpu.x = 0x62 }
+
+          it_should 'set A value', 0x00
+
+          it_should 'set C flag'
+
+          it_should 'set Z flag'
+        end
+      end
+
+      context 'absolute' do
+        before do
+          cpu.memory[0..2] = 0x6D, 0x34, 0x12 # ADC $1234
+          cpu.n = false
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set A value', 0x45
+
+        it_should 'set C flag'
+      end
+
+      context 'absolute, x' do
+        before do
+          cpu.memory[0..2] = 0x7D, 0x34, 0x12  # ADC $1234,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set A value', 0x78
+
+        context 'crossing page boundary' do
+          before { cpu.x = 0xD0 }
+
+          it_should 'set A value', 0xAB
+
+          it_should 'take five cycles'
+        end
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..2] = 0x7D, 0xF5, 0xFF } # ADC $FFF5,X
+
+          it_should 'set A value', 0xBD
+        end
+      end
+
+      context 'absolute, y' do
+        before do
+          cpu.memory[0..2] = 0x79, 0x34, 0x12  # ADC $1234,Y
+          cpu.y = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set A value', 0x78
+
+        context 'crossing page boundary' do
+          before { cpu.y = 0xD0 }
+
+          it_should 'set A value', 0xAB
+
+          it_should 'take five cycles'
+        end
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..2] = 0x79, 0xF5, 0xFF } # ADC $FFF5,Y
+
+          it_should 'set A value', 0xBD
+        end
+      end
+
+      context '(indirect, x)' do
+        before do
+          cpu.memory[0..1] = 0x61, 0xA5  # ADC ($A5,X)
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take six cycles'
+
+        it_should 'set A value', 0x50
+
+        context 'crossing zero-page boundary' do
+          before { cpu.x = 0x60 }
+
+          it_should 'set A value', 0x61
+        end
+      end
+
+      context '(indirect), y' do
+        before do
+          cpu.memory[0..1] = 0x71, 0xA5  # ADC ($A5),Y
+          cpu.y = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take five cycles'
+
+        it_should 'set A value', 0x23
+
+        context 'crossing page boundary' do
+          before { cpu.y = 0xD0 }
+
+          it_should 'set A value', 0x34
+
+          it_should 'take six cycles'
+        end
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..1] = 0x71, 0xA3}  # ADC ($A3),Y
+
+          it_should 'set A value', 0xBD
+        end
+      end
     end
 
     context 'AND' do
@@ -1349,6 +1537,8 @@ describe Ruby2600::CPU do
 
     context 'SBC' do
       pending 'not implemented'
+
+      pending 'decimal mode'
     end
 
     context 'SEC' do

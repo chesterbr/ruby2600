@@ -205,6 +205,11 @@ module Ruby2600
         flag_nz @y = load
       when INC
         flag_nz store byte(load + 1)
+      when ADC
+        t = @a + load + (@c ? 1 : 0)
+        @v = (t[7]==@a[7])
+        @c = t > 255
+        flag_nz @a = byte(t)
       when STA
         store @a
       when STX
