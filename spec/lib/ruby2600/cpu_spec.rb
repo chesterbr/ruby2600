@@ -93,11 +93,10 @@ describe Ruby2600::CPU do
     # Full 650x instruction set
 
     context 'ADC' do
-      pending 'decimal mode'
-
       before do
         cpu.a = 0xAC
         cpu.c = false
+        cpu.d = false
       end
 
       context 'immediate' do
@@ -115,7 +114,7 @@ describe Ruby2600::CPU do
 
         it_should 'reset C flag'
 
-        it_should 'set V flag'
+        it_should 'reset V flag'
 
         context 'with_carry' do
           before { cpu.c = true }
@@ -123,6 +122,37 @@ describe Ruby2600::CPU do
           it_should 'set A value', 0xCF
 
           it_should 'reset C flag'
+        end
+
+        context '-10+2 regression' do
+          before do
+            cpu.memory[1] = 0x02
+            cpu.a = 0xF6 # -10
+          end
+
+          it_should 'set A value', 0xF8 # -8
+
+          it_should 'reset V flag'
+        end
+
+        context 'decimal mode' do
+          before { cpu.d = true }
+
+          context 'result <= 99' do
+            before { cpu.a = 0x19 }
+
+            it_should 'set A value', 41
+
+            it_should 'reset C flag'
+          end
+
+          context 'result > 99' do
+            before { cpu.a = 0x78 }
+
+            it_should 'set A value', 0
+
+            it_should 'set C flag'
+          end
         end
       end
 

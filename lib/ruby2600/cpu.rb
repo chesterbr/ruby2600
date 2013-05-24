@@ -129,11 +129,6 @@ module Ruby2600
       @c = value >= 0
     end
 
-    def flag_nzv(value)
-      flag_nz value
-      @v = (value & 0b01000000 != 0)
-    end
-
     # Core execution (try individual opcodes first, then instructions)
 
     def execute
@@ -196,7 +191,8 @@ module Ruby2600
       when AND
         flag_nz @a = @a & load
       when BIT
-        flag_nzv (@a & load)
+        flag_nz (@a & load)
+        @v = @a[6] & load[6] != 0
       when LDA
         flag_nz @a = load
       when LDX
@@ -206,10 +202,19 @@ module Ruby2600
       when INC
         flag_nz store byte(load + 1)
       when ADC
-        t = @a + load + (@c ? 1 : 0)
-        @v = (t[7]==@a[7])
-        @c = t > 255
-        flag_nz @a = byte(t)
+        # FIXME this is probably defective. (e.g., -10 + 2 will set V, I guess).
+        # Check http://www.6502.org/tutorials/vflag.html . The hardware really does this:
+        # http://atariage.com/forums/topic/163876-flags-on-decimal-mode-on-the-nmos-6502/
+        # Stella has also some interesting code (M6502.ins, L271-305)
+        t = bcd(@a) + bcd(load) + bit(@c)
+        @v = !(load[7]==@a[7] && t[7]==1)
+        puts load[7]
+        puts @a[7]
+        puts t[7]
+#       This is m6502-inspired, but we can make it mor clear
+        @v = (~(@a ^ load) & (@a ^ t) & 0x80) != 0
+        @c = t > bcd(255)
+        flag_nz @a = t % (bcd(255)+1)
       when STA
         store @a
       when STX
@@ -358,14 +363,26 @@ module Ruby2600
       numeric_value < 0 ? 0x100 + numeric_value  : numeric_value
     end
 
+    # BCD function will only convert if decimal mode. It will also
+    # conveniently convert 0xFF to 99 (for easy c flag setting on ADC)
+
+    def bcd(value)
+      @d ? ([value / 16, 9].min) * 10 + ([value % 16, 9].min) : value
+    end
+
     # Keeping values within their bit sizes (due to lack of byte/word types)
+    # Byte will also take BCD in consideration
 
     def byte(value)
-      (value || 0) & 0xFF
+      (value || 0) & bcd(0xFF)
     end
 
     def word(value)
       (value || 0) & 0xFFFF
+    end
+
+    def bit(flag)
+      flag ? 1 : 0
     end
 
     # Debug tools
