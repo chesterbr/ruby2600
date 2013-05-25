@@ -716,7 +716,12 @@ describe Ruby2600::CPU do
     end
 
     context 'CLV' do
-      pending 'not implemented'
+      before {
+        cpu.memory[0] = 0xB8 # CLV
+        cpu.v = true
+      }
+
+      it_should 'reset V flag'
     end
 
     context 'CMP' do

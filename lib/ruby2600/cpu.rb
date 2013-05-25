@@ -165,6 +165,8 @@ module Ruby2600
         @s = @x
       when 0x18 # CLC
         @c = false
+      when 0xB8 # CLV
+        @v = false
       when 0x38 # SEC
         @c = true
       when 0xD8 # CLD
