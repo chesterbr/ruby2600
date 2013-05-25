@@ -80,6 +80,32 @@ end
   end
 end
 
+shared_examples_for 'add and set A/C/V' do |a, m, result, c, v|
+  before do
+    cpu.c = false              # CLC
+    cpu.a = a                  # LDA #$a
+    cpu.memory[0..1] = 0x69, m # ADC #$m
+    cpu.step
+  end
+
+  it { cpu.a.should == result }
+  it { cpu.c.should == c }
+  it { cpu.v.should == v }
+end
+
+shared_examples_for 'subtract and set A/C/V' do |a, m, result, c, v|
+  before do
+    cpu.c = true               # SEC
+    cpu.a = a                  # LDA #$a
+    cpu.memory[0..1] = 0xE9, m # SBC #$m
+    cpu.step
+  end
+
+  it { cpu.a.should == result }
+  it { cpu.c.should == c }
+  it { cpu.v.should == v }
+end
+
 shared_examples_for "a branch instruction" do
   before { cpu.pc = 0x0510 }
 

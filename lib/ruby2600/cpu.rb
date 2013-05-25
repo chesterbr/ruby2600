@@ -201,20 +201,8 @@ module Ruby2600
         flag_nz @y = load
       when INC
         flag_nz store byte(load + 1)
-      when ADC
-        # FIXME this is probably defective. (e.g., -10 + 2 will set V, I guess).
-        # Check http://www.6502.org/tutorials/vflag.html . The hardware really does this:
-        # http://atariage.com/forums/topic/163876-flags-on-decimal-mode-on-the-nmos-6502/
-        # Stella has also some interesting code (M6502.ins, L271-305)
-        t = bcd(@a) + bcd(load) + bit(@c)
-        @v = !(load[7]==@a[7] && t[7]==1)
-        puts load[7]
-        puts @a[7]
-        puts t[7]
-#       This is m6502-inspired, but we can make it mor clear
-        @v = (~(@a ^ load) & (@a ^ t) & 0x80) != 0
-        @c = t > bcd(255)
-        flag_nz @a = t % (bcd(255)+1)
+      when ADC, SBC
+        flag_nz @a = arithmetic
       when STA
         store @a
       when STX
@@ -249,6 +237,23 @@ module Ruby2600
       expected = (@opcode & 0b00100000) != 0
       actual   = instance_variable_get(BRANCH_FLAGS[flag])
       !(expected ^ actual)
+    end
+
+    # We don't deal with undocumented flags on BCD mode, maybe we should.
+    # See http://www.6502.org/tutorials/vflag.html &
+    #     http://atariage.com/forums/topic/163876-flags-on-decimal-mode-on-the-nmos-6502/
+    # Stella/M6502 has this verison of the V code (M6502.ins, L271-305):
+    #        @v = (~(@a ^ load) & (@a ^ t) & 0x80) != 0
+    def arithmetic
+      signal = @instruction == ADC ? 1 : -1
+      carry  = @instruction == ADC ? bit(@c) : bit(@c) - 1
+      limit  = @instruction == ADC ? bcd(255) : -1
+
+      k = numeric_value(@a) + signal * numeric_value(load) + carry
+      t = bcd(@a) + signal * bcd(load) + carry
+      @v = k > 127 || k < -128
+      @c = t > limit
+      value_to_bcd(t) & 0xFF
     end
 
     # Read/write memory/A for (most) addressing modes. load and save
@@ -367,7 +372,15 @@ module Ruby2600
     # conveniently convert 0xFF to 99 (for easy c flag setting on ADC)
 
     def bcd(value)
-      @d ? ([value / 16, 9].min) * 10 + ([value % 16, 9].min) : value
+      return value unless @d
+      ([value / 16, 9].min) * 10 + ([value % 16, 9].min)
+    end
+
+    def value_to_bcd(value)
+      return value unless @d
+      value = 100 + value if value < 0
+      value -= 100        if value > 99
+      (value / 10) * 16 + (value % 10)
     end
 
     # Keeping values within their bit sizes (due to lack of byte/word types)

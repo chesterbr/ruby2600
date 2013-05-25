@@ -124,15 +124,16 @@ describe Ruby2600::CPU do
           it_should 'reset C flag'
         end
 
-        context '-10+2 regression' do
-          before do
-            cpu.memory[1] = 0x02
-            cpu.a = 0xF6 # -10
-          end
+        # http://www.6502.org/tutorials/vflag.html
+        context 'Bruce Clark paper tests' do
+          it_should 'add and set A/C/V', 0x01, 0x01, 0x02, false, false
+          it_should 'add and set A/C/V', 0x01, 0xFF, 0x00, true, false
+          it_should 'add and set A/C/V', 0x7F, 0x01, 0x80, false, true
+          it_should 'add and set A/C/V', 0x80, 0xFF, 0x7F, true, true
+        end
 
-          it_should 'set A value', 0xF8 # -8
-
-          it_should 'reset V flag'
+        context '2 - 10 = -8; no carry/overflow' do
+          it_should 'add and set A/C/V', 0x02, 0xF6, 0xF8, false, false
         end
 
         context 'decimal mode' do
@@ -141,7 +142,7 @@ describe Ruby2600::CPU do
           context 'result <= 99' do
             before { cpu.a = 0x19 }
 
-            it_should 'set A value', 41
+            it_should 'set A value', 0x41
 
             it_should 'reset C flag'
           end
@@ -149,7 +150,7 @@ describe Ruby2600::CPU do
           context 'result > 99' do
             before { cpu.a = 0x78 }
 
-            it_should 'set A value', 0
+            it_should 'set A value', 0x00
 
             it_should 'set C flag'
           end
@@ -169,7 +170,7 @@ describe Ruby2600::CPU do
 
         it_should 'set C flag'
 
-        it_should 'set V flag'
+        it_should 'reset V flag'
       end
 
       context 'zero page, x' do
@@ -1566,9 +1567,218 @@ describe Ruby2600::CPU do
     end
 
     context 'SBC' do
-      pending 'not implemented'
+      before do
+        cpu.a = 0xAC
+        cpu.c = true
+        cpu.d = false
+      end
 
-      pending 'decimal mode'
+      context 'immediate' do
+        before { cpu.memory[0..1] = 0xE9, 0x22 } # SBC #$22
+
+        it_should 'advance PC by two'
+
+        it_should 'take two cycles'
+
+        it_should 'set A value', 0x8A
+
+        it_should 'reset Z flag'
+
+        it_should 'set N flag'
+
+        it_should 'set C flag'
+
+        it_should 'reset V flag'
+
+        context 'with carry' do
+          before { cpu.c = false }
+
+          it_should 'set A value', 0x89
+        end
+
+        # http://www.6502.org/tutorials/vflag.html
+        context 'Bruce Clark paper tests' do
+          it_should 'subtract and set A/C/V', 0x00, 0x01, 0xFF, false, false
+          it_should 'subtract and set A/C/V', 0x80, 0x01, 0x7F, true,  true
+          it_should 'subtract and set A/C/V', 0x7F, 0xFF, 0x80, false, true
+        end
+
+        context '2 - 10 = -8; no carry/overflow' do
+          it_should 'subtract and set A/C/V', 0x02, 0x10, 0xF2, false, false
+        end
+
+        context 'decimal mode' do
+          before { cpu.d = true }
+
+          context 'result => 0' do
+            before { cpu.a = 0x23 }
+
+            it_should 'set A value', 1
+
+            it_should 'set C flag'
+          end
+
+          context 'result < 0' do
+            before { cpu.a = 0x21 }
+
+            it_should 'set A value', 0x99
+
+            it_should 'reset C flag'
+          end
+        end
+      end
+
+      context 'zero page' do
+        before { cpu.memory[0..1] = 0xE5, 0xA4 } # SBC $A4
+
+        it_should 'advance PC by two'
+
+        it_should 'take three cycles'
+
+        it_should 'set A value', 0xAD
+
+        it_should 'set N flag'
+
+        it_should 'reset C flag'
+
+        it_should 'reset V flag'
+      end
+
+      context 'zero page, x' do
+        before do
+          cpu.memory[0..1] = 0xF5, 0xA5 # SBC $A5,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take four cycles'
+
+        it_should 'set A value', 0x46
+
+        it_should 'set C flag'
+
+        context 'wrapping zero-page boundary' do
+          before { cpu.x = 0x62 }
+
+          it_should 'set A value', 0x58
+
+          it_should 'set C flag'
+        end
+      end
+
+      context 'absolute' do
+        before do
+          cpu.memory[0..2] = 0xED, 0x34, 0x12 # SBC $1234
+          cpu.n = false
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set A value', 0x13
+      end
+
+      context 'absolute, x' do
+        before do
+          cpu.memory[0..2] = 0xFD, 0x34, 0x12  # SBC $1234,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set A value', 0xE0
+
+        context 'crossing page boundary' do
+          before { cpu.x = 0xD0 }
+
+          it_should 'set A value', 0xAD
+
+          it_should 'take five cycles'
+        end
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..2] = 0xFD, 0xF5, 0xFF } # SBC $FFF5,X
+
+          it_should 'set A value', 0x9B
+        end
+      end
+
+      context 'absolute, y' do
+        before do
+          cpu.memory[0..2] = 0xF9, 0x34, 0x12  # SBC $1234,Y
+          cpu.y = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set A value', 0xE0
+
+        context 'crossing page boundary' do
+          before { cpu.y = 0xD0 }
+
+          it_should 'set A value', 0xAD
+
+          it_should 'take five cycles'
+        end
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..2] = 0xF9, 0xF5, 0xFF } # SBC $FFF5,Y
+
+          it_should 'set A value', 0x9B
+        end
+      end
+
+      context '(indirect, x)' do
+        before do
+          cpu.memory[0..1] = 0xE1, 0xA5  # SBC ($A5,X)
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take six cycles'
+
+        it_should 'set A value', 0x08
+
+        context 'crossing zero-page boundary' do
+          before { cpu.x = 0x60 }
+
+          it_should 'set A value', 0xF7
+        end
+      end
+
+      context '(indirect), y' do
+        before do
+          cpu.memory[0..1] = 0xF1, 0xA5  # SBC ($A5),Y
+          cpu.y = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take five cycles'
+
+        it_should 'set A value', 0x35
+
+        context 'crossing page boundary' do
+          before { cpu.y = 0xD0 }
+
+          it_should 'set A value', 0x24
+
+          it_should 'take six cycles'
+        end
+
+        context 'crossing memory boundary' do
+          before { cpu.memory[0..1] = 0xF1, 0xA3}  # SBC ($A3),Y
+
+          it_should 'set A value', 0x9B
+        end
+      end
     end
 
     context 'SEC' do
