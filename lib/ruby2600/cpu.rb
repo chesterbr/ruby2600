@@ -167,6 +167,10 @@ module Ruby2600
         @c = false
       when 0x38 # SEC
         @c = true
+      when 0xD8 # CLD
+        @d = false
+      when 0xF8 # SED
+        @d = true
       when 0x58 # CLI
         @i = false
       when 0x78 # SEI

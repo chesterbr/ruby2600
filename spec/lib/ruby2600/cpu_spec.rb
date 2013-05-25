@@ -698,7 +698,12 @@ describe Ruby2600::CPU do
     end
 
     context 'CLD' do
-      pending 'not implemented'
+      before {
+        cpu.memory[0] = 0xD8 # CLD
+        cpu.d = true
+      }
+
+      it_should 'reset D flag'
     end
 
     context 'CLI' do
@@ -1791,7 +1796,12 @@ describe Ruby2600::CPU do
     end
 
     context 'SED' do
-      pending 'not implemented'
+      before {
+        cpu.memory[0] = 0xF8 # SED
+        cpu.d = false
+      }
+
+      it_should 'set D flag'
     end
 
     context 'SEI' do
