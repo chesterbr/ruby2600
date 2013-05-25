@@ -224,12 +224,17 @@ module Ruby2600
         # FIXME not sure if this is dealing with signed
         flag_nzc @y - load
       when BXX
-        if should_branch?
-          old_pc = pc
-          @pc = word(@pc + numeric_value(@param_lo))
-          @branch_cost = (old_pc & 0xFF00) == (@pc & 0xFF00) ? 1 : 2
-        end
+        @pc = branch
       end
+    end
+
+    # Generalized instructions (branches, arithmetic)
+
+    def branch
+      return @pc unless should_branch?
+      new_pc = word(@pc + numeric_value(@param_lo))
+      @branch_cost = (@pc & 0xFF00) == (new_pc & 0xFF00) ? 1 : 2
+      new_pc
     end
 
     def should_branch?
@@ -239,11 +244,6 @@ module Ruby2600
       !(expected ^ actual)
     end
 
-    # We don't deal with undocumented flags on BCD mode, maybe we should.
-    # See http://www.6502.org/tutorials/vflag.html &
-    #     http://atariage.com/forums/topic/163876-flags-on-decimal-mode-on-the-nmos-6502/
-    # Stella/M6502 has this verison of the V code (M6502.ins, L271-305):
-    #        @v = (~(@a ^ load) & (@a ^ t) & 0x80) != 0
     def arithmetic
       signal = @instruction == ADC ? 1 : -1
       carry  = @instruction == ADC ? bit(@c) : bit(@c) - 1

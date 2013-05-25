@@ -2149,5 +2149,12 @@ describe Ruby2600::CPU do
 
       it_should 'set N flag'
     end
+
+    # We don't deal with undocumented flags on BCD mode, maybe we should.
+    # See http://www.6502.org/tutorials/vflag.html &
+    #     http://atariage.com/forums/topic/163876-flags-on-decimal-mode-on-the-nmos-6502/
+    # Stella/M6502 has this verison of the V code (M6502.ins, L271-305):
+    #        @v = (~(@a ^ load) & (@a ^ t) & 0x80) != 0
+    pending "undocumented flags on BCD mode"
   end
 end
