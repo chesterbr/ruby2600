@@ -40,6 +40,7 @@ describe Ruby2600::CPU do
       cpu.memory[0x0005] = 0x11
       cpu.memory[0x0006] = 0x03
       cpu.memory[0x0007] = 0x54
+      cpu.memory[0x000E] = 0xAC
       cpu.memory[0x0010] = 0x53
       cpu.memory[0x0011] = 0xA4
       cpu.memory[0x00A3] = 0xF5
@@ -47,6 +48,8 @@ describe Ruby2600::CPU do
       cpu.memory[0x00A5] = 0x33
       cpu.memory[0x00A6] = 0x20
       cpu.memory[0x00A7] = 0x01
+      cpu.memory[0x00A8] = 0xFE
+      cpu.memory[0x00A9] = 0xFF
       cpu.memory[0x00B5] = 0x66
       cpu.memory[0x00B6] = 0x02
       cpu.memory[0x0151] = 0xB7
@@ -233,7 +236,7 @@ describe Ruby2600::CPU do
           it_should 'take five cycles'
         end
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..2] = 0x7D, 0xF5, 0xFF } # ADC $FFF5,X
 
           it_should 'set A value', 0xBD
@@ -260,7 +263,7 @@ describe Ruby2600::CPU do
           it_should 'take five cycles'
         end
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..2] = 0x79, 0xF5, 0xFF } # ADC $FFF5,Y
 
           it_should 'set A value', 0xBD
@@ -279,7 +282,7 @@ describe Ruby2600::CPU do
 
         it_should 'set A value', 0x50
 
-        context 'crossing zero-page boundary' do
+        context 'wrapping around zero-page' do
           before { cpu.x = 0x60 }
 
           it_should 'set A value', 0x61
@@ -306,7 +309,7 @@ describe Ruby2600::CPU do
           it_should 'take six cycles'
         end
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..1] = 0x71, 0xA3}  # ADC ($A3),Y
 
           it_should 'set A value', 0xBD
@@ -353,7 +356,7 @@ describe Ruby2600::CPU do
 
         it_should 'set A value', 0x24
 
-        context 'crossing zero-page boundary' do
+        context 'wrapping around zero-page' do
           before { cpu.x = 0x60 }
 
           it_should 'set A value', 0x00
@@ -397,7 +400,7 @@ describe Ruby2600::CPU do
           it_should 'take five cycles'
         end
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..2] = 0x3D, 0xF5, 0xFF } # AND $FFF5,X
 
           it_should 'set A value', 0x00
@@ -424,7 +427,7 @@ describe Ruby2600::CPU do
           it_should 'take five cycles'
         end
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..2] = 0x39, 0xF5, 0xFF } # AND $FFF5,Y
 
           it_should 'set A value', 0x0
@@ -443,7 +446,7 @@ describe Ruby2600::CPU do
 
         it_should 'set A value', 0xA4
 
-        context 'crossing zero-page boundary' do
+        context 'wrapping around zero-page' do
           before { cpu.x = 0x60 }
 
           it_should 'set A value', 0xA4
@@ -470,7 +473,7 @@ describe Ruby2600::CPU do
           it_should 'take six cycles'
         end
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..1] = 0x31, 0xA3}  # AND ($A3),Y
 
           it_should 'set A value', 0x00
@@ -725,7 +728,191 @@ describe Ruby2600::CPU do
     end
 
     context 'CMP' do
-      pending 'not implemented'
+      before { cpu.a = 0xAC }
+
+      context 'immediate' do
+        before { cpu.memory[0..1] = 0xC9, 0x22 } # CMP #$22
+
+        it_should 'advance PC by two'
+
+        it_should 'take two cycles'
+
+        it_should 'reset Z flag'
+
+        it_should 'set N flag'
+
+        it_should 'set C flag'
+
+        pending 'Z FLAG TEST'
+      end
+
+      context 'zero page' do
+        before { cpu.memory[0..1] = 0xC5, 0xA4 } # CMP $A4
+
+        it_should 'advance PC by two'
+
+        it_should 'take three cycles'
+
+        it_should 'set N flag'
+
+        it_should 'reset C flag'
+      end
+
+      context 'zero page, x' do
+        before do
+          cpu.memory[0..1] = 0xD5, 0xA5 # CMP $A5,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take four cycles'
+
+        it_should 'set C flag'
+
+        context 'wrapping zero-page boundary' do
+          before { cpu.x = 0x62 }
+
+          it_should 'reset N flag'
+
+          it_should 'set C flag'
+        end
+      end
+
+      context 'absolute' do
+        before do
+          cpu.memory[0..2] = 0xCD, 0x34, 0x12 # CMP $1234
+          cpu.n = false
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'reset N flag'
+
+        it_should 'set C flag'
+      end
+
+      context 'absolute, x' do
+        before do
+          cpu.memory[0..2] = 0xDD, 0x34, 0x12  # CMP $1234,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set N flag'
+
+        it_should 'reset C flag'
+
+        context 'crossing page boundary' do
+          before { cpu.x = 0xD0 }
+
+          it_should 'set N flag'
+
+          it_should 'reset C flag'
+
+          it_should 'take five cycles'
+        end
+
+        context 'wrapping memory' do
+          before { cpu.memory[0..2] = 0xDD, 0xF5, 0xFF } # CMP $FFF5,X
+
+          it_should 'set N flag'
+
+          it_should 'set C flag'
+        end
+      end
+
+      context 'absolute, y' do
+        before do
+          cpu.memory[0..2] = 0xD9, 0x34, 0x12  # CMP $1234,Y
+          cpu.y = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set N flag'
+
+        it_should 'reset C flag'
+
+        context 'crossing page boundary' do
+          before { cpu.y = 0xD0 }
+
+          it_should 'set N flag'
+
+          it_should 'reset C flag'
+
+          it_should 'take five cycles'
+        end
+
+        context 'wrapping memory' do
+          before { cpu.memory[0..2] = 0xD9, 0xF5, 0xFF } # CMP $FFF5,Y
+
+          it_should 'set N flag'
+
+          it_should 'set C flag'
+        end
+      end
+
+      context '(indirect, x)' do
+        before do
+          cpu.memory[0..1] = 0xC1, 0xA5  # CMP ($A5,X)
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take six cycles'
+
+        context 'wrapping around zero-page' do
+          before { cpu.x = 0x60 }
+
+          it_should 'set N flag'
+
+          it_should 'reset C flag'
+        end
+      end
+
+      context '(indirect), y' do
+        before do
+          cpu.memory[0..1] = 0xD1, 0xA5  # CMP ($A5),Y
+          cpu.y = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take five cycles'
+
+        it_should 'reset N flag'
+
+        it_should 'set C flag'
+
+        context 'crossing page boundary' do
+          before { cpu.y = 0xD0 }
+
+          it_should 'reset N flag'
+
+          it_should 'set C flag'
+
+          it_should 'take six cycles'
+        end
+
+        context 'wrapping memory' do
+          before { cpu.memory[0..1] = 0xD1, 0xA8}  # CMP ($A8),Y
+
+          it_should 'reset N flag'
+
+          it_should 'set C flag'
+
+          it_should 'set Z flag'
+        end
+      end
     end
 
     context 'CPX' do
@@ -894,7 +1081,7 @@ describe Ruby2600::CPU do
 
         it_should 'set memory with value', 0xB5, 0x67
 
-        context 'crossing zero-page boundary' do
+        context 'wrapping around zero-page' do
           before { cpu.x = 0x60 }
 
           it_should 'set memory with value', 0x05, 0x12
@@ -937,7 +1124,7 @@ describe Ruby2600::CPU do
           it_should 'set Z flag'
         end
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..2] = 0xFE, 0xF5, 0xFF } # INC $FFF5,X
 
           it_should 'set memory with value', 0x0005, 0x12
@@ -1098,7 +1285,7 @@ describe Ruby2600::CPU do
 
         it_should 'set A value', 0x66
 
-        context 'crossing zero-page boundary' do
+        context 'wrapping around zero-page' do
           before { cpu.x = 0x60 }
 
           it_should 'set A value', 0x11
@@ -1140,7 +1327,7 @@ describe Ruby2600::CPU do
           it_should 'take five cycles'
         end
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..2] = 0xBD, 0xF5, 0xFF } # LDA $FFF5,X
 
           it_should 'set A value', 0x11
@@ -1167,7 +1354,7 @@ describe Ruby2600::CPU do
           it_should 'take five cycles'
         end
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..2] = 0xB9, 0xF5, 0xFF } # LDA $FFF5,Y
 
           it_should 'set A value', 0x11
@@ -1194,7 +1381,7 @@ describe Ruby2600::CPU do
           it_should 'take six cycles'
         end
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..1] = 0xB1, 0xA3}  # LDA ($A3),Y
 
           it_should 'set A value', 0x11
@@ -1213,7 +1400,7 @@ describe Ruby2600::CPU do
 
         it_should 'set A value', 0xA4
 
-        context 'crossing zero-page boundary' do
+        context 'wrapping around zero-page' do
           before { cpu.x = 0x60 }
 
           it_should 'set A value', 0xB5
@@ -1262,7 +1449,7 @@ describe Ruby2600::CPU do
 
         it_should 'set X value', 0x66
 
-        context 'crossing zero-page boundary' do
+        context 'wrapping around zero-page' do
           before { cpu.y = 0x60 }
 
           it_should 'set X value', 0x11
@@ -1304,7 +1491,7 @@ describe Ruby2600::CPU do
           it_should 'take five cycles'
         end
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..2] = 0xBE, 0xF5, 0xFF } # LDX $FFF5,Y
 
           it_should 'set X value', 0x11
@@ -1353,7 +1540,7 @@ describe Ruby2600::CPU do
 
         it_should 'set Y value', 0x66
 
-        context 'crossing zero-page boundary' do
+        context 'wrapping around zero-page' do
           before { cpu.x = 0x60 }
 
           it_should 'set Y value', 0x11
@@ -1395,7 +1582,7 @@ describe Ruby2600::CPU do
           it_should 'take five cycles'
         end
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..2] = 0xBC, 0xF5, 0xFF } # LDY $FFF5,Y
 
           it_should 'set Y value', 0x11
@@ -1710,7 +1897,7 @@ describe Ruby2600::CPU do
           it_should 'take five cycles'
         end
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..2] = 0xFD, 0xF5, 0xFF } # SBC $FFF5,X
 
           it_should 'set A value', 0x9B
@@ -1737,7 +1924,7 @@ describe Ruby2600::CPU do
           it_should 'take five cycles'
         end
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..2] = 0xF9, 0xF5, 0xFF } # SBC $FFF5,Y
 
           it_should 'set A value', 0x9B
@@ -1756,7 +1943,7 @@ describe Ruby2600::CPU do
 
         it_should 'set A value', 0x08
 
-        context 'crossing zero-page boundary' do
+        context 'wrapping around zero-page' do
           before { cpu.x = 0x60 }
 
           it_should 'set A value', 0xF7
@@ -1783,7 +1970,7 @@ describe Ruby2600::CPU do
           it_should 'take six cycles'
         end
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..1] = 0xF1, 0xA3}  # SBC ($A3),Y
 
           it_should 'set A value', 0x9B
@@ -1861,7 +2048,7 @@ describe Ruby2600::CPU do
 
         it_should 'preserve flags'
 
-        context 'crossing zero-page boundary' do
+        context 'wrapping around zero-page' do
           before { cpu.x = 0x60 }
 
           it_should 'set memory with value', 0x0005, 0x2F
@@ -1882,7 +2069,7 @@ describe Ruby2600::CPU do
 
         it_should 'preserve flags'
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..2] = 0x9D, 0xF5, 0xFF } # STA $FFF5,X
 
           it_should 'set memory with value', 0x0005, 0x2F
@@ -1903,7 +2090,7 @@ describe Ruby2600::CPU do
 
         it_should 'preserve flags'
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..2] = 0x99, 0xF5, 0xFF } # STA $FFF5,Y
 
           it_should 'set memory with value', 0x0005, 0x2F
@@ -1932,7 +2119,7 @@ describe Ruby2600::CPU do
           it_should 'take six cycles'
         end
 
-        context 'crossing memory boundary' do
+        context 'wrapping memory' do
           before { cpu.memory[0..1] = 0x91, 0xA3}  # STA ($A3),Y
 
           it_should 'set memory with value', 0x0005, 0x2F
@@ -1953,7 +2140,7 @@ describe Ruby2600::CPU do
 
         it_should 'preserve flags'
 
-        context 'crossing zero-page boundary' do
+        context 'wrapping around zero-page' do
           before { cpu.x = 0x60 }
 
           it_should 'take six cycles'
@@ -2006,7 +2193,7 @@ describe Ruby2600::CPU do
 
         it_should 'preserve flags'
 
-        context 'crossing zero-page boundary' do
+        context 'wrapping around zero-page' do
           before { cpu.y = 0x60 }
 
           it_should 'set memory with value', 0x0005, 0x2F
@@ -2057,7 +2244,7 @@ describe Ruby2600::CPU do
 
         it_should 'preserve flags'
 
-        context 'crossing zero-page boundary' do
+        context 'wrapping around zero-page' do
           before { cpu.x = 0x60 }
 
           it_should 'set memory with value', 0x0005, 0x2F

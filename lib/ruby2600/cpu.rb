@@ -223,6 +223,8 @@ module Ruby2600
         _ = load
         @c = _[0].nonzero?
         flag_nz store _ >> 1
+      when CMP
+        flag_nzc @a - load
       when CPX
         # FIXME not sure if this is dealing with signed
         flag_nzc @x - load
