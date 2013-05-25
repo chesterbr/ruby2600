@@ -384,10 +384,9 @@ module Ruby2600
     end
 
     # Keeping values within their bit sizes (due to lack of byte/word types)
-    # Byte will also take BCD in consideration
 
     def byte(value)
-      (value || 0) & bcd(0xFF)
+      (value || 0) & 0xFF
     end
 
     def word(value)
