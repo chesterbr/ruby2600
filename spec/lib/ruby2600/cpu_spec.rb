@@ -2171,5 +2171,7 @@ describe Ruby2600::CPU do
     # Stella/M6502 has this verison of the V code (M6502.ins, L271-305):
     #        @v = (~(@a ^ load) & (@a ^ t) & 0x80) != 0
     pending "undocumented flags on BCD mode"
+
+    pending "nice CMP test: http://forum.6502.org/viewtopic.php?t=474#p2984"
   end
 end
