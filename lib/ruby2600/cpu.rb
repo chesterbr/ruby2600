@@ -44,8 +44,9 @@ module Ruby2600
       2, 5, 0, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7
     ]
 
-    # Instructions that have different opcodes for each access mode follow a bit pattern
-    # represented on the tables below (see http://www.llx.com/~nparker/a2/opcodes.html)
+    # Synertek's 65xx programming manual divides instructions in three groups, and
+    # http://www.llx.com/~nparker/a2/opcodes.html goes into detail on their bitnary
+    # footprint. The tables below represent that info in order to simplify decoding
 
     INSTRUCTION_GROUPS = [
       %w'xxx BIT JMP xxx STY LDY CPY CPX',
@@ -59,7 +60,7 @@ module Ruby2600
       [ :immediate, :zero_page, :accumulator, :absolute, nil, :zero_page_indexed_x_or_y, nil, :absolute_indexed_x_or_y ]
     ]
 
-    # Generate constants for instructions above for easy matching upon execution
+    # Build instruction-named constants from the tables above
 
     INSTRUCTION_GROUPS.each_with_index do |names, cc|
       names.each_with_index do |name, aaa|
@@ -68,13 +69,13 @@ module Ruby2600
     end
 
     # Conditional branches (BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ) also follow a bit
-    # pattern for target flag and expected value, so we'll generalize them as "BXX"
+    # pattern (for target flag and expected value), so we'll generalize them as "BXX"
 
     BXX = 0b00010000
     BRANCH_FLAGS = [:@n, :@v, :@c, :@z]
 
     # Some instructions take an extra cycle if memory access crosses a page boundary.
-    # STA/STX/STY are notable exceptions, here is the reason: http://bit.ly/10JNkOR
+    # (STA/STX/STY are notable exceptions, see: http://bit.ly/10JNkOR)
 
     INSTRUCTIONS_WITH_PAGE_PENALTY = [ORA, AND, EOR, ADC, LDA, CMP, SBC, LDX, LDY]
 
@@ -116,8 +117,7 @@ module Ruby2600
       @pc = word(@pc + OPCODE_SIZES[@opcode])
     end
 
-    # These helpers allow us to "mark" most operations
-    # with the flags that should reflect their values
+    # These helpers allow us to "tag" operations with affected flags
 
     def flag_nz(value)
       @z = (value == 0)
@@ -264,8 +264,8 @@ module Ruby2600
       value_to_bcd(t) & 0xFF
     end
 
-    # Read/write memory/A for (most) addressing modes. load and save
-    # load and save can be prefixed with flag_* to update P flags
+    # Read/write memory/A for different addressing modes.
+    # store returns the written value, allowing it to be prefixed with flag_*
 
     def load
       case @addressing_mode
@@ -356,14 +356,14 @@ module Ruby2600
 
     def penalize_for_page_boundary_cross?
       return false unless INSTRUCTIONS_WITH_PAGE_PENALTY.include? @instruction
-      delta = case @addressing_mode
-              when :absolute_indexed_y then @param_lo + @y
-              when :indirect_indexed_y then memory[@param_lo] + @y
-              when :absolute_indexed_x then @param_lo + @x
-              when :absolute_indexed_x_or_y then @param_lo + (@instruction == LDX ? @y : @x)
-              else 0
-              end
-      delta > 0xFF
+      lo_addr = case @addressing_mode
+                when :absolute_indexed_y then @param_lo + @y
+                when :indirect_indexed_y then memory[@param_lo] + @y
+                when :absolute_indexed_x then @param_lo + @x
+                when :absolute_indexed_x_or_y then @param_lo + (@instruction == LDX ? @y : @x)
+                else 0
+                end
+      lo_addr > 0xFF
     end
 
     # Two's complement conversion for byte values
@@ -376,8 +376,8 @@ module Ruby2600
       numeric_value < 0 ? 0x100 + numeric_value  : numeric_value
     end
 
-    # BCD function will only convert if decimal mode. It will also
-    # conveniently convert 0xFF to 99 (for easy c flag setting on ADC)
+    # BCD functions are inert unless we are in decimal mode. bcd will also
+    # conveniently make 0xFF into 99, making carry-check decimal-mode-agnostic
 
     def bcd(value)
       return value unless @d
@@ -405,7 +405,7 @@ module Ruby2600
       flag ? 1 : 0
     end
 
-    # Debug tools
+    # Debug tools (should be expanded and moved into its own module)
 
     def to_s
       "PC=#{sprintf("$%04X", @pc)} A=#{sprintf("$%02X", @a)} X=#{sprintf("$%02X", @x)} Y=#{sprintf("$%02X", @y)}"
