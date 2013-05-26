@@ -221,16 +221,20 @@ module Ruby2600
         store @y
       when ASL
         _ = load
-        @c = _[7] == 1
         flag_nz store byte(_ << 1)
+        @c = _[7] == 1
       when ROL
         _ = load
         flag_nz store byte(_ << 1) + bit(@c)
         @c = _[7] == 1
       when LSR
         _ = load
-        @c = _[0] == 1
         flag_nz store _ >> 1
+        @c = _[0] == 1
+      when ROR
+        _ = load
+        flag_nz store (_ >> 1) + (bit(@c) <<7)
+        @c = _[0] == 1
       when CMP
         flag_nzc @a - load
       when CPX

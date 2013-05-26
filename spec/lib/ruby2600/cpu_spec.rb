@@ -1877,7 +1877,88 @@ describe Ruby2600::CPU do
     end
 
     context 'ROR' do
-      pending 'not implemented'
+      before { cpu.c = false }
+
+      context 'accumulator' do
+        before do
+          cpu.memory[0] = 0x6A # ROR A
+          cpu.a = 0b11101110
+        end
+
+        it_should 'advance PC by one'
+
+        it_should 'take two cycles'
+
+        it_should 'set A value', 0b01110111
+
+        it_should 'reset Z flag'
+
+        it_should 'reset C flag'
+
+        it_should 'reset N flag'
+
+        context 'with carry set' do
+          before { cpu.c = true }
+
+          it_should 'set A value', 0b11110111
+        end
+      end
+
+      context 'zero page' do
+        before { cpu.memory[0..1] = 0x66, 0xA7 } # ROR $A7
+
+        it_should 'advance PC by two'
+
+        it_should 'take five cycles'
+
+        it_should 'set memory with value', 0x00A7, 0x00
+
+        it_should 'set C flag'
+
+        it_should 'set Z flag'
+      end
+
+      context 'zero page, x' do
+        before do
+          cpu.memory[0..1] = 0x76, 0xA5  # ROR $A5,X
+          cpu.x = 0x11
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take six cycles'
+
+        it_should 'set memory with value', 0x00B6, 0x01
+
+        it_should 'reset C flag'
+      end
+
+      context 'absolute' do
+        before { cpu.memory[0..2] = 0x6E, 0x04, 0x13 } # ROR $1304
+
+        it_should 'advance PC by three'
+
+        it_should 'take six cycles'
+
+        it_should 'set memory with value', 0x1304, 0x7F
+
+        it_should 'set C flag'
+      end
+
+      context 'absolute, x' do
+        before do
+          cpu.memory[0..2] = 0x7E, 0x04, 0x13 # ROR $1304,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take seven cycles'
+
+        it_should 'set memory with value', 0x1314, 0x00
+
+        it_should 'reset C flag'
+      end
     end
 
     context 'RTI' do
