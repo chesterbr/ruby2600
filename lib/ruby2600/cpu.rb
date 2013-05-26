@@ -2,7 +2,7 @@ module Ruby2600
   class CPU
     attr_accessor :memory
     attr_accessor :pc, :a, :x, :y, :s
-    attr_accessor :n, :v, :b, :d, :i, :z, :c    # Flags (P register): nv-bdizc
+    attr_accessor :n, :v, :d, :i, :z, :c    # Flags (P register): nv--dizc
 
     RESET_VECTOR = 0xFFFC
 

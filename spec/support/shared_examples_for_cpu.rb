@@ -1,5 +1,5 @@
 CPU_8_BIT_REGISTERS = %w'a x y s'
-CPU_FLAGS = %w'n v b d i z c'
+CPU_FLAGS = %w'n v d i z c'
 
 CPU_8_BIT_REGISTERS.each do |register|
   shared_examples_for "set #{register.upcase} value" do |expected|
