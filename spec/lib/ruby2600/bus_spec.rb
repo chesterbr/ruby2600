@@ -32,7 +32,7 @@ describe Ruby2600::Bus do
     it_should 'read address range from riot', 0x0080..0x00FF
 
     it "should translate reads on address range $F000-FFFF to lower 4K range on cart" do
-      (0..4095).each do |address|
+      0.upto(4095).each do |address|
         value = Random.rand(256)
         cart.stub(:[]).with(address).and_return(value)
 
