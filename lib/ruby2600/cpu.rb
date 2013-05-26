@@ -223,6 +223,10 @@ module Ruby2600
         _ = load
         @c = _[7] == 1
         flag_nz store byte(_ << 1)
+      when ROL
+        _ = load
+        flag_nz store byte(_ << 1) + bit(@c)
+        @c = _[7] == 1
       when LSR
         _ = load
         @c = _[0] == 1

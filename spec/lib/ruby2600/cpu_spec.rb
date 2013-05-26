@@ -1777,7 +1777,103 @@ describe Ruby2600::CPU do
     end
 
     context 'ROL' do
-      pending 'not implemented'
+      before { cpu.c = false }
+
+      context 'accumulator' do
+        before do
+          cpu.memory[0] = 0x2A # ROL A
+          cpu.a = 0b11101110
+          cpu.c = false
+        end
+
+        it_should 'advance PC by one'
+
+        it_should 'take two cycles'
+
+        it_should 'set A value', 0b11011100
+
+        it_should 'reset Z flag'
+
+        it_should 'set C flag'
+
+        it_should 'set N flag'
+
+        context 'with carry set' do
+          before { cpu.c = true }
+
+          it_should 'set A value', 0b11011101
+        end
+      end
+
+      context 'zero page' do
+        before { cpu.memory[0..1] = 0x26, 0xA7 } # ROL $A7
+
+        it_should 'advance PC by two'
+
+        it_should 'take five cycles'
+
+        it_should 'set memory with value', 0x00A7, 0x02
+
+        it_should 'reset N flag'
+
+        it_should 'reset C flag'
+
+        it_should 'reset Z flag'
+      end
+
+      context 'zero page, x' do
+        before do
+          cpu.memory[0..1] = 0x36, 0xA5  # ROL $A5,X
+          cpu.x = 0x11
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take six cycles'
+
+        it_should 'set memory with value', 0x00B6, 0x04
+
+        it_should 'reset N flag'
+
+        it_should 'reset C flag'
+
+        it_should 'reset Z flag'
+      end
+
+      context 'absolute' do
+        before { cpu.memory[0..2] = 0x2E, 0x04, 0x13 } # ROL $1304
+
+        it_should 'advance PC by three'
+
+        it_should 'take six cycles'
+
+        it_should 'set memory with value', 0x1304, 0xFE
+
+        it_should 'set N flag'
+
+        it_should 'set C flag'
+
+        it_should 'reset Z flag'
+      end
+
+      context 'absolute, x' do
+        before do
+          cpu.memory[0..2] = 0x3E, 0x04, 0x13 # ROL $1304,X
+          cpu.x = 0x12
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take seven cycles'
+
+        it_should 'set memory with value', 0x1316, 0x00
+
+        it_should 'reset N flag'
+
+        it_should 'set C flag'
+
+        it_should 'set Z flag'
+      end
     end
 
     context 'ROR' do
