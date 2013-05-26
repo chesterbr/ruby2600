@@ -145,6 +145,8 @@ module Ruby2600
         @pc = memory[0xFFFE] + 0x100 * memory[0xFFFF]
       when 0x08 # PHP
         push p
+      when 0x28 # PLP
+        self.p = pop
       when 0xEA # NOP
       when 0xE8 # INX
         flag_nz @x = byte(@x + 1)
@@ -368,6 +370,15 @@ module Ruby2600
       _ += 0b00000010 if @z
       _ += 0b00000001 if @c
       _
+    end
+
+    def p=(value)
+      @n = (value & 0b10000000) != 0
+      @v = (value & 0b01000000) != 0
+      @d = (value & 0b00001000) != 0
+      @i = (value & 0b00000100) != 0
+      @z = (value & 0b00000010) != 0
+      @c = (value & 0b00000001) != 0
     end
 
     # Timing

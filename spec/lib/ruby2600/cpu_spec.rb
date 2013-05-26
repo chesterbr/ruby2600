@@ -1764,7 +1764,48 @@ describe Ruby2600::CPU do
     end
 
     context 'PLP' do
-      pending 'not implemented'
+      before do
+        cpu.memory[0] = 0x28 # PLP
+        cpu.s = 0xA3
+      end
+
+      it_should 'advance PC by one'
+
+      it_should 'take four cycles'
+
+      context 'all flags set' do
+        before { cpu.memory[0x01A4] = 0b11111111 }
+
+        it_should 'set N flag'
+        it_should 'set V flag'
+        it_should 'set D flag'
+        it_should 'set I flag'
+        it_should 'set Z flag'
+        it_should 'set C flag'
+      end
+
+      context 'all flags clear' do
+        before { cpu.memory[0x01A4] = 0 }
+
+        it_should 'reset N flag'
+        it_should 'reset V flag'
+        it_should 'reset D flag'
+        it_should 'reset I flag'
+        it_should 'reset Z flag'
+        it_should 'reset C flag'
+      end
+
+      context 'mixed flags' do
+        before { cpu.memory[0x01A4] = 0b10111010 }
+
+        it_should 'set N flag'
+        it_should 'set D flag'
+        it_should 'set Z flag'
+
+        it_should 'reset V flag'
+        it_should 'reset I flag'
+        it_should 'reset C flag'
+      end
     end
 
     context 'ROL' do
