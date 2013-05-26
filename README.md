@@ -14,7 +14,7 @@ Speed and sound are lowest-priority goals ([Stella](http://stella.sourceforge.ne
 
 ## Current status
 
-- 650x CPU emulation covers about 65% of the instruction set, [cloc](http://cloc.sourceforge.net/)-ing just about 260 lines of code.
+- 650x CPU emulation covers about 93% of the instruction set, [cloc](http://cloc.sourceforge.net/)-ing around 350 lines of code.
 - TIA emulation covers basic VSYNC/VBLANK, playfield registers and CPU sync (including WSYNC), being able to generate an entire scanline or even a full frame (in Atari colors)
 - Every single aspect of the emulated code is spec-ed.
 - Rudimentary [Gosu](http://www.libgosu.org/)-based command-line interface allows running a [Hello World ROM](http://pastebin.com/abBRfUjd), which is also included on a functional test.
