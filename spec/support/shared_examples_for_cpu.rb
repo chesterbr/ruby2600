@@ -106,6 +106,29 @@ shared_examples_for 'subtract and set A/C/V' do |a, m, result, c, v|
   it { cpu.v.should == v }
 end
 
+shared_examples_for 'set memory with P for various flag values' do |address|
+  context '; all flags set' do
+    before { cpu.n = cpu.v = cpu.d = cpu.i = cpu.z = cpu.c = true }
+
+    it_should 'set memory with value', address, 0b11111111
+  end
+
+  context '; all flags clear' do
+    before { cpu.n = cpu.v = cpu.d = cpu.i = cpu.z = cpu.c = false }
+
+    it_should 'set memory with value', address, 0b00110000
+  end
+
+  context '; mixed flags' do
+    before do
+      cpu.n = cpu.d = cpu.z = true
+      cpu.v = cpu.i = cpu.c = false
+    end
+
+    it_should 'set memory with value', address, 0b10111010
+  end
+end
+
 shared_examples_for "a branch instruction" do
   before { cpu.pc = 0x0510 }
 

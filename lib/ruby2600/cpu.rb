@@ -143,6 +143,8 @@ module Ruby2600
         push p
         @i = true
         @pc = memory[0xFFFE] + 0x100 * memory[0xFFFF]
+      when 0x08 # PHP
+        push p
       when 0xEA # NOP
       when 0xE8 # INX
         flag_nz @x = byte(@x + 1)
