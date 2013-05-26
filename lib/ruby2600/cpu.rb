@@ -441,7 +441,7 @@ module Ruby2600
     end
 
     def memory_word(address)
-      memory[address + 1] * 0x100 + memory[address]
+      memory[word(address + 1)] * 0x100 + memory[address]
     end
 
     # Debug tools (should be expanded and moved into its own module)
