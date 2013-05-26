@@ -5,6 +5,7 @@ module Ruby2600
     attr_accessor :n, :v, :d, :i, :z, :c    # Flags (P register): nv--dizc
 
     RESET_VECTOR = 0xFFFC
+    BRK_VECTOR   = 0xFFFE
 
     OPCODE_SIZES = [
       1, 2, 0, 2, 2, 2, 2, 2, 1, 2, 1, 2, 3, 3, 3, 3,
@@ -49,9 +50,9 @@ module Ruby2600
     # footprint. The tables below represent that info in order to simplify decoding
 
     INSTRUCTION_GROUPS = [
-      %w'xxx BIT JMP xxx STY LDY CPY CPX',
-      %w'ORA AND EOR ADC STA LDA CMP SBC',
-      %w'ASL ROL LSR ROR STX LDX DEC INC'
+      %w'xxx BIT JMP JMPabs STY LDY CPY CPX',
+      %w'ORA AND EOR ADC    STA LDA CMP SBC',
+      %w'ASL ROL LSR ROR    STX LDX DEC INC'
     ]
 
     ADDRESSING_MODE_GROUPS = [
@@ -89,7 +90,7 @@ module Ruby2600
     end
 
     def reset
-      @pc = memory[RESET_VECTOR] + 0x100 * memory[RESET_VECTOR + 1]
+      @pc = memory_word(RESET_VECTOR)
     end
 
     def step
@@ -149,11 +150,7 @@ module Ruby2600
         push_word @pc
         push p
         @i = true
-        @pc = memory[0xFFFE] + 0x100 * memory[0xFFFF]
-      when 0x08 # PHP
-        push p
-      when 0x28 # PLP
-        self.p = pop
+        @pc = memory_word(BRK_VECTOR)
       when 0xEA # NOP
       when 0xE8 # INX
         flag_nz @x = byte(@x + 1)
@@ -163,10 +160,6 @@ module Ruby2600
         flag_nz @x = byte(@x - 1)
       when 0x88 # DEY
         flag_nz @y = byte(@y - 1)
-      when 0x4C # JMP
-        @pc = @param
-      when 0x6C # JMP()
-        @pc = 0x100 * memory[@param + 1] + memory[@param]
       when 0xAA # TAX
         flag_nz @x = @a
       when 0xA8 # TAY
@@ -181,6 +174,10 @@ module Ruby2600
         @s = @x
       when 0xB8 # CLV
         @v = false
+      when 0x08 # PHP
+        push p
+      when 0x28 # PLP
+        self.p = pop
       when 0x48 # PHA
         push @a
       when 0x68 # PLA
@@ -188,11 +185,11 @@ module Ruby2600
       when 0x20 # JSR
         push_word @pc - 1
         @pc = @param
-      when 0x60 # RTS
-        @pc = word(pop_word + 1)
       when 0x40 # RTI
         self.p = pop
         @pc = pop_word
+      when 0x60 # RTS
+        @pc = word(pop_word + 1)
       else
         return false
       end
@@ -224,11 +221,11 @@ module Ruby2600
         store @y
       when ASL
         _ = load
-        @c = _[7].nonzero?
+        @c = _[7] == 1
         flag_nz store byte(_ << 1)
       when LSR
         _ = load
-        @c = _[0].nonzero?
+        @c = _[0] == 1
         flag_nz store _ >> 1
       when CMP
         flag_nzc @a - load
@@ -238,6 +235,10 @@ module Ruby2600
       when CPY
         # FIXME not sure if this is dealing with signed
         flag_nzc @y - load
+      when JMP
+        @pc = @param
+      when JMPabs
+        @pc = memory_word(@param)
       when BXX
         @pc = branch
       when SCX
@@ -273,8 +274,8 @@ module Ruby2600
       value_to_bcd(t) & 0xFF
     end
 
-    # Read/write memory/A for different addressing modes.
-    # store returns the written value, allowing it to be prefixed with flag_*
+    # Memory (and A) read/write for the current opcode's access mode.
+    # store() returns the written value, allowing it to be prefixed with flag_*
 
     def load
       case @addressing_mode
@@ -326,12 +327,11 @@ module Ruby2600
     end
 
     def indirect_indexed_y
-      (memory[@param_lo + 1] * 0x100 + memory[@param_lo] + @y) % 0x10000
+      word(memory_word(@param_lo) + @y)
     end
 
     def indexed_indirect_x
-      indexed_param = (@param_lo + @x) % 0x100
-      memory[indexed_param + 1] * 0x100 + memory[indexed_param]
+      memory_word(byte(@param_lo + @x))
     end
 
     # Stack
@@ -438,6 +438,10 @@ module Ruby2600
 
     def bit(flag)
       flag ? 1 : 0
+    end
+
+    def memory_word(address)
+      memory[address + 1] * 0x100 + memory[address]
     end
 
     # Debug tools (should be expanded and moved into its own module)
