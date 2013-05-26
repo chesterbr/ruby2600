@@ -1773,39 +1773,7 @@ describe Ruby2600::CPU do
 
       it_should 'take four cycles'
 
-      context 'all flags set' do
-        before { cpu.memory[0x01A4] = 0b11111111 }
-
-        it_should 'set N flag'
-        it_should 'set V flag'
-        it_should 'set D flag'
-        it_should 'set I flag'
-        it_should 'set Z flag'
-        it_should 'set C flag'
-      end
-
-      context 'all flags clear' do
-        before { cpu.memory[0x01A4] = 0 }
-
-        it_should 'reset N flag'
-        it_should 'reset V flag'
-        it_should 'reset D flag'
-        it_should 'reset I flag'
-        it_should 'reset Z flag'
-        it_should 'reset C flag'
-      end
-
-      context 'mixed flags' do
-        before { cpu.memory[0x01A4] = 0b10111010 }
-
-        it_should 'set N flag'
-        it_should 'set D flag'
-        it_should 'set Z flag'
-
-        it_should 'reset V flag'
-        it_should 'reset I flag'
-        it_should 'reset C flag'
-      end
+      it_should_behave_like 'read flags (P) from memory for various values', 0x01A4
     end
 
     context 'ROL' do
@@ -1817,7 +1785,19 @@ describe Ruby2600::CPU do
     end
 
     context 'RTI' do
-      pending 'not implemented'
+      before do
+        cpu.memory[0] = 0x40 # RTI
+        cpu.memory[0x01EF..0x01F0] = 0x35, 0x12
+        cpu.s = 0xED
+      end
+
+      it_should 'take six cycles'
+
+      it_should 'set S value', 0xF0
+
+      it_should 'set PC value', 0x1235
+
+      it_should_behave_like 'read flags (P) from memory for various values', 0x01EE
     end
 
     context 'RTS' do

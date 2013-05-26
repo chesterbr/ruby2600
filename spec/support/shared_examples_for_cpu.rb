@@ -107,25 +107,61 @@ shared_examples_for 'subtract and set A/C/V' do |a, m, result, c, v|
 end
 
 shared_examples_for 'set memory with P for various flag values' do |address|
-  context '; all flags set' do
+  context 'all flags set' do
     before { cpu.n = cpu.v = cpu.d = cpu.i = cpu.z = cpu.c = true }
 
     it_should 'set memory with value', address, 0b11111111
   end
 
-  context '; all flags clear' do
+  context 'all flags clear' do
     before { cpu.n = cpu.v = cpu.d = cpu.i = cpu.z = cpu.c = false }
 
     it_should 'set memory with value', address, 0b00110000
   end
 
-  context '; mixed flags' do
+  context 'mixed flags' do
     before do
       cpu.n = cpu.d = cpu.z = true
       cpu.v = cpu.i = cpu.c = false
     end
 
     it_should 'set memory with value', address, 0b10111010
+  end
+end
+
+shared_examples_for 'read flags (P) from memory for various values' do |address|
+  context 'all flags set' do
+    before { cpu.memory[address] = 0b11111111 }
+
+    it_should 'set N flag'
+    it_should 'set V flag'
+    it_should 'set D flag'
+    it_should 'set I flag'
+    it_should 'set Z flag'
+    it_should 'set C flag'
+  end
+
+  context 'all flags clear' do
+    before { cpu.memory[address] = 0 }
+
+    it_should 'reset N flag'
+    it_should 'reset V flag'
+    it_should 'reset D flag'
+    it_should 'reset I flag'
+    it_should 'reset Z flag'
+    it_should 'reset C flag'
+  end
+
+  context 'mixed flags' do
+    before { cpu.memory[address] = 0b10111010 }
+
+    it_should 'set N flag'
+    it_should 'set D flag'
+    it_should 'set Z flag'
+
+    it_should 'reset V flag'
+    it_should 'reset I flag'
+    it_should 'reset C flag'
   end
 end
 

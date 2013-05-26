@@ -195,6 +195,9 @@ module Ruby2600
         @pc = @param
       when 0x60 # RTS
         @pc = word(pop_word + 1)
+      when 0x40 # RTI
+        self.p = pop
+        @pc = pop_word
       else
         return false
       end
