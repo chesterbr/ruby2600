@@ -672,7 +672,50 @@ describe Ruby2600::CPU do
     end
 
     context 'BRK' do
-      pending 'not implemented'
+      before do
+        cpu.memory[0x1234] = 0x00 # BRK
+        cpu.memory[0xFFFE..0xFFFF] = 0x89, 0x67 # Interrupt vector
+        cpu.pc = 0x1234
+        cpu.s = 0xF0
+      end
+
+      it_should 'take seven cycles'
+
+      it_should 'set memory with value', 0x01F0, 0x12
+      it_should 'set memory with value', 0x01EF, 0x35
+
+      it_should 'set S value', 0xED
+
+      it_should 'set PC value', 0x6789
+
+      it_should 'set I flag'
+
+      context 'all flags set' do
+        before { cpu.n = cpu.v = cpu.d = cpu.i = cpu.z = cpu.c = true }
+
+        it_should 'set memory with value', 0x01EE, 0b11111111
+
+        it_should 'set I flag'
+      end
+
+      context 'all flags clear' do
+        before { cpu.n = cpu.v = cpu.d = cpu.i = cpu.z = cpu.c = false }
+
+        it_should 'set memory with value', 0x01EE, 0b00110000
+
+        it_should 'set I flag'
+      end
+
+      context 'mixed flags' do
+        before do
+          cpu.n = cpu.d = cpu.z = true
+          cpu.v = cpu.i = cpu.c = false
+        end
+
+        it_should 'set memory with value', 0x01EE, 0b10111010
+
+        it_should 'set I flag'
+      end
     end
 
     context 'BVC' do

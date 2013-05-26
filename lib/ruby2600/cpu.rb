@@ -7,7 +7,7 @@ module Ruby2600
     RESET_VECTOR = 0xFFFC
 
     OPCODE_SIZES = [
-      0, 2, 0, 2, 2, 2, 2, 2, 1, 2, 1, 2, 3, 3, 3, 3,
+      1, 2, 0, 2, 2, 2, 2, 2, 1, 2, 1, 2, 3, 3, 3, 3,
       2, 2, 0, 2, 2, 2, 2, 2, 1, 3, 1, 3, 3, 3, 3, 3,
       3, 2, 0, 2, 2, 2, 2, 2, 1, 2, 1, 2, 3, 3, 3, 3,
       2, 2, 0, 2, 2, 2, 2, 2, 1, 3, 1, 3, 3, 3, 3, 3,
@@ -26,7 +26,7 @@ module Ruby2600
     ]
 
     OPCODE_CYCLE_COUNTS = [
-      0, 6, 0, 8, 3, 3, 5, 5, 3, 2, 2, 2, 4, 4, 6, 6,
+      7, 6, 0, 8, 3, 3, 5, 5, 3, 2, 2, 2, 4, 4, 6, 6,
       2, 5, 0, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7,
       6, 6, 0, 8, 3, 3, 5, 5, 4, 2, 2, 2, 4, 4, 6, 6,
       2, 5, 0, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7,
@@ -138,6 +138,11 @@ module Ruby2600
 
     def execute_opcode
       case @opcode
+      when 0x00 # BRK
+        push_word @pc
+        push p
+        @i = true
+        @pc = memory[0xFFFE] + 0x100 * memory[0xFFFF]
       when 0xEA # NOP
       when 0xE8 # INX
         flag_nz @x = byte(@x + 1)
@@ -344,6 +349,23 @@ module Ruby2600
 
     def pop_word
       pop + (0x100 * pop)
+    end
+
+    # Flags are stored as individual booleans, but sometimes we need
+    # them as a flags register (P), which bit-maps to "NV_BDIZC"
+    #
+    # Notice that bit 5 (_) is always 1 and bit 4 (B) is only false
+    # on non-software interrupts (IRQ/NMI), which we don't support.
+
+    def p
+      _  = 0b00110000
+      _ += 0b10000000 if @n
+      _ += 0b01000000 if @v
+      _ += 0b00001000 if @d
+      _ += 0b00000100 if @i
+      _ += 0b00000010 if @z
+      _ += 0b00000001 if @c
+      _
     end
 
     # Timing
