@@ -68,11 +68,16 @@ module Ruby2600
       end
     end
 
-    # Conditional branches (BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ) also follow a bit
-    # pattern (for target flag and expected value), so we'll generalize them as "BXX"
+    # Conditional branches (BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ) and the symmetric
+    # set/clear flag instructions (SEC, SEI, SED, CLD, CLI, CLD) also follow bit
+    # patterns (for target flag and expected value).
+    #
+    # We'll generalize them as "BXX" and SCX"
 
     BXX = 0b00010000
-    BRANCH_FLAGS = [:@n, :@v, :@c, :@z]
+    SCX = 0b00011000
+    BXX_FLAGS = [:@n, :@v, :@c, :@z]
+    SCX_FLAGS = [:@c, :@i, :@v, :@d] # @v not really used, it behaves differently
 
     # Some instructions take an extra cycle if memory access crosses a page boundary.
     # (STA/STX/STY are notable exceptions, see: http://bit.ly/10JNkOR)
@@ -99,8 +104,10 @@ module Ruby2600
     def fetch
       @opcode = memory[@pc] || 0
 
-      if (@opcode & 0b00011111) == BXX
+      if    (@opcode & 0b00011111) == BXX
         @instruction = BXX
+      elsif (@opcode & 0b00011111) == SCX
+        @instruction = SCX
       else
         @instruction_group  = (@opcode & 0b00000011)
         mode_in_group       = (@opcode & 0b00011100) >> 2
@@ -172,20 +179,8 @@ module Ruby2600
         flag_nz @x = @s
       when 0x9A # TXS
         @s = @x
-      when 0x18 # CLC
-        @c = false
       when 0xB8 # CLV
         @v = false
-      when 0x38 # SEC
-        @c = true
-      when 0xD8 # CLD
-        @d = false
-      when 0xF8 # SED
-        @d = true
-      when 0x58 # CLI
-        @i = false
-      when 0x78 # SEI
-        @i = true
       when 0x48 # PHA
         push @a
       when 0x68 # PLA
@@ -245,6 +240,8 @@ module Ruby2600
         flag_nzc @y - load
       when BXX
         @pc = branch
+      when SCX
+        instance_variable_set SCX_FLAGS[@opcode >> 6], @opcode[5] == 1
       end
     end
 
@@ -260,7 +257,7 @@ module Ruby2600
     def should_branch?
       flag     = (@opcode & 0b11000000) >> 6
       expected = (@opcode & 0b00100000) != 0
-      actual   = instance_variable_get(BRANCH_FLAGS[flag])
+      actual   = instance_variable_get(BXX_FLAGS[flag])
       !(expected ^ actual)
     end
 
