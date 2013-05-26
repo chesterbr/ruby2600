@@ -219,22 +219,8 @@ module Ruby2600
         store @x
       when STY
         store @y
-      when ASL
-        _ = load
-        flag_nz store byte(_ << 1)
-        @c = _[7] == 1
-      when ROL
-        _ = load
-        flag_nz store byte(_ << 1) + bit(@c)
-        @c = _[7] == 1
-      when LSR
-        _ = load
-        flag_nz store _ >> 1
-        @c = _[0] == 1
-      when ROR
-        _ = load
-        flag_nz store (_ >> 1) + (bit(@c) <<7)
-        @c = _[0] == 1
+      when ASL, ROL, LSR, ROR
+        shift
       when CMP
         flag_nzc @a - load
       when CPX
@@ -254,7 +240,7 @@ module Ruby2600
       end
     end
 
-    # Generalized instructions (branches, arithmetic)
+    # Generalized instructions (branches, arithmetic, shift)
 
     def branch
       return @pc unless should_branch?
@@ -280,6 +266,19 @@ module Ruby2600
       @v = k > 127 || k < -128
       @c = t > limit
       value_to_bcd(t) & 0xFF
+    end
+
+    def shift
+      # FIXME: maybe move this to fetch / have constants for masks
+      right  = @instruction & 0b01000000 != 0
+      rotate = @instruction & 0b00100000 != 0
+
+      inserted_bit = bit(@c) << (right ? 7 : 0)
+      delta        = right ? -1 : 1
+
+      _ = load
+      flag_nz store byte(_ << delta) + inserted_bit
+      @c = _[right ? 0 : 7] == 1
     end
 
     # Memory (and A) read/write for the current opcode's access mode.
