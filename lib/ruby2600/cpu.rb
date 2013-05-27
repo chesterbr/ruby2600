@@ -71,7 +71,7 @@ module Ruby2600
 
     # Conditional branches (BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ) and the symmetric
     # set/clear flag instructions (SEC, SEI, SED, CLD, CLI, CLD) also follow bit
-    # patterns (for target flag and expected value).
+    # patterns (for target flag and expected/set value).
     #
     # We'll generalize them as "BXX" and SCX"
 
@@ -100,7 +100,7 @@ module Ruby2600
 
     private
 
-    # Decodes instruction, parameter, addressing mode, opcode and next PC
+    # Decodes instruction, parameter(s), addressing mode, opcode and advances PC
 
     def fetch
       @opcode = memory[@pc] || 0
@@ -146,11 +146,6 @@ module Ruby2600
 
     def execute_opcode
       case @opcode
-      when 0x00 # BRK
-        push_word @pc
-        push p
-        @i = true
-        @pc = memory_word(BRK_VECTOR)
       when 0xEA # NOP
       when 0xE8 # INX
         flag_nz @x = byte(@x + 1)
@@ -185,11 +180,16 @@ module Ruby2600
       when 0x20 # JSR
         push_word @pc - 1
         @pc = @param
+      when 0x60 # RTS
+        @pc = word(pop_word + 1)
+      when 0x00 # BRK
+        push_word @pc
+        push p
+        @i = true
+        @pc = memory_word(BRK_VECTOR)
       when 0x40 # RTI
         self.p = pop
         @pc = pop_word
-      when 0x60 # RTS
-        @pc = word(pop_word + 1)
       else
         return false
       end
@@ -220,14 +220,12 @@ module Ruby2600
       when STY
         store @y
       when ASL, ROL, LSR, ROR
-        shift
+        flag_nz store shift
       when CMP
         flag_nzc @a - load
       when CPX
-        # FIXME not sure if this is dealing with signed
         flag_nzc @x - load
       when CPY
-        # FIXME not sure if this is dealing with signed
         flag_nzc @y - load
       when JMP
         @pc = @param
@@ -244,7 +242,7 @@ module Ruby2600
 
     def branch
       return @pc unless should_branch?
-      new_pc = word(@pc + numeric_value(@param_lo))
+      new_pc = word(@pc + signed(@param_lo))
       @branch_cost = (@pc & 0xFF00) == (new_pc & 0xFF00) ? 1 : 2
       new_pc
     end
@@ -259,26 +257,25 @@ module Ruby2600
     def arithmetic
       signal = @instruction == ADC ? 1 : -1
       carry  = @instruction == ADC ? bit(@c) : bit(@c) - 1
-      limit  = @instruction == ADC ? bcd(255) : -1
+      limit  = @instruction == ADC ? bcd_to_value(255) : -1
 
-      k = numeric_value(@a) + signal * numeric_value(load) + carry
-      t = bcd(@a) + signal * bcd(load) + carry
+      k = signed(@a) + signal * signed(load) + carry
+      t = bcd_to_value(@a) + signal * bcd_to_value(load) + carry
       @v = k > 127 || k < -128
       @c = t > limit
       value_to_bcd(t) & 0xFF
     end
 
     def shift
-      # FIXME: maybe move this to fetch / have constants for masks
       right  = @instruction & 0b01000000 != 0
       rotate = @instruction & 0b00100000 != 0
 
-      inserted_bit = bit(@c) << (right ? 7 : 0)
-      delta        = right ? -1 : 1
+      new_bit = rotate ? (bit(@c) << (right ? 7 : 0)) : 0
+      delta   = right  ? -1 : 1
 
       _ = load
-      flag_nz store byte(_ << delta) + (rotate ? inserted_bit : 0)
       @c = _[right ? 0 : 7] == 1
+      byte(_ << delta) | new_bit
     end
 
     # Memory (and A) read/write for the current opcode's access mode.
@@ -306,11 +303,11 @@ module Ruby2600
     end
 
     def zero_page_indexed_x
-      (@param_lo + @x) % 0x100
+      byte @param_lo + @x
     end
 
     def zero_page_indexed_y
-      (@param_lo + @y) % 0x100
+      byte @param_lo + @y
     end
 
     def zero_page_indexed_x_or_y
@@ -322,11 +319,11 @@ module Ruby2600
     end
 
     def absolute_indexed_x
-      (@param + @x) % 0x10000
+      word @param + @x
     end
 
     def absolute_indexed_y
-      (@param + @y) % 0x10000
+      word @param + @y
     end
 
     def absolute_indexed_x_or_y
@@ -391,9 +388,9 @@ module Ruby2600
     # Timing
 
     def time_in_cycles
-      cycles = OPCODE_CYCLE_COUNTS[@opcode] + @branch_cost
+      cycles = OPCODE_CYCLE_COUNTS[@opcode]
       cycles += 1 if penalize_for_page_boundary_cross?
-      cycles
+      cycles += @branch_cost
     end
 
     def penalize_for_page_boundary_cross?
@@ -408,20 +405,10 @@ module Ruby2600
       lo_addr > 0xFF
     end
 
-    # Two's complement conversion for byte values
-
-    def numeric_value(signed_byte)
-      signed_byte > 0x7F ? signed_byte - 0x100 : signed_byte
-    end
-
-    def signed_byte(numeric_value)
-      numeric_value < 0 ? 0x100 + numeric_value  : numeric_value
-    end
-
     # BCD functions are inert unless we are in decimal mode. bcd will also
     # conveniently make 0xFF into 99, making carry-check decimal-mode-agnostic
 
-    def bcd(value)
+    def bcd_to_value(value)
       return value unless @d
       ([value / 16, 9].min) * 10 + ([value % 16, 9].min)
     end
@@ -433,7 +420,7 @@ module Ruby2600
       (value / 10) * 16 + (value % 10)
     end
 
-    # Keeping values within their bit sizes (due to lack of byte/word types)
+    # Convenience conversions (most due to the lack of byte/word & signed/unsigned types)
 
     def byte(value)
       (value || 0) & 0xFF
@@ -445,6 +432,10 @@ module Ruby2600
 
     def bit(flag)
       flag ? 1 : 0
+    end
+
+    def signed(signed_byte)
+      signed_byte > 0x7F ? signed_byte - 0x100 : signed_byte
     end
 
     def memory_word(address)
