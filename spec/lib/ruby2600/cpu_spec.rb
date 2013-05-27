@@ -499,6 +499,12 @@ describe Ruby2600::CPU do
         it_should 'set C flag'
 
         it_should 'set N flag'
+
+        context 'carry set' do
+          before { cpu.c = true }
+
+          it_should 'set A value', 0b11011100 # carry does not affect ASL
+        end
       end
 
       context 'zero page' do
@@ -1626,6 +1632,12 @@ describe Ruby2600::CPU do
         it_should 'reset C flag'
 
         it_should 'reset N flag'
+
+        context 'carry set' do
+          before { cpu.c = true }
+
+          it_should 'set A value', 0b01110111 # carry does not affect LSR
+        end
       end
 
       context 'zero page' do

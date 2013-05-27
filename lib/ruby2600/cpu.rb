@@ -277,7 +277,7 @@ module Ruby2600
       delta        = right ? -1 : 1
 
       _ = load
-      flag_nz store byte(_ << delta) + inserted_bit
+      flag_nz store byte(_ << delta) + (rotate ? inserted_bit : 0)
       @c = _[right ? 0 : 7] == 1
     end
 
