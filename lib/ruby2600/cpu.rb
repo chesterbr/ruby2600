@@ -211,6 +211,8 @@ module Ruby2600
         flag_nz @y = load
       when INC
         flag_nz store byte(load + 1)
+      when DEC
+        flag_nz store byte(load - 1)
       when ADC, SBC
         flag_nz @a = arithmetic
       when STA

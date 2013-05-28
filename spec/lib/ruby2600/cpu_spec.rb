@@ -37,6 +37,7 @@ describe Ruby2600::CPU do
       cpu.memory = []
       cpu.memory[0x0001] = 0xFE
       cpu.memory[0x0002] = 0xFF
+      cpu.memory[0x0004] = 0x01
       cpu.memory[0x0005] = 0x11
       cpu.memory[0x0006] = 0x03
       cpu.memory[0x0007] = 0x54
@@ -1004,7 +1005,79 @@ describe Ruby2600::CPU do
     end
 
     context 'DEC' do
-      pending 'not implemented'
+      context 'zero page' do
+        before { cpu.memory[0..1] = 0xC6, 0xA5 } # DEC $A5
+
+        it_should 'advance PC by two'
+
+        it_should 'take five cycles'
+
+        it_should 'set memory with value', 0xA5, 0x32
+      end
+
+      context 'zero page, x' do
+        before do
+          cpu.memory[0..1] = 0xD6, 0xA5 # DEC $A5,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take six cycles'
+
+        it_should 'set memory with value', 0xB5, 0x65
+
+        context 'wrapping around zero-page' do
+          before { cpu.x = 0x60 }
+
+          it_should 'set memory with value', 0x05, 0x10
+        end
+      end
+
+      context 'absolute' do
+        before do
+          cpu.memory[0..2] = 0xCE, 0x34, 0x12 # DEC $1234
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take six cycles'
+
+        it_should 'set memory with value', 0x1234, 0x98
+      end
+
+      context 'absolute, x' do
+        before do
+          cpu.memory[0..2] = 0xDE, 0x34, 0x12  # DEC $1234,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take seven cycles'
+
+        it_should 'set memory with value', 0x1244, 0xCB
+
+        it_should 'set N flag'
+
+        context 'crossing page boundary' do
+          before { cpu.x = 0xE1 }
+
+          it_should 'set memory with value', 0x1315, 0xFE
+
+          it_should 'take seven cycles'
+
+          it_should 'reset Z flag'
+        end
+
+        context 'wrapping memory' do
+          before { cpu.memory[0..2] = 0xDE, 0xF4, 0xFF } # DEC $FFF5,X
+
+          it_should 'set memory with value', 0x0004, 0x00
+
+          it_should 'set Z flag'
+        end
+      end
     end
 
     context 'DEX' do
