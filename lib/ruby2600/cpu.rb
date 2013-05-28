@@ -202,6 +202,8 @@ module Ruby2600
         flag_nz @a = @a & load
       when ORA
         flag_nz @a = @a | load
+      when EOR
+        flag_nz @a = @a ^ load
       when BIT
         flag_nz (@a & load)
         @v = @a[6] & load[6] != 0
