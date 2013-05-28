@@ -14,7 +14,7 @@ Speed and sound are lowest-priority goals ([Stella](http://stella.sourceforge.ne
 
 ## Current status
 
-- 650x CPU emulation covers about 93% of the instruction set, [cloc](http://cloc.sourceforge.net/)-ing around 350 lines of code.
+- Full 650x instruction set emulation, [cloc](http://cloc.sourceforge.net/)-ing around 350 lines of code. (hardware interrupts not emulated, as the 2600 does not have them)
 - TIA emulation covers basic VSYNC/VBLANK, playfield registers and CPU sync (including WSYNC), being able to generate an entire scanline or even a full frame (in Atari colors)
 - Every single aspect of the emulated code is spec-ed.
 - Rudimentary [Gosu](http://www.libgosu.org/)-based command-line interface allows running a [Hello World ROM](http://pastebin.com/abBRfUjd), which is also included on a functional test.
@@ -42,5 +42,7 @@ If you can see this repository, it means I gave you a sneak preview. Play with i
 Once released (planned for [RubyConf BR 2013](http://cfp.rubyconf.com.br/)), this software will be distributed under the terms of the [MIT License](http://opensource.org/licenses/MIT). If you have access right now, it me
 
 Copyright (c) 2013 Carlos Duarte do Nascimento (Chester) <cd@pobox.com>
+
+Atari word mark and logo are trademarks owned by Atari Interactive, Inc.
 
 See the file LICENSE.txt for copying permission.
