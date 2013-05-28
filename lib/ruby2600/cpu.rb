@@ -200,6 +200,8 @@ module Ruby2600
       case @instruction
       when AND
         flag_nz @a = @a & load
+      when ORA
+        flag_nz @a = @a | load
       when BIT
         flag_nz (@a & load)
         @v = @a[6] & load[6] != 0

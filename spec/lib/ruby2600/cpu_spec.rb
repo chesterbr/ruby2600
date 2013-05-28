@@ -1781,7 +1781,184 @@ describe Ruby2600::CPU do
     end
 
     context 'ORA' do
-      pending 'not implemented'
+      before { cpu.a = 0b10101100 } # #$AC
+
+      context 'immediate' do
+        before { cpu.memory[0..1] = 0x09, 0x22 } # ORA #$22
+
+        it_should 'advance PC by two'
+
+        it_should 'take two cycles'
+
+        it_should 'set A value', 0xAE
+
+        it_should 'reset Z flag'
+
+        it_should 'set N flag'
+
+        context 'resulting positive' do
+          before { cpu.a = 0x01 }
+
+          it_should 'reset N flag'
+        end
+
+        context 'resulting zero' do
+          before do
+            cpu.a = 0x00
+            cpu.memory[1] = 0x00
+          end
+
+          it_should 'reset N flag'
+
+          it_should 'set Z flag'
+        end
+      end
+
+      context 'zero page' do
+        before { cpu.memory[0..1] = 0x05, 0xA4 } # ORA $A4
+
+        it_should 'advance PC by two'
+
+        it_should 'take three cycles'
+
+        it_should 'set A value', 0xFF
+      end
+
+      context 'zero page, x' do
+        before do
+          cpu.memory[0..1] = 0x15, 0xA5 # ORA $A5,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take four cycles'
+
+        it_should 'set A value', 0xEE
+
+        context 'wrapping around zero-page' do
+          before { cpu.x = 0x60 }
+
+          it_should 'set A value', 0xBD
+
+          it_should 'reset Z flag'
+        end
+      end
+
+      context 'absolute' do
+        before do
+          cpu.memory[0..2] = 0x0D, 0x34, 0x12 # ORA $1234
+          cpu.n = false
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set A value', 0xBD
+
+        it_should 'set N flag'
+      end
+
+      context 'absolute, x' do
+        before do
+          cpu.memory[0..2] = 0x1D, 0x34, 0x12  # ORA $1234,X
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set A value', 0xEC
+
+        context 'crossing page boundary' do
+          before { cpu.x = 0xD0 }
+
+          it_should 'set A value', 0xFF
+
+          it_should 'take five cycles'
+        end
+
+        context 'wrapping memory' do
+          before { cpu.memory[0..2] = 0x1D, 0xF5, 0xFF } # ORA $FFF5,X
+
+          it_should 'set A value', 0xBD
+        end
+      end
+
+      context 'absolute, y' do
+        before do
+          cpu.memory[0..2] = 0x19, 0x34, 0x12  # ORA $1234,Y
+          cpu.y = 0x10
+        end
+
+        it_should 'advance PC by three'
+
+        it_should 'take four cycles'
+
+        it_should 'set A value', 0xEC
+
+        context 'crossing page boundary' do
+          before { cpu.y = 0xD0 }
+
+          it_should 'set A value', 0xFF
+
+          it_should 'take five cycles'
+        end
+
+        context 'wrapping memory' do
+          before { cpu.memory[0..2] = 0x19, 0xF5, 0xFF } # ORA $FFF5,Y
+
+          it_should 'set A value', 0xBD
+        end
+      end
+
+      context '(indirect, x)' do
+        before do
+          cpu.memory[0..1] = 0x01, 0xA5  # ORA ($A5,X)
+          cpu.x = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take six cycles'
+
+        it_should 'set A value', 0xAC
+
+        context 'wrapping around zero-page' do
+          before { cpu.x = 0x60 }
+
+          it_should 'set A value', 0xBD
+        end
+      end
+
+      context '(indirect), y' do
+        before do
+          cpu.memory[0..1] = 0x11, 0xA5  # ORA ($A5),Y
+          cpu.y = 0x10
+        end
+
+        it_should 'advance PC by two'
+
+        it_should 'take five cycles'
+
+        it_should 'set A value', 0xFF
+
+        context 'crossing page boundary' do
+          before { cpu.y = 0xD0 }
+
+          it_should 'set A value', 0xAC
+
+          it_should 'take six cycles'
+        end
+
+        context 'wrapping memory' do
+          before { cpu.memory[0..1] = 0x11, 0xA3}  # ORA ($A3),Y
+
+          it_should 'set A value', 0xBD
+        end
+      end
     end
 
     context 'PHA' do
