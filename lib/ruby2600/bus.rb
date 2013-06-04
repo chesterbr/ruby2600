@@ -1,7 +1,8 @@
 module Ruby2600
   class Bus
-    # FIXME make a better structure (classes?) for frame-to-whatever conversions
     attr_accessor :tia
+
+    MASK_6507_ADDRESS = 0b0001111111111111 # cheapo 6507 has no A14-A16
 
     def initialize(cpu, tia, cart, riot)
       @cpu = cpu
@@ -15,18 +16,23 @@ module Ruby2600
     end
 
     def [](address)
-      case address
-      when 0x0000..0x000D then @tia[address]
-      when 0x0080..0x00FF then @riot[address]
-      when 0xF000..0xFFFF then @cart[address - 0xF000]
+      address &= MASK_6507_ADDRESS
+      if address[12] == 1
+        return @cart[address]
+      elsif address[7] == 1
+        return @riot[address & 0x7F]
+      else
+        return @tia[address & 0x3F]
       end
     end
 
     def []=(address, value)
-      if address.between? 0x0000, 0x002C
-        @tia[address] = value
+      return if address[12] == 1
+      address = address & MASK_6507_ADDRESS
+      if address[7] == 0
+        @tia[address & 0x3F] = value
       else
-        @riot[address] = value
+        @riot[address & 0x7F] = value
       end
     end
   end
