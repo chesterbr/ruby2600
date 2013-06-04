@@ -31,7 +31,12 @@ module Ruby2600
           if vertical_blank?
             @scanline[@pixel] = 0
           else
-            @scanline[@pixel] = pf_bit.nonzero? ? @reg[COLUPF] : @reg[COLUBK]
+            if @reg[CTRLPF][1] == 1
+              pf_color = @reg[COLUP0 + @pixel / 80]
+            else
+              pf_color = @reg[COLUPF]
+            end
+            @scanline[@pixel] = pf_bit.nonzero? ? pf_color : @reg[COLUBK]
           end
           pf_fetch
         end
