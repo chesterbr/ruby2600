@@ -2,8 +2,6 @@ module Ruby2600
   class Bus
     attr_accessor :tia
 
-    MASK_6507_ADDRESS = 0b0001111111111111 # cheapo 6507 has no A14-A16
-
     def initialize(cpu, tia, cart, riot)
       @cpu = cpu
       @tia  = tia
@@ -15,8 +13,9 @@ module Ruby2600
       cpu.reset
     end
 
+    # FIXME dry
+
     def [](address)
-      address &= MASK_6507_ADDRESS
       if address[12] == 1
         return @cart[address & 0x0FFF]
       elsif address[7] == 1

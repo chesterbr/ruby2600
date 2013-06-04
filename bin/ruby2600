@@ -45,7 +45,7 @@ class GameWindow < Gosu::Window
     @bus = Ruby2600::Bus.new(Ruby2600::CPU.new,
                              Ruby2600::TIA.new,
                              Ruby2600::Cart.new(filename),
-                             nil)
+                             Ruby2600::RIOT.new)
   end
 
   def update
