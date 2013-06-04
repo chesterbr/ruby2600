@@ -61,9 +61,9 @@ describe Ruby2600::Bus do
         end
       end
 
-      it 'reads from CART (ROM)' do
+      it 'reads from cart (ROM)' do
         CART_ADDRESSES.each do |a|
-          bus[a].should == cart[a & 0b0001111111111111]
+          bus[a].should == cart[a & 0b0000111111111111]
         end
       end
     end
@@ -87,9 +87,12 @@ describe Ruby2600::Bus do
         end
       end
 
-      it 'does NOT write to cart (ROM == Read-Only-Memory)' do
+      it 'writes to cart (most are only ROM and will ignore, but some may have custom hardware)' do
         CART_ADDRESSES.each do |a|
-          bus[a] = rand(256) # no mock should receive any message
+          value = rand(256)
+          bus[a] = value
+
+          cart[a & 0b0000111111111111].should == value
         end
       end
     end

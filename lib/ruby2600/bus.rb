@@ -18,7 +18,7 @@ module Ruby2600
     def [](address)
       address &= MASK_6507_ADDRESS
       if address[12] == 1
-        return @cart[address]
+        return @cart[address & 0x0FFF]
       elsif address[7] == 1
         return @riot[address & 0x7F]
       else
@@ -27,12 +27,12 @@ module Ruby2600
     end
 
     def []=(address, value)
-      return if address[12] == 1
-      address = address & MASK_6507_ADDRESS
-      if address[7] == 0
-        @tia[address & 0x3F] = value
-      else
+      if address[12] == 1
+        @cart[address & 0x0FFF] = value
+      elsif address[7] == 1
         @riot[address & 0x7F] = value
+      else
+        @tia[address & 0x3F] = value
       end
     end
   end
