@@ -28,14 +28,7 @@ module Ruby2600
         sync_cpu_with color_clock
         if color_clock >= WBLANK_WIDTH
           @pixel = color_clock - WBLANK_WIDTH
-          if vertical_blank?
-            @scanline[@pixel] = 0
-          else
-            if @reg[CTRLPF][1] == 1
-              pf_color = @reg[COLUP0 + @pixel / 80]
-            else
-              pf_color = @reg[COLUPF]
-            end
+          unless vertical_blank?
             @scanline[@pixel] = pf_bit.nonzero? ? pf_color : @reg[COLUBK]
           end
           pf_fetch
@@ -56,7 +49,7 @@ module Ruby2600
     def reset_beam
       reset_cpu_sync
       pf_reset
-      @scanline = Array.new(160)
+      @scanline = Array.new(160, 0)
     end
 
     # The 2600 hardware wiring ensures that we have three color clocks
@@ -108,6 +101,14 @@ module Ruby2600
       @pf_direction = -@pf_direction
       @pf_bit += @pf_direction
       @pf_reg += 1
+    end
+
+    def pf_color
+      @reg[score_mode? ? COLUP0 + @pixel / 80 : COLUPF]
+    end
+
+    def score_mode?
+      @reg[CTRLPF][1] == 1
     end
   end
 end
