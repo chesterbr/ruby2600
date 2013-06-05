@@ -33,7 +33,7 @@ describe Ruby2600::CPU do
       # Catch unexpected side effects
       randomize :a, :x, :y, :s, :n, :v, :i, :z, :c
 
-      # Examples wil refer to these values. Add, but don't change!
+      # Examples will refer to these values. Add, but don't change!
       cpu.memory = []
       cpu.memory[0x0001] = 0xFE
       cpu.memory[0x0002] = 0xFF

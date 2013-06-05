@@ -6,6 +6,10 @@ module Ruby2600
 
     WBLANK_WIDTH = 68
 
+    PLAYFIELD_ORDER = [[PF0, 4], [PF0, 5], [PF0, 6], [PF0, 7],
+                       [PF1, 7], [PF1, 6], [PF1, 5], [PF1, 4], [PF1, 3], [PF1, 2], [PF1, 1], [PF1, 0],
+                       [PF2, 0], [PF2, 1], [PF2, 2], [PF2, 3], [PF2, 4], [PF2, 5], [PF2, 6], [PF2, 7]]
+
     def initialize
       @reg = Array.new(32) { rand(256) }
       @cpu_credits = 0
@@ -29,9 +33,8 @@ module Ruby2600
         if color_clock >= WBLANK_WIDTH
           @pixel = color_clock - WBLANK_WIDTH
           unless vertical_blank?
-            @scanline[@pixel] = pf_bit.nonzero? ? pf_color : @reg[COLUBK]
+            @scanline[@pixel] = pf_bit_set? ? pf_color : @reg[COLUBK]
           end
-          pf_fetch
         end
       end
       @scanline
@@ -48,7 +51,6 @@ module Ruby2600
 
     def reset_beam
       reset_cpu_sync
-      pf_reset
       @scanline = Array.new(160, 0)
     end
 
@@ -79,28 +81,15 @@ module Ruby2600
 
     # Playfield
 
-    def pf_reset
-      @pf_reg = PF0
-      @pf_bit = 4
-      @pf_direction = 1
+    def pf_bit_set?
+      pf_pixel = (@pixel / 4) % 20
+      pf_pixel = 19 - pf_pixel if reflect_current_side?
+      register, bit = PLAYFIELD_ORDER[pf_pixel]
+      @reg[register][bit] == 1
     end
 
-    def pf_bit
-      @reg[@pf_reg][@pf_bit]
-    end
-
-    def pf_fetch
-      if @pixel % 80 % 4 == 3
-        @pf_bit += @pf_direction
-        pf_flip_direction_and_register if @pf_bit == 8 || @pf_bit == -1
-        pf_reset if @pf_reg > PF2
-      end
-    end
-
-    def pf_flip_direction_and_register
-      @pf_direction = -@pf_direction
-      @pf_bit += @pf_direction
-      @pf_reg += 1
+    def reflect_current_side?
+      @reg[CTRLPF][0] == 1 && @pixel > 79
     end
 
     def pf_color
@@ -110,6 +99,7 @@ module Ruby2600
     def score_mode?
       @reg[CTRLPF][1] == 1
     end
+
   end
 end
 
