@@ -19,7 +19,7 @@ module Ruby2600
       if address[12] == 1
         return @cart[address & 0x0FFF]
       elsif address[7] == 1
-        return @riot[address & 0x7F]
+        return @riot.ram[address & 0x7F]
       else
         return @tia[address & 0x3F]
       end
@@ -29,7 +29,7 @@ module Ruby2600
       if address[12] == 1
         @cart[address & 0x0FFF] = value
       elsif address[7] == 1
-        @riot[address & 0x7F] = value
+        @riot.ram[address & 0x7F] = value
       else
         @tia[address & 0x3F] = value
       end
