@@ -1,9 +1,65 @@
 module Ruby2600
   class RIOT
-    attr_accessor :ram
+    include Constants
 
     def initialize
       @ram = Array.new(128)
+      tim1t = 0
     end
+
+    def [](address)
+      case address
+      when 0x00..0x7F then @ram[address]
+      when INTIM      then @timer
+      when INSTAT     then read_timer_flags
+      end
+    end
+
+    def []=(address, value)
+      case address
+      when 0x00..0x7F then @ram[address] = value
+      when TIM1T      then initialize_timer(value, 1)
+      when TIM8T      then initialize_timer(value, 8)
+      end
+    end
+
+    def pulse
+      @cycle_count -= 1
+      if @cycle_count == 0
+        decrement_timer
+      end
+    end
+
+    private
+
+    def initialize_timer(value, resolution)
+      @timer_flags = 0
+      @timer = value
+      @resolution = resolution
+      decrement_timer
+    end
+
+    def decrement_timer
+      @timer -= 1
+      underflow if @timer < 0
+      reset_cycle_count
+    end
+
+    def underflow
+      @timer_flags = 0b11000000
+      @timer = 0xFF
+      @resolution = 1
+    end
+
+    def reset_cycle_count
+      @cycle_count = @resolution
+    end
+
+    def read_timer_flags
+      instat = @timer_flags
+      @timer_flags &= 0b10111111
+      instat
+    end
+
   end
 end
