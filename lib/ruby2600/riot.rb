@@ -4,7 +4,7 @@ module Ruby2600
 
     def initialize
       @ram = Array.new(128)
-      tim1t = 0
+      self[T1024T] = rand(256) # FIXME Stella says H.E.R.O. hangs if it is zero, check it out
     end
 
     def [](address)

@@ -4,6 +4,10 @@ describe Ruby2600::RIOT do
 
   subject(:riot) { Ruby2600::RIOT.new }
 
+  it 'should initialize on a working state' do
+    expect { riot.pulse }.to_not raise_error
+  end
+
   describe '#ram' do
     it 'should have lower 128 bytes available for reading/writing' do
       0.upto(127).each do |position|
