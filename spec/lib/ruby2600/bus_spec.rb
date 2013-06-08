@@ -16,9 +16,9 @@ describe Ruby2600::Bus do
 
   ALL_ADDRESSES      = (0x0000..0xFFFF).to_a
   CART_ADDRESSES     = ALL_ADDRESSES.select { |a| a[12] == 1 }
-  TIA_ADDRESSES      = ALL_ADDRESSES.select { |a| a[12] == 0 && a[7] == 0 }
-  RIOT_RAM_ADDRESSES = ALL_ADDRESSES.select { |a| a[12] == 0 && a[7] == 1 && a[9] == 1 }
-  RIOT_IOT_ADDRESSES = ALL_ADDRESSES.select { |a| a[12] == 0 && a[7] == 1 && a[9] == 0 }
+  TIA_ADDRESSES      = ALL_ADDRESSES.select { |a| a[12] == 0 &&              a[7] == 0 }
+  RIOT_IOT_ADDRESSES = ALL_ADDRESSES.select { |a| a[12] == 0 && a[9] == 1 && a[7] == 1 }
+  RIOT_RAM_ADDRESSES = ALL_ADDRESSES.select { |a| a[12] == 0 && a[9] == 0 && a[7] == 1 }
 
   context 'initialization' do
     it 'should wire itself as a memory proxy for CPU' do
@@ -46,8 +46,8 @@ describe Ruby2600::Bus do
     # too long. Instead, we'll use arrays as chip stubs.
 
     let(:cart) { Array.new(4096) { rand(256) } }
-    let(:tia)  { Array.new(64)   { rand(256) } }
-    let(:riot) { mock('riot', :ram => Array.new(64) { rand(256) }) }
+    let(:tia)  { Array.new(32)   { rand(256) } }
+    let(:riot) { Array.new(768)  { rand(256) } }
 
     before { tia.stub(:cpu=) }
 
@@ -59,9 +59,15 @@ describe Ruby2600::Bus do
         end
       end
 
-      it 'translates RAM mirror reads to RIOT RAM 00-7F (128 bytes)' do
+      it 'translates RAM mirror reads to RIOT $00-$7F' do
         RIOT_RAM_ADDRESSES.each do |a|
-          bus[a].should == riot.ram[a & 0b0000000001111111]
+          bus[a].should == riot[a & 0b0000000001111111]
+        end
+      end
+
+      it 'translates I/O and timer mirror reads to RIOT $0280-$02FF' do
+        RIOT_IOT_ADDRESSES.each do |a|
+          bus[a].should == riot[a & 0b0000001011111111]
         end
       end
 
@@ -82,12 +88,21 @@ describe Ruby2600::Bus do
         end
       end
 
-      it 'translates RAM mirror writes to RIOT RAM 00-7F (128 bytes)' do
+      it 'translates RAM mirror writes to RIOT $00-$FF' do
         RIOT_RAM_ADDRESSES.each do |a|
           value = rand(256)
           bus[a] = value
 
-          riot.ram[a & 0b0000000001111111].should == value
+          riot[a & 0b0000000001111111].should == value
+        end
+      end
+
+      it 'translates I/O and timer mirror writes to RIOT $0280-$02FF' do
+        RIOT_IOT_ADDRESSES.each do |a|
+          value = rand(256)
+          bus[a] = value
+
+          riot[a & 0b0000001011111111].should == value
         end
       end
 
