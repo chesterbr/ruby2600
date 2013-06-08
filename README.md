@@ -14,7 +14,9 @@ Speed and sound are lowest-priority goals ([Stella](http://stella.sourceforge.ne
 
 ## Current status
 
-Right now several games display their initial screen playfields (still blue-ish). Tested: Pitfall!, Oink!, Adventure, Berzerk (initial screen animation works also), Pac-Man, Donkey Kong.
+Right now several games display their initial screen playfields (still with weird colors, most likely because Color/BW switch was not implemented yet).
+
+Tested: Pitfall!, Oink!, Adventure, Berzerk (initial screen animation works also), Pac-Man, Donkey Kong. Any non-crazy 4K cart should display something by now.
 
 - Full 650x instruction set emulation, [cloc](http://cloc.sourceforge.net/)-ing around 350 lines of code. (hardware interrupts not emulated, as the 2600 does not have them)
 - TIA emulation covers basic VSYNC/VBLANK, playfield registers and CPU sync (including WSYNC), being able to generate an entire scanline or even a full frame (in Atari colors)
