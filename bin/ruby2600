@@ -54,7 +54,7 @@ class GameWindow < Gosu::Window
       frame.each_index do |y|
         frame[y].each_index do |x|
           # FIXME do some color translation; ignore invisible top/bottom
-          pixel x, y, :color => 0xFF000000 + frame[y][x]
+          pixel x, y, :color => 0xFF000000 + frame[y][x]*50
         end
       end
     end
