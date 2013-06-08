@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Ruby2600::Bus do
 
   let(:cpu)  { double('cpu', :memory= => nil, :reset => nil) }
-  let(:tia)  { double('tia', :cpu= => nil) }
+  let(:tia)  { double('tia', :cpu= => nil, :riot= => nil) }
   let(:cart) { double('cart') }
   let(:riot) { double('riot') }
 
@@ -31,6 +31,12 @@ describe Ruby2600::Bus do
       bus
     end
 
+    it 'should wire TIA to RIOT (so it can drive the timers)' do
+      tia.should_receive(:riot=).with(riot)
+
+      bus
+    end
+
     it 'should reset CPU' do
       cpu.should_receive(:reset)
 
@@ -49,7 +55,10 @@ describe Ruby2600::Bus do
     let(:tia)  { Array.new(32)   { rand(256) } }
     let(:riot) { Array.new(768)  { rand(256) } }
 
-    before { tia.stub(:cpu=) }
+    before do
+      tia.stub :cpu=
+      tia.stub :riot=
+    end
 
     describe '#read' do
       # FIXME there is a finer-grained mirroring for read, see http://nocash.emubase.de/2k6specs.htm#memorymirrors

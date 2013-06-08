@@ -10,6 +10,7 @@ module Ruby2600
 
       @cpu.memory = self
       @tia.cpu = cpu
+      @tia.riot = riot
       cpu.reset
     end
 
