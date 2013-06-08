@@ -6,6 +6,7 @@ describe Ruby2600::TIA do
   subject(:tia) do
     tia = Ruby2600::TIA.new
     tia.cpu = mock('cpu', :step => 2)
+    tia.riot = mock('riot', :pulse => nil)
     tia
   end
 
@@ -31,7 +32,7 @@ describe Ruby2600::TIA do
   describe '#scanline' do
     before { clear_tia_registers }
 
-    context 'CPU-TIA integration' do
+    context 'TIA-CPU integration' do
       it 'should spend 76 CPU cycles generating a scanline' do
         tia.cpu.stub(:step).and_return(2)
         tia.cpu.should_receive(:step).exactly(76 / 2).times
@@ -56,6 +57,15 @@ describe Ruby2600::TIA do
 
         tia.scanline
         tia.scanline
+        tia.scanline
+      end
+    end
+
+    context 'TIA-RIOT integtation' do
+      it 'should pulse RIOT 76 times while generating a scanline, regardless of CPU timing' do
+        tia.cpu.stub(:step) { rand(5) + 2 }
+        tia.riot.should_receive(:pulse).exactly(76).times
+
         tia.scanline
       end
     end
