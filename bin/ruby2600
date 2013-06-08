@@ -8,6 +8,138 @@ require 'ruby2600'
 # which would enable different outputs (including fun stuff like
 # outputing to a text screen, a la Text Mode Quake II)
 
+
+NTSC_COLOR_LUM_TO_SRGB = [
+  0xFF000000,
+  0xFF404040,
+  0xFF6C6C6C,
+  0xFF909090,
+  0xFFB0B0B0,
+  0xFFC8C8C8,
+  0xFFDCDCDC,
+  0xFFECECEC,
+  0xFF444400,
+  0xFF646410,
+  0xFF848424,
+  0xFFA0A034,
+  0xFFB8B840,
+  0xFFD0D050,
+  0xFFE8E85C,
+  0xFFFCFC68,
+  0xFF702800,
+  0xFF844414,
+  0xFF985C28,
+  0xFFAC783C,
+  0xFFBC8C4C,
+  0xFFCCA05C,
+  0xFFDCB468,
+  0xFFECC878,
+  0xFF841800,
+  0xFF983418,
+  0xFFAC5030,
+  0xFFC06848,
+  0xFFD0805C,
+  0xFFE09470,
+  0xFFECA880,
+  0xFFFCBC94,
+  0xFF880000,
+  0xFF9C2020,
+  0xFFB03C3C,
+  0xFFC05858,
+  0xFFD07070,
+  0xFFE08888,
+  0xFFECA0A0,
+  0xFFFCB4B4,
+  0xFF78005C,
+  0xFF8C2074,
+  0xFFA03C88,
+  0xFFB0589C,
+  0xFFC070B0,
+  0xFFD084C0,
+  0xFFDC9CD0,
+  0xFFECB0E0,
+  0xFF480078,
+  0xFF602090,
+  0xFF783CA4,
+  0xFF8C58B8,
+  0xFFA070CC,
+  0xFFB484DC,
+  0xFFC49CEC,
+  0xFFD4B0FC,
+  0xFF140084,
+  0xFF302098,
+  0xFF4C3CAC,
+  0xFF6858C0,
+  0xFF7C70D0,
+  0xFF9488E0,
+  0xFFA8A0EC,
+  0xFFBCB4FC,
+  0xFF000088,
+  0xFF1C209C,
+  0xFF3840B0,
+  0xFF505CC0,
+  0xFF6874D0,
+  0xFF7C8CE0,
+  0xFF90A4EC,
+  0xFFA4B8FC,
+  0xFF00187C,
+  0xFF1C3890,
+  0xFF3854A8,
+  0xFF5070BC,
+  0xFF6888CC,
+  0xFF7C9CDC,
+  0xFF90B4EC,
+  0xFFA4C8FC,
+  0xFF002C5C,
+  0xFF1C4C78,
+  0xFF386890,
+  0xFF5084AC,
+  0xFF689CC0,
+  0xFF7CB4D4,
+  0xFF90CCE8,
+  0xFFA4E0FC,
+  0xFF003C2C,
+  0xFF1C5C48,
+  0xFF387C64,
+  0xFF509C80,
+  0xFF68B494,
+  0xFF7CD0AC,
+  0xFF90E4C0,
+  0xFFA4FCD4,
+  0xFF003C00,
+  0xFF205C20,
+  0xFF407C40,
+  0xFF5C9C5C,
+  0xFF74B474,
+  0xFF8CD08C,
+  0xFFA4E4A4,
+  0xFFB8FCB8,
+  0xFF143800,
+  0xFF345C1C,
+  0xFF507C38,
+  0xFF6C9850,
+  0xFF84B468,
+  0xFF9CCC7C,
+  0xFFB4E490,
+  0xFFC8FCA4,
+  0xFF2C3000,
+  0xFF4C501C,
+  0xFF687034,
+  0xFF848C4C,
+  0xFF9CA864,
+  0xFFB4C078,
+  0xFFCCD488,
+  0xFFE0EC9C,
+  0xFF442800,
+  0xFF644818,
+  0xFF846830,
+  0xFFA08444,
+  0xFFB89C58,
+  0xFFD0B46C,
+  0xFFE8CC7C,
+  0xFFFCE08C
+]
+
 # http://www.libgosu.org/cgi-bin/mwf/topic_show.pl?tid=196
 # EmptyImageStub is based on an idea Julian Raschke suggested in #gosu
 # on IRC. It provides empty RMagic::Image-like objects which, when
@@ -53,15 +185,15 @@ class GameWindow < Gosu::Window
     @canvas.paint do
       frame.each_index do |y|
         frame[y].each_index do |x|
-          # FIXME do some color translation; ignore invisible top/bottom
-          pixel x, y, :color => 0xFF000000 + frame[y][x]*50
+          # FIXME ignore invisible top/bottom
+          pixel x, y, :color => NTSC_COLOR_LUM_TO_SRGB[frame[y][x]*2]
         end
       end
     end
   end
 
   def draw
-    @canvas.draw(0, 0, 0)
+    @canvas.draw(0, 0, 0, 4, 2)
   end
 end
 
