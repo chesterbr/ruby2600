@@ -66,5 +66,18 @@ module Ruby2600
     INPT3  = 0x3B
     INPT4  = 0x3C
     INPT5  = 0x3D
+
+    # RIOT
+
+    SWCHA   = 0x0280
+    SWACNT  = 0x0281
+    SWCHB   = 0x0282
+    SWBCNT  = 0x0283
+    INTIM   = 0x0284
+    INSTAT  = 0x0285
+    TIM1T   = 0x0294
+    TIM8T   = 0x0295
+    TIM64T  = 0x0296
+    T1024T  = 0x0297
   end
 end
