@@ -18,6 +18,10 @@ Right now several games display their initial screen playfields (still with weir
 
 Tested: Pitfall!, Oink!, Adventure, Berzerk (initial screen animation works also), Pac-Man, Donkey Kong. Any non-crazy 4K cart should display something by now.
 
+![alt text](http://i.imgur.com/XPk1ehJ.jpg "Pitfall! on Stella x Ruby2600")
+
+### Details
+
 - Full 650x instruction set emulation, [cloc](http://cloc.sourceforge.net/)-ing around 350 lines of code. (hardware interrupts not emulated, as the 2600 does not have them)
 - TIA emulation covers basic VSYNC/VBLANK, playfield registers and CPU sync (including WSYNC), being able to generate an entire scanline or even a full frame (in Atari colors)
 - RIOT RAM and timers implemented
