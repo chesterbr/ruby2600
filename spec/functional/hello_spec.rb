@@ -5,7 +5,8 @@ describe 'hello world with CPU, TIA, Cart and Bus' do
   let(:cart) { Ruby2600::Cart.new(path_for_ROM :hello) }
   let(:tia)  { Ruby2600::TIA.new }
   let(:cpu)  { Ruby2600::CPU.new }
-  let!(:bus) { Ruby2600::Bus.new(cpu, tia, cart, nil) }
+  let(:riot) { Ruby2600::RIOT.new }
+  let!(:bus) { Ruby2600::Bus.new(cpu, tia, cart, riot) }
 
   before do
     2.times { tia.frame } # discard the first few, most likely won't sync right
