@@ -74,8 +74,6 @@ shared_examples_for 'a timer with clock interval' do |interval|
       riot[INSTAT][7].should == 1
     end
 
-    it '"However, the interval is automatically re-actived when reading from the INTIM register, ie. the timer does then continue to decrement at interval speed (originated at the current value)."' do
-      fail
-    end
+    it '"However, the interval is automatically re-actived when reading from the INTIM register, ie. the timer does then continue to decrement at interval speed (originated at the current value)."'
   end
 end
