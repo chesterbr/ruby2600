@@ -15,11 +15,10 @@ describe Ruby2600::RIOT do
   end
 
   describe '#pulse' do
-    context '1 clock interval' do
-      before { riot[TIM1T] = rand(255) + 1 }
-      it 'should reduce current value (INTIM) by one' do
-        expect{ riot.pulse }.to change{ riot[INTIM] }.by -1
-      end
+    context '1-clock timer' do
+      let(:timer_register) { TIM1T }
+
+      it_should_behave_like 'a timer with clock interval', 1
     end
 
     context '8-clock timer' do
