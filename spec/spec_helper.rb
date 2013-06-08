@@ -5,6 +5,7 @@ require 'timeout'
 require 'ruby2600'
 require 'support/shared_examples_for_bus.rb'
 require 'support/shared_examples_for_cpu.rb'
+require 'support/shared_examples_for_riot.rb'
 
 include Ruby2600::Constants
 

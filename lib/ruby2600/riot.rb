@@ -20,6 +20,8 @@ module Ruby2600
       when 0x00..0x7F then @ram[address] = value
       when TIM1T      then initialize_timer(value, 1)
       when TIM8T      then initialize_timer(value, 8)
+      when TIM64T     then initialize_timer(value, 64)
+      when T1024T     then initialize_timer(value, 1024)
       end
     end
 
