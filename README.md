@@ -14,11 +14,14 @@ Speed and sound are lowest-priority goals ([Stella](http://stella.sourceforge.ne
 
 ## Current status
 
-Right now several games display their initial screen playfields (still with weird colors, most likely because Color/BW switch was not implemented yet).
+Right now several games display their initial screen playfields, with right colors!
 
 Tested: Pitfall!, Oink!, Adventure, Berzerk (initial screen animation works also), Pac-Man, Donkey Kong. Any non-crazy 4K cart should display something by now.
 
-![alt text](http://i.imgur.com/XPk1ehJ.jpg "Pitfall! on Stella x Ruby2600")
+![alt text](http://i.imgur.com/9t8D7EV.jpg "Pitfall! on Stella x Ruby2600")
+
+The blurry visual is due to Gosu bitmap stetch - easy to fix, but it reminds me so much of how TVs got Atari RF that I decided to keep it that way for now.
+
 
 ### Details
 
