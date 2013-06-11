@@ -186,7 +186,7 @@ class GameWindow < Gosu::Window
       frame.each_index do |y|
         frame[y].each_index do |x|
           # FIXME ignore invisible top/bottom
-          pixel x, y, :color => NTSC_COLOR_LUM_TO_SRGB[frame[y][x]*2]
+          pixel x, y, :color => NTSC_COLOR_LUM_TO_SRGB[frame[y][x] / 2]
         end
       end
     end
