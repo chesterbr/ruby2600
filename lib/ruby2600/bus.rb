@@ -44,7 +44,7 @@ module Ruby2600
       end
     end
 
-    def color_switch=(value)
+    def color_bw_switch=(value)
       @riot.portB = value ? 0b00001000 : 0
     end
 
