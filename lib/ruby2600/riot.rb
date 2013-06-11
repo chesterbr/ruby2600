@@ -5,6 +5,7 @@ module Ruby2600
     def initialize
       @ram = Array.new(128)
       self[T1024T] = rand(256) # FIXME Stella says H.E.R.O. hangs if it is zero, check it out
+      @portA = @portB = @swcha = @swchb = @swacnt = @swbcnt = 0
     end
 
     def [](address)
