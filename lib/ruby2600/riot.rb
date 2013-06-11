@@ -12,6 +12,8 @@ module Ruby2600
       when 0x00..0x7F then @ram[address]
       when INTIM      then @timer
       when INSTAT     then read_timer_flags
+      when SWCHA      then (@swcha & @swacnt) | (@portA & (@swacnt ^ 0xFF))
+      when SWCHB      then (@swchb & @swbcnt) | (@portB & (@swbcnt ^ 0xFF))
       end
     end
 
@@ -22,6 +24,10 @@ module Ruby2600
       when TIM8T      then initialize_timer(value, 8)
       when TIM64T     then initialize_timer(value, 64)
       when T1024T     then initialize_timer(value, 1024)
+      when SWCHA      then @swcha  = value
+      when SWACNT     then @swacnt = value
+      when SWCHB      then @swchb  = value
+      when SWBCNT     then @swbcnt = value
       end
     end
 
@@ -30,6 +36,14 @@ module Ruby2600
       if @cycle_count == 0
         decrement_timer
       end
+    end
+
+    def portA=(value)
+      @portA = value
+    end
+
+    def portB=(value)
+      @portB = value
     end
 
     private
