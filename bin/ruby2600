@@ -178,6 +178,7 @@ class GameWindow < Gosu::Window
                              Ruby2600::TIA.new,
                              Ruby2600::Cart.new(filename),
                              Ruby2600::RIOT.new)
+    @bus.color_bw_switch = true
   end
 
   def update
