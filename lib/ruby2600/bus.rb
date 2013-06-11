@@ -43,5 +43,10 @@ module Ruby2600
         @tia[address & 0x3F] = value
       end
     end
+
+    def color_switch=(value)
+      @riot.portB = value ? 0b00001000 : 0
+    end
+
   end
 end

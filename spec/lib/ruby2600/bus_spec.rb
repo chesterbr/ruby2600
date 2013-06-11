@@ -44,6 +44,26 @@ describe Ruby2600::Bus do
     end
   end
 
+  context 'console switches' do
+    before do
+      riot.stub(:portB=)
+      # FIXME add other "zero" states here
+      bus.color_switch = false
+    end
+
+    it 'should update RIOT with right value when color switch is set to COLOR' do
+      riot.should_receive(:portB=).with(0b00001000)
+
+      bus.color_switch = true
+    end
+
+    it 'should update RIOT with right value when color switch is set to B/W' do
+      riot.should_receive(:portB=).with(0b00000000)
+
+      bus.color_switch = false
+    end
+  end
+
 
   context 'CPU read/write' do
 
