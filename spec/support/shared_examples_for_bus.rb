@@ -21,3 +21,19 @@
     end
   end
 end
+
+shared_examples_for 'set bits on RIOT after switch is set/pressed' do |bits, switch|
+  it 'should update portB' do
+    riot.should_receive(:portB=).with(bits)
+
+    bus.send "#{switch}_switch=", true
+  end
+end
+
+shared_examples_for 'set bits on RIOT after switch is reset/released' do |bits, switch|
+  it 'should update portB' do
+    riot.should_receive(:portB=).with(bits)
+
+    bus.send "#{switch}_switch=", false
+  end
+end

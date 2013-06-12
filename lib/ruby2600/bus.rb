@@ -11,6 +11,9 @@ module Ruby2600
       @cpu.memory = self
       @tia.cpu = cpu
       @tia.riot = riot
+
+      @switch_bits = 0
+
       cpu.reset
     end
 
@@ -44,8 +47,35 @@ module Ruby2600
       end
     end
 
+    def reset_switch=(value)
+      update_switch_bit 0, value
+    end
+
+    def select_switch=(value)
+      update_switch_bit 1, value
+    end
+
     def color_bw_switch=(value)
-      @riot.portB = value ? 0b00001000 : 0
+      update_switch_bit 3, value
+    end
+
+    def p0_difficulty_switch=(value)
+      update_switch_bit 6, value
+    end
+
+    def p1_difficulty_switch=(value)
+      update_switch_bit 7, value
+    end
+
+    private
+
+    def update_switch_bit(n, value)
+      if value
+        @switch_bits |= 2 ** n
+      else
+        @switch_bits &= 0xFF - (2 ** n)
+      end
+      @riot.portB = @switch_bits
     end
 
   end

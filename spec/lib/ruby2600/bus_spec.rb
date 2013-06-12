@@ -47,20 +47,58 @@ describe Ruby2600::Bus do
   context 'console switches' do
     before do
       riot.stub(:portB=)
-      # FIXME add other "zero" states here
-      bus.color_bw_switch = false
+      bus.color_bw_switch      = false
+      bus.reset_switch         = false
+      bus.select_switch        = false
+      bus.p0_difficulty_switch = false
+      bus.p1_difficulty_switch = false
     end
 
-    it 'should update RIOT with right value when color switch is set to COLOR' do
-      riot.should_receive(:portB=).with(0b00001000)
+    context 'single-switch press/release' do
+      it_should 'set bits on RIOT after switch is set/pressed',    0b00000001, :reset
 
-      bus.color_bw_switch = true
+      it_should 'set bits on RIOT after switch is set/pressed',    0b00000010, :select
+
+      it_should 'set bits on RIOT after switch is set/pressed',    0b00001000, :color_bw
+
+      it_should 'set bits on RIOT after switch is set/pressed',    0b01000000, :p0_difficulty
+
+      it_should 'set bits on RIOT after switch is set/pressed',    0b10000000, :p1_difficulty
+
+      it_should 'set bits on RIOT after switch is reset/released', 0b00000000, :reset
+
+      it_should 'set bits on RIOT after switch is reset/released', 0b00000000, :select
+
+      it_should 'set bits on RIOT after switch is reset/released', 0b00000000, :color_bw
+
+      it_should 'set bits on RIOT after switch is reset/released', 0b00000000, :p0_difficulty
+
+      it_should 'set bits on RIOT after switch is reset/released', 0b00000000, :p1_difficulty
     end
 
-    it 'should update RIOT with right value when color switch is set to B/W' do
-      riot.should_receive(:portB=).with(0b00000000)
+    context 'multiple switches' do
+      context 'select is pressed with P1 difficulty set (A)' do
+        before { bus.p1_difficulty_switch = true }
 
-      bus.color_bw_switch = false
+        it_should 'set bits on RIOT after switch is set/pressed', 0b10000010, :select
+      end
+
+      context 'select is released with P1 difficulty set (A)' do
+        before { bus.p1_difficulty_switch = true }
+
+        it_should 'set bits on RIOT after switch is reset/released', 0b10000000, :select
+      end
+
+      context 'reset pressed with all switches pressed/set' do
+        before do
+          bus.select_switch = true
+          bus.color_bw_switch = true
+          bus.p0_difficulty_switch = true
+          bus.p1_difficulty_switch = true
+        end
+
+        it_should 'set bits on RIOT after switch is set/pressed', 0b11001011, :reset
+      end
     end
   end
 
