@@ -196,6 +196,41 @@ class GameWindow < Gosu::Window
   def draw
     @canvas.draw(0, 0, 0, 4, 2)
   end
+
+  def button_down(id)
+    case id
+    when Gosu::Kb1
+      @bus.select_switch = true
+    when Gosu::Kb2
+      @bus.reset_switch = true
+    end
+  end
+
+  def button_up(id)
+    case id
+    when Gosu::Kb1
+      @bus.select_switch = false
+    when Gosu::Kb2
+      @bus.reset_switch = false
+    when Gosu::Kb3
+      @bus.color_bw_switch = true
+    when Gosu::Kb4
+      @bus.color_bw_switch = false
+    when Gosu::Kb5
+      @bus.p0_difficulty_switch = true
+    when Gosu::Kb6
+      @bus.p0_difficulty_switch = false
+    when Gosu::Kb7
+      @bus.p1_difficulty_switch = true
+    when Gosu::Kb8
+      @bus.p1_difficulty_switch = false
+    end
+  end
+
+  private
+
+  def button_toggle(id, state)
+  end
 end
 
 window = GameWindow.new

@@ -22,6 +22,8 @@ Tested: Pitfall!, Oink!, Adventure, Berzerk (initial screen animation works also
 
 The blurry visual is due to Gosu bitmap stetch - easy to fix, but it reminds me so much of how TVs got Atari RF that I decided to keep it that way for now.
 
+Console switches are mapped inspired on the [Stella Keys Layout](http://stella.sourceforge.net/docs/#Keyboard), but using (laptop-friendly) Mac keys instead of function keys. Right now select (1) and Reset (2) need to be held for about a second, so they can be picked up by the slow frame generator, the others are picked up naturally.
+
 
 ### Details
 
@@ -29,7 +31,7 @@ The blurry visual is due to Gosu bitmap stetch - easy to fix, but it reminds me 
 - TIA emulation covers basic VSYNC/VBLANK, playfield registers and CPU sync (including WSYNC), being able to generate an entire scanline or even a full frame (in Atari colors)
 - RIOT RAM and timers implemented
 - Every single aspect of the emulated code is spec-ed.
-- Rudimentary [Gosu](http://www.libgosu.org/)-based command-line interface allows running a [Hello World ROM](http://pastebin.com/abBRfUjd), which is also included on a functional test.
+- Rudimentary [Gosu](http://www.libgosu.org/)-based command-line interface allows playfield-booting some games.
 
 ## Installation
 
