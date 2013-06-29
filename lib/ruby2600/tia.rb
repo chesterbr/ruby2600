@@ -4,7 +4,11 @@ module Ruby2600
 
     include Constants
 
-    WBLANK_WIDTH = 68
+    # A scanline "lasts" 228 "color clocks" (CLKs), of which 68
+    # are the initial blank period, and each of the remai
+
+    HORIZONTAL_BLANK_CLK_COUNT = 68
+    TOTAL_SCANLINE_CLK_COUNT = 228
 
     PLAYFIELD_ORDER = [[PF0, 4], [PF0, 5], [PF0, 6], [PF0, 7],
                        [PF1, 7], [PF1, 6], [PF1, 5], [PF1, 4], [PF1, 3], [PF1, 2], [PF1, 1], [PF1, 0],
@@ -23,21 +27,10 @@ module Ruby2600
       @reg[position] = value
     end
 
-    # A scanline "lasts" 228 "color clocks", of which 68 (WBLANK_WIDTH) are
-    # the initial blank period, and each of the remaining 160 is a pixel
-
     def scanline
-      reset_beam
-      0.upto 227 do |color_clock|
-        sync_cpu_with color_clock
-        if color_clock >= WBLANK_WIDTH
-          @pixel = color_clock - WBLANK_WIDTH
-          unless vertical_blank?
-            @scanline[@pixel] = pf_bit_set? ? pf_color : @reg[COLUBK]
-          end
-        end
-      end
-      @scanline
+      intialize_scanline
+      wait_horizontal_blank
+      draw_scanline
     end
 
     def frame
@@ -49,9 +42,25 @@ module Ruby2600
 
     private
 
-    def reset_beam
+    def intialize_scanline
       reset_cpu_sync
       @scanline = Array.new(160, 0)
+    end
+
+    def wait_horizontal_blank
+      HORIZONTAL_BLANK_CLK_COUNT.times { |color_clock| sync_cpu_with color_clock }
+    end
+
+    def draw_scanline
+      HORIZONTAL_BLANK_CLK_COUNT.upto TOTAL_SCANLINE_CLK_COUNT - 1 do |color_clock|
+        sync_cpu_with color_clock
+        @pixel = color_clock - HORIZONTAL_BLANK_CLK_COUNT
+        unless vertical_blank?
+          #@scanline[@pixel] = pf_color if @pixel == @ball_pixel
+          @scanline[@pixel] = pf_pixel || bg_pixel
+        end
+      end
+      @scanline
     end
 
     # The 2600 hardware wiring ensures that we have three color clocks
@@ -80,7 +89,21 @@ module Ruby2600
       @reg[VSYNC] & 0b00000010 != 0
     end
 
+    # Background
+
+    def bg_pixel
+      @reg[COLUBK]
+    end
+
     # Playfield
+
+    def pf_pixel
+      pf_color if pf_bit_set?
+    end
+
+    def pf_color
+      @reg[score_mode? ? COLUP0 + @pixel / 80 : COLUPF]
+    end
 
     def pf_bit_set?
       pf_pixel = (@pixel / 4) % 20
@@ -91,10 +114,6 @@ module Ruby2600
 
     def reflect_current_side?
       @reg[CTRLPF][0] == 1 && @pixel > 79
-    end
-
-    def pf_color
-      @reg[score_mode? ? COLUP0 + @pixel / 80 : COLUPF]
     end
 
     def score_mode?
