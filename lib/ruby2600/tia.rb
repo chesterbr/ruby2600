@@ -10,6 +10,8 @@ module Ruby2600
     HORIZONTAL_BLANK_CLK_COUNT = 68
     TOTAL_SCANLINE_CLK_COUNT = 228
 
+    # Maps which register/bit should be set for each playfield pixel
+
     PLAYFIELD_ORDER = [[PF0, 4], [PF0, 5], [PF0, 6], [PF0, 7],
                        [PF1, 7], [PF1, 6], [PF1, 5], [PF1, 4], [PF1, 3], [PF1, 2], [PF1, 1], [PF1, 0],
                        [PF2, 0], [PF2, 1], [PF2, 2], [PF2, 3], [PF2, 4], [PF2, 5], [PF2, 6], [PF2, 7]]
@@ -17,6 +19,7 @@ module Ruby2600
     def initialize
       @reg = Array.new(32) { rand(256) }
       @cpu_credits = 0
+      @bl_counter = TIACounter.new
     end
 
     def [](position)
@@ -24,7 +27,12 @@ module Ruby2600
     end
 
     def []=(position, value)
-      @reg[position] = value
+      case position
+      when RESBL
+        @bl_counter.reset
+      else
+        @reg[position] = value
+      end
     end
 
     def scanline
@@ -45,6 +53,7 @@ module Ruby2600
     def intialize_scanline
       reset_cpu_sync
       @scanline = Array.new(160, 0)
+      @pixel = 0
     end
 
     def wait_horizontal_blank
@@ -54,11 +63,11 @@ module Ruby2600
     def draw_scanline
       HORIZONTAL_BLANK_CLK_COUNT.upto TOTAL_SCANLINE_CLK_COUNT - 1 do |color_clock|
         sync_cpu_with color_clock
-        @pixel = color_clock - HORIZONTAL_BLANK_CLK_COUNT
         unless vertical_blank?
-          #@scanline[@pixel] = pf_color if @pixel == @ball_pixel
-          @scanline[@pixel] = pf_pixel || bg_pixel
+          @scanline[@pixel] = bl_pixel || pf_pixel || bg_pixel
         end
+        @pixel += 1
+        @bl_counter.tick
       end
       @scanline
     end
@@ -118,6 +127,12 @@ module Ruby2600
 
     def score_mode?
       @reg[CTRLPF][1] == 1
+    end
+
+    # Ball
+
+    def bl_pixel
+      @reg[COLUPF] if @reg[ENABL][1]==1 && @bl_counter.value == 0
     end
 
   end
