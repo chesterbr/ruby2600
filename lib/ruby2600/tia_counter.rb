@@ -21,8 +21,14 @@ module Ruby2600
     end
 
     def tick
+      old_value = value
       @internal_value += 1
       @internal_value = 0 if @internal_value == 160
+      @on_change.call(value) if @on_change && value != old_value
+    end
+
+    def on_change(&block)
+      @on_change = block
     end
   end
 end
