@@ -20,6 +20,8 @@ module Ruby2600
       @reg = Array.new(32) { rand(256) }
       @cpu_credits = 0
       @bl_counter = TIACounter.new
+      @bl_counter.on_change { |value| bl_counter_increased(value) }
+      @bl_pixels_to_draw = 0
     end
 
     def [](position)
@@ -132,9 +134,24 @@ module Ruby2600
     # Ball
 
     def bl_pixel
-      @reg[COLUPF] if @reg[ENABL][1]==1 && @bl_counter.value == 0
+      return nil unless @reg[ENABL][1]==1 && @bl_pixels_to_draw > 0
+      @bl_pixels_to_draw -= 1
+      @reg[COLUPF]
     end
 
+    def bl_size
+      2 ** (2 * @reg[CTRLPF][5] + @reg[CTRLPF][4])
+    end
+
+    def bl_counter_increased(value)
+      if value == 0
+        @bl_pixels_to_draw = [bl_size, 4].min
+      elsif value == 1 && bl_size == 8
+        @bl_pixels_to_draw = 4
+      else
+        @bl_pixels_to_draw = 0
+      end
+    end
   end
 end
 

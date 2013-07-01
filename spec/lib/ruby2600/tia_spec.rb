@@ -215,14 +215,14 @@ describe Ruby2600::TIA do
         context 'set on an arbitrary position' do
           before do
             tia.cpu.stub(:step) do
-              write_register_after_cycles RESBL, 40
+              write_register_after_cycles RESBL, 28
             end
             tia.scanline
           end
 
           it 'should position ball on the appropriate position of the following scanline' do
             expected = Array.new(160, 0x00)
-            expected[60] = 0xC0
+            expected[15] = 0xC0
 
             tia.scanline.should == expected
           end
