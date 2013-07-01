@@ -186,14 +186,10 @@ describe Ruby2600::TIA do
       before { tia[COLUPF] = 0xC0 }
 
       def write_register_after_cycles(register, cpu_cycles)
-        @delay_counter ||= 0
-        @delay_counter += 1 unless @delay_counter = :disabled
-
-        if @delay_counter != :disabled && @delay_counter > cpu_cycles
-          tia[register] = rand(256)
-          @delay_counter = :disabled
+        if @delay_counter.to_i <= cpu_cycles
+          @delay_counter = @delay_counter.to_i + 1
+          tia[register] = rand(256) if @delay_counter > cpu_cycles
         end
-
         1
       end
 
@@ -218,20 +214,17 @@ describe Ruby2600::TIA do
 
         context 'set on an arbitrary position' do
           before do
+            tia.cpu.stub(:step) do
+              write_register_after_cycles RESBL, 40
+            end
             tia.scanline
-            tia.cpu.stub(:step) { write_register_after_cycles RESBL, 0 }
           end
 
           it 'should position ball on the appropriate position of the following scanline' do
             expected = Array.new(160, 0x00)
             expected[60] = 0xC0
 
-            tia.scanline
             tia.scanline.should == expected
-          end
-
-          it 'should not affect the current scanline' do
-            tia.scanline.should == Array.new(160, 0x00)
           end
         end
       end
