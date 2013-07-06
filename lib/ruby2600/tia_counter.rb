@@ -33,6 +33,10 @@ module Ruby2600
       @on_change.call(value) if @on_change && value != old_value
     end
 
+    def move(tia_motion_value)
+      internal_value_add nibble_to_decimal(tia_motion_value)
+    end
+
     def on_change(&block)
       @on_change = block
     end
@@ -50,7 +54,6 @@ module Ruby2600
       signal   = signed_nibble[3] * 2 - 1
       absolute * signal
     end
->>>>>>> 663edfa... Removing magic numbers
   end
 end
 

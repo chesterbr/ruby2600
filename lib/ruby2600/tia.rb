@@ -32,6 +32,8 @@ module Ruby2600
       case position
       when RESBL
         @bl_counter.reset
+      when HMOVE
+        @bl_counter.move @reg[HMBL]
       else
         @reg[position] = value
       end
