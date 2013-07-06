@@ -49,10 +49,8 @@ module Ruby2600
       @internal_value += 160 while @internal_value < 0
     end
 
-    def nibble_to_decimal(signed_nibble)
-      absolute = signed_nibble & 0b0111
-      signal   = signed_nibble[3] * 2 - 1
-      absolute * signal
+    def nibble_to_decimal(signed)
+      [0, 1, 2, 3, 4, 5, 6, 7, -8, -7, -6, -5, -4, -3, -2, -1][signed & 0b1111]
     end
   end
 end

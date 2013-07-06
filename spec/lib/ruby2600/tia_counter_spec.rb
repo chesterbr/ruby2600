@@ -129,7 +129,7 @@ describe Ruby2600::TIACounter do
     end
 
     it "should go back 4 ticks for a -4 move" do
-      counter.move 0b1001
+      counter.move 0b1100
       3.times { counter.tick }
       expect { counter.tick }.to change { counter.value }.to 20
     end
