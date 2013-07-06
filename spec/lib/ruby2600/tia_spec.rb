@@ -68,6 +68,16 @@ describe Ruby2600::TIA do
 
         tia.scanline
       end
+
+      it 'should pulse RIOT even if CPU is frozen by a write to WSYNC' do
+        tia.cpu.stub(:step) do
+          tia[WSYNC] = rand(256)
+          rand(5) + 2
+        end
+        tia.riot.should_receive(:pulse).exactly(76).times
+
+        tia.scanline
+      end
     end
 
     context 'PF0, PF1, PF2' do
