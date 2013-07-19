@@ -22,6 +22,8 @@ module Ruby2600
       @bl_counter = TIACounter.new
       @bl_counter.on_change { |value| bl_counter_increased(value) }
       @bl_pixels_to_draw = 0
+      @p0 = TIAPlayer.new(@reg, 0)
+      @p1 = TIAPlayer.new(@reg, 1)
     end
 
     def [](position)
@@ -32,6 +34,10 @@ module Ruby2600
       case position
       when RESBL
         @bl_counter.reset
+      when RESP0
+        @p0.strobe
+      when RESP1
+        @p1.strobe
       when HMOVE
         @bl_counter.move @reg[HMBL]
       else
@@ -68,7 +74,7 @@ module Ruby2600
       HORIZONTAL_BLANK_CLK_COUNT.upto TOTAL_SCANLINE_CLK_COUNT - 1 do |color_clock|
         sync_cpu_with color_clock
         unless vertical_blank?
-          @scanline[@pixel] = bl_pixel || pf_pixel || bg_pixel
+          @scanline[@pixel] = player_pixel || bl_pixel || pf_pixel || bg_pixel
         end
         @pixel += 1
         @bl_counter.tick
@@ -153,6 +159,16 @@ module Ruby2600
       else
         @bl_pixels_to_draw = 0
       end
+    end
+
+    # Players
+    # (need to request both pixels to keep counters in sync,
+    #  even if one overrides the other)
+
+    def player_pixel
+      p0_pixel = @p0.pixel
+      p1_pixel = @p1.pixel
+      p0_pixel || p1_pixel
     end
   end
 end
