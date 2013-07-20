@@ -2,10 +2,14 @@ module Ruby2600
   class TIAPlayer
     include Constants
 
+    attr_accessor :old_GRPn
+
     def initialize(tia_registers, player_number)
       @NUSIZn = player_number.zero? ? NUSIZ0 : NUSIZ1
       @COLUPn = player_number.zero? ? COLUP0 : COLUP1
       @GRPn   = player_number.zero? ? GRP0   : GRP1
+      @VDELPn = player_number.zero? ? VDELP0 : VDELP1
+      @REFPn  = player_number.zero? ? REFP0  : REFP1
       @tia = tia_registers
       @counter = TIACounter.new
       @counter.on_change do |value|
@@ -28,6 +32,7 @@ module Ruby2600
     # FIXME might call reset?
     def strobe
       @counter.reset
+      #@counter.instance_variable_set(:@internal_value, 39*4)
     end
 
     # FIXME test; might call the counter one hmove?
@@ -40,7 +45,7 @@ module Ruby2600
     def update_pixel_bit
       if @grp_bit
         if (0..7).include?(@grp_bit)
-          @pixel_bit = @tia[@GRPn][7 - @grp_bit] 
+          @pixel_bit = grp[7 - @grp_bit] 
           @bit_copies_written += 1
           if @bit_copies_written == player_size
             @bit_copies_written = 0
@@ -53,6 +58,15 @@ module Ruby2600
       else
         @pixel_bit = nil
       end
+    end
+
+    def grp
+      result = @tia[@VDELPn] && @tia[@VDELPn][0] == 1 ? @old_GRPn : @tia[@GRPn]
+      @tia[@REFPn] && @tia[@REFPn][3] == 1 ? reflect(result) : result
+    end
+
+    def reflect(bits)
+      (0..7).inject(0) { |value, n| value + (bits[n] << (7 - n)) }
     end
 
     def player_size

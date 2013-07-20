@@ -43,6 +43,8 @@ module Ruby2600
       else
         @reg[position] = value
       end
+      @p1.old_GRPn = @reg[GRP1] if position == GRP0
+      @p0.old_GRPn = @reg[GRP0] if position == GRP1
     end
 
     def scanline
