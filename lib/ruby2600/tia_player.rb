@@ -10,6 +10,7 @@ module Ruby2600
       @GRPn   = player_number.zero? ? GRP0   : GRP1
       @VDELPn = player_number.zero? ? VDELP0 : VDELP1
       @REFPn  = player_number.zero? ? REFP0  : REFP1
+      @HMPn   = player_number.zero? ? HMP0   : HMP1
       @tia = tia_registers
       @counter = TIACounter.new
       @counter.on_change do |value|
@@ -32,12 +33,25 @@ module Ruby2600
     # FIXME might call reset?
     def strobe
       @counter.reset
-      #@counter.instance_variable_set(:@internal_value, 39*4)
+      #@counter.instance_variable_set(:@internal_value, 36*4-1)
     end
 
-    # FIXME test; might call the counter one hmove?
-    def hmove(value)
-      @counter.move(value)
+    def start_hmove
+      @hmove_counter = 0
+      @movement_required = true 
+    end
+
+    def apply_hmove
+      @movement_required = false if @hmove_counter == moves_to_apply_for_HMPn
+      return unless @movement_required
+      @counter.tick
+      @hmove_counter += 1
+    end
+
+    def moves_to_apply_for_HMPn
+      return 0 unless @tia[@HMPn]
+      signed = @tia[@HMPn] >> 4
+      signed >= 8 ? signed - 8 : signed + 8
     end
 
     private

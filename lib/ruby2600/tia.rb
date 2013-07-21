@@ -39,7 +39,12 @@ module Ruby2600
       when RESP1
         @p1.strobe
       when HMOVE
-        @bl_counter.move @reg[HMBL]
+        @late_reset_hblank = true
+        @p0.start_hmove
+        @p1.start_hmove
+        #@bl_counter.move @reg[HMBL]
+      when HMCLR
+        @reg[HMP0] = @reg[HMP1] = 0
       else
         @reg[position] = value
       end
@@ -64,6 +69,7 @@ module Ruby2600
 
     def intialize_scanline
       reset_cpu_sync
+      @late_reset_hblank = false
       @scanline = Array.new(160, 0)
       @pixel = 0
     end
@@ -75,11 +81,15 @@ module Ruby2600
     def draw_scanline
       HORIZONTAL_BLANK_CLK_COUNT.upto TOTAL_SCANLINE_CLK_COUNT - 1 do |color_clock|
         sync_cpu_with color_clock
+        if @late_reset_hblank && @pixel < 8
+          @pixel += 1
+          next
+        end
         unless vertical_blank?
           @scanline[@pixel] = player_pixel || bl_pixel || pf_pixel || bg_pixel
         end
-        @pixel += 1
         @bl_counter.tick
+        @pixel += 1
       end
       @scanline
     end
@@ -92,6 +102,10 @@ module Ruby2600
 
     def sync_cpu_with(color_clock)
       riot.pulse if color_clock % 3 == 0
+      if color_clock % 4 == 0 # FIXME assuming H@1 postition here, might need adjustment
+        @p0.apply_hmove
+        @p1.apply_hmove
+      end
       return if @reg[WSYNC]
       @cpu_credits += 1 if color_clock % 3 == 0
       @cpu_credits -= @cpu.step while @cpu_credits > 0
