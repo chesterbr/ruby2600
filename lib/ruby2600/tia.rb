@@ -43,6 +43,8 @@ module Ruby2600
         #@bl_counter.move @reg[HMBL]
       when HMCLR
         @reg[HMP0] = @reg[HMP1] = 0
+      when WSYNC
+        @cpu.halted = true
       else
         @reg[position] = value
       end
@@ -66,7 +68,7 @@ module Ruby2600
     private
 
     def intialize_scanline
-      reset_cpu_sync
+      @cpu.halted = false
       @late_reset_hblank = false
       @scanline = Array.new(160, 0)
       @pixel = 0
@@ -103,13 +105,14 @@ module Ruby2600
         @p0.apply_hmove
         @p1.apply_hmove
       end
-      return if @reg[WSYNC]
-      @cpu_credits += 1 if color_clock % 3 == 0
-      @cpu_credits -= @cpu.step while @cpu_credits > 1
+      cpu.tick if color_clock % 3 == 0
+      # return if @reg[WSYNC]
+      # @cpu_credits += 1 if color_clock % 3 == 0
+      # @cpu_credits -= @cpu.step while @cpu_credits > 1
     end
 
     def reset_cpu_sync
-      @cpu_credits = 0 if @reg[WSYNC]
+      # @cpu_credits = 0 if @reg[WSYNC]
       @reg[WSYNC] = nil
     end
 
