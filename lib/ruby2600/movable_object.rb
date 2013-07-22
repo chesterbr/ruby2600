@@ -15,7 +15,7 @@ module Ruby2600
     def reset
       # FIXME 35 * TIA_COUNTER_DIVIDER works for Pitfall ball; may be an
       # artifact of lack other implementations
-      @counter_inner_value = 0
+      @counter_inner_value = 38*4+1
     end
 
     def value
