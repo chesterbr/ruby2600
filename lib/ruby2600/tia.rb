@@ -19,9 +19,9 @@ module Ruby2600
     def initialize
       @reg = Array.new(32) { rand(256) }
       @cpu_credits = 0
-      @bl_counter = MovableObject.new
-      @bl_counter.on_change { |value| bl_counter_increased(value) }
-      @bl_pixels_to_draw = 0
+      #@bl_counter = MovableObject.new
+      # @bl_counter.on_change { |value| bl_counter_increased(value) }
+      #@bl_pixels_to_draw = 0
       @p0 = TIAPlayer.new(@reg, 0)
       @p1 = TIAPlayer.new(@reg, 1)
     end
@@ -32,8 +32,6 @@ module Ruby2600
 
     def []=(position, value)
       case position
-      when RESBL
-        @bl_counter.reset
       when RESP0
         @p0.strobe
       when RESP1
@@ -86,9 +84,8 @@ module Ruby2600
           next
         end
         unless vertical_blank?
-          @scanline[@pixel] = player_pixel || bl_pixel || pf_pixel || bg_pixel
+          @scanline[@pixel] = player_pixel || pf_pixel || bg_pixel
         end
-        @bl_counter.tick
         @pixel += 1
       end
       @scanline
@@ -157,25 +154,25 @@ module Ruby2600
 
     # Ball
 
-    def bl_pixel
-      return nil unless @reg[ENABL][1]==1 && @bl_pixels_to_draw > 0
-      @bl_pixels_to_draw -= 1
-      @reg[COLUPF]
-    end
+    # def bl_pixel
+    #   return nil unless @reg[ENABL][1]==1 && @bl_pixels_to_draw > 0
+    #   @bl_pixels_to_draw -= 1
+    #   @reg[COLUPF]
+    # end
 
-    def bl_size
-      2 ** (2 * @reg[CTRLPF][5] + @reg[CTRLPF][4])
-    end
+    # def bl_size
+    #   2 ** (2 * @reg[CTRLPF][5] + @reg[CTRLPF][4])
+    # end
 
-    def bl_counter_increased(value)
-      if value == 0
-        @bl_pixels_to_draw = [bl_size, 4].min
-      elsif value == 1 && bl_size == 8
-        @bl_pixels_to_draw = 4
-      else
-        @bl_pixels_to_draw = 0
-      end
-    end
+    # def bl_counter_increased(value)
+    #   if value == 0
+    #     @bl_pixels_to_draw = [bl_size, 4].min
+    #   elsif value == 1 && bl_size == 8
+    #     @bl_pixels_to_draw = 4
+    #   else
+    #     @bl_pixels_to_draw = 0
+    #   end
+    # end
 
     # Players
     # (need to request both pixels to keep counters in sync,

@@ -236,6 +236,3 @@ end
 window = GameWindow.new
 window.load_cart ARGV[0]
 window.show
-
-
-puts "ohai"

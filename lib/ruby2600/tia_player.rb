@@ -1,10 +1,11 @@
 module Ruby2600
-  class TIAPlayer
+  class TIAPlayer < MovableObject
     include Constants
 
     attr_accessor :old_GRPn
 
     def initialize(tia_registers, player_number)
+      super()
       @NUSIZn = player_number.zero? ? NUSIZ0 : NUSIZ1
       @COLUPn = player_number.zero? ? COLUP0 : COLUP1
       @GRPn   = player_number.zero? ? GRP0   : GRP1
@@ -12,28 +13,17 @@ module Ruby2600
       @REFPn  = player_number.zero? ? REFP0  : REFP1
       @HMPn   = player_number.zero? ? HMP0   : HMP1
       @tia = tia_registers
-      @counter = MovableObject.new
-      @counter.on_change do |value|
-        if (value == 39) ||
-           (value ==  3 && [0b001, 0b011].include?(@tia[@NUSIZn])) ||
-           (value ==  7 && [0b010, 0b011, 0b110].include?(@tia[@NUSIZn])) ||
-           (value == 15 && [0b100, 0b110].include?(@tia[@NUSIZn]))
-          @grp_bit = -5
-          @bit_copies_written = 0
-        end
-      end
     end
 
     def pixel
       update_pixel_bit
-      @counter.tick
+      tick      
       @tia[@COLUPn] if @pixel_bit == 1
     end
 
     # FIXME might call reset?
     def strobe
-      @counter.reset
-      #@counter.instance_variable_set(:@internal_value, 36*4-1)
+      reset
     end
 
     def start_hmove
@@ -43,7 +33,7 @@ module Ruby2600
 
     def apply_hmove
       return unless @movement_required
-      @counter.tick
+      tick
       @hmove_counter += 1
       @movement_required = false if @hmove_counter == moves_to_apply_for_HMPn
     end
@@ -55,6 +45,16 @@ module Ruby2600
     end
 
     private
+
+    def on_counter_change
+      if (value == 39) ||
+         (value ==  3 && [0b001, 0b011].include?(@tia[@NUSIZn])) ||
+         (value ==  7 && [0b010, 0b011, 0b110].include?(@tia[@NUSIZn])) ||
+         (value == 15 && [0b100, 0b110].include?(@tia[@NUSIZn]))
+        @grp_bit = -5
+        @bit_copies_written = 0
+      end
+    end
 
     def update_pixel_bit
       if @grp_bit
