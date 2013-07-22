@@ -19,7 +19,7 @@ module Ruby2600
     def initialize
       @reg = Array.new(32) { rand(256) }
       @cpu_credits = 0
-      @bl_counter = TIACounter.new
+      @bl_counter = MovableObject.new
       @bl_counter.on_change { |value| bl_counter_increased(value) }
       @bl_pixels_to_draw = 0
       @p0 = TIAPlayer.new(@reg, 0)

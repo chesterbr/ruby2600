@@ -12,7 +12,7 @@ module Ruby2600
       @REFPn  = player_number.zero? ? REFP0  : REFP1
       @HMPn   = player_number.zero? ? HMP0   : HMP1
       @tia = tia_registers
-      @counter = TIACounter.new
+      @counter = MovableObject.new
       @counter.on_change do |value|
         if (value == 39) ||
            (value ==  3 && [0b001, 0b011].include?(@tia[@NUSIZn])) ||

@@ -2,7 +2,7 @@ module Ruby2600
   # Movable objects on TIA use counters that go from 0 to 39, but run at 1/4
   # of the TIA speed. See http://www.atarihq.com/danb/files/TIA_HW_Notes.txt
   # FIXME review test coverage due to hmove spike
-  class TIACounter
+  class MovableObject
     PERIOD = 40
     CLKS_PER_COUNT = 4
     MAX_VALUE = PERIOD * CLKS_PER_COUNT - 1

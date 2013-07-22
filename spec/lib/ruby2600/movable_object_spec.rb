@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-describe Ruby2600::TIACounter do
+describe Ruby2600::MovableObject do
 
-  subject(:counter) { Ruby2600::TIACounter.new }
+  subject(:counter) { Ruby2600::MovableObject.new }
 
-  let(:sample_of_initial_values) { Array.new(100) { Ruby2600::TIACounter.new.value } }
+  let(:sample_of_initial_values) { Array.new(100) { Ruby2600::MovableObject.new.value } }
 
   describe '#initialize' do
     it 'should initialize with a random value' do
