@@ -2,7 +2,8 @@ module Ruby2600
   class CPU
     attr_accessor :memory
     attr_accessor :pc, :a, :x, :y, :s
-    attr_accessor :n, :v, :d, :i, :z, :c    # Flags (P register): nv--dizc
+    attr_accessor :n, :v, :d, :i, :z, :c  # Flags (P register): nv--dizc
+    attr_accessor :halted                 # Simulates RDY (if true, clock is ignored)
 
     RESET_VECTOR = 0xFFFC
     BRK_VECTOR   = 0xFFFE
@@ -98,6 +99,19 @@ module Ruby2600
       decode
       execute   
       @time_in_cycles   
+    end
+
+    def tick
+      return if @halted
+      if !@time_in_cycles
+        fetch
+        decode        
+      end
+      @time_in_cycles -= 1
+      if @time_in_cycles == 0
+        execute
+        @time_in_cycles = nil
+      end
     end
 
     private

@@ -25,6 +25,14 @@ describe Ruby2600::CPU do
     end
   end
 
+  describe '#halted' do
+    it 'needs to be tested'
+  end
+
+  describe '#tick' do
+    it 'needs to be tested'
+  end
+
   describe '#step' do
     before do
       # Most examples will run a single opcode from here
