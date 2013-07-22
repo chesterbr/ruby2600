@@ -20,6 +20,8 @@ Tested: Pitfall!, Oink!, Adventure, Berzerk (initial screen animation works also
 
 ![alt text](http://i.imgur.com/9t8D7EV.jpg "Pitfall! on Stella x Ruby2600")
 
+Not shown on picture above: players also display and do HMOVE, but imprecise timing makes them ill-positioned. Most likely due to CPU sync issues; currently refactoring to solve that.
+
 The blurry visual is due to Gosu bitmap stetch - easy to fix, but it reminds me so much of how TVs got Atari RF that I decided to keep it that way for now.
 
 Console switches are mapped inspired on the [Stella Keys Layout](http://stella.sourceforge.net/docs/#Keyboard), but using (laptop-friendly) Mac keys instead of function keys. Right now select (1) and Reset (2) need to be held for about a second, so they can be picked up by the slow frame generator, the others are picked up naturally.
