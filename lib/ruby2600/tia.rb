@@ -108,7 +108,7 @@ module Ruby2600
       end
       return if @reg[WSYNC]
       @cpu_credits += 1 if color_clock % 3 == 0
-      @cpu_credits -= @cpu.step while @cpu_credits > 0
+      @cpu_credits -= @cpu.step while @cpu_credits > 2
     end
 
     def reset_cpu_sync
