@@ -38,18 +38,18 @@ module Ruby2600
 
     def start_hmove
       @hmove_counter = 0
-      @movement_required = true 
+      @movement_required = true if moves_to_apply_for_HMPn != 0
     end
 
     def apply_hmove
-      @movement_required = false if @hmove_counter == moves_to_apply_for_HMPn
       return unless @movement_required
       @counter.tick
       @hmove_counter += 1
+      @movement_required = false if @hmove_counter == moves_to_apply_for_HMPn
     end
 
     def moves_to_apply_for_HMPn
-      return 0 unless @tia[@HMPn]
+      return 8 unless @tia[@HMPn]
       signed = @tia[@HMPn] >> 4
       signed >= 8 ? signed - 8 : signed + 8
     end
