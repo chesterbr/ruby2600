@@ -95,16 +95,29 @@ module Ruby2600
 
     def step
       fetch
-      execute
+      decode
+      execute   
+      @time_in_cycles   
     end
 
     private
 
-    # Decodes instruction, parameter(s), addressing mode, opcode and advances PC
+    # 6502 has an internal "T-state" that gets incremented as each clock cycle
+    # advances within an instruction (cf. http://www.pagetable.com/?p=39).
+    #
+    # For simplicity, let's stick to the fetch-decode-execute cycle and advance
+    # the PC to the next instruction right on fetch. As a consequence, "@pc" will
+    # be the PC for *NEXT* instruction throughout the decode and execute phases.
 
     def fetch
-      @opcode = memory[@pc] || 0
+      @opcode   = memory[@pc] || 0
+      @param_lo = memory[word(@pc + 1)] || 0
+      @param_hi = memory[word(@pc + 2)] || 0
+      @param    = @param_hi * 0x100 + @param_lo
+      @pc       = word(@pc + OPCODE_SIZES[@opcode])
+    end
 
+    def decode
       if    (@opcode & 0b00011111) == BXX
         @instruction = BXX
       elsif (@opcode & 0b00011111) == SCX
@@ -116,13 +129,12 @@ module Ruby2600
         @instruction = (@opcode & 0b11100011)
       end
 
-      @param_lo = memory[word(@pc + 1)] || 0
-      @param_hi = memory[word(@pc + 2)] || 0
-      @param    = @param_hi * 0x100 + @param_lo
+      @time_in_cycles = time_in_cycles
+    end
 
-      @branch_cost = 0
-
-      @pc = word(@pc + OPCODE_SIZES[@opcode])
+    def execute
+      # Try individual opcodes first, then instructions
+      execute_instruction unless execute_opcode
     end
 
     # These helpers allow us to "tag" operations with affected flags
@@ -137,12 +149,7 @@ module Ruby2600
       @c = value >= 0
     end
 
-    # Core execution (try individual opcodes first, then instructions)
-
-    def execute
-      execute_instruction unless execute_opcode
-      time_in_cycles
-    end
+    # Core execution logic
 
     def execute_opcode
       case @opcode
@@ -247,10 +254,11 @@ module Ruby2600
     # Generalized instructions (branches, arithmetic, shift)
 
     def branch
-      return @pc unless should_branch?
-      new_pc = word(@pc + signed(@param_lo))
-      @branch_cost = (@pc & 0xFF00) == (new_pc & 0xFF00) ? 1 : 2
-      new_pc
+      should_branch? ? branch_target_address : @pc
+    end
+
+    def branch_target_address
+      return word(@pc + signed(@param_lo))
     end
 
     def should_branch?
@@ -396,7 +404,7 @@ module Ruby2600
     def time_in_cycles
       cycles = OPCODE_CYCLE_COUNTS[@opcode]
       cycles += 1 if penalize_for_page_boundary_cross?
-      cycles += @branch_cost
+      cycles += branch_cost
     end
 
     def penalize_for_page_boundary_cross?
@@ -409,6 +417,11 @@ module Ruby2600
                 else 0
                 end
       lo_addr > 0xFF
+    end
+
+    def branch_cost
+      return 0 unless @instruction == BXX && should_branch?
+      (@pc & 0xFF00) == (branch_target_address & 0xFF00) ? 1 : 2
     end
 
     # BCD functions are inert unless we are in decimal mode. bcd will also
