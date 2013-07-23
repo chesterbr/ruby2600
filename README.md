@@ -22,7 +22,7 @@ Tested: Pitfall!, Oink!, Adventure, Berzerk (initial screen animation works also
 
 A more recent comparsion (after a spike rethinking the CPU-TIA sync): background priority not yet implemented, but HMOVE is good and positioning got *way* better:
 
-![alt text](http://i.imgur.com/vqOznWI.png "Frogger on Stella x Ruby2600""
+![alt text](http://i.imgur.com/vqOznWI.png "Frogger on Stella x Ruby2600")
 
 The blurry visual is due to Gosu bitmap stetch - easy to fix, but it reminds me so much of how TVs got Atari RF that I decided to keep it that way for now.
 
