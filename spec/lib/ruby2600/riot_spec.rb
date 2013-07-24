@@ -5,7 +5,7 @@ describe Ruby2600::RIOT do
   subject(:riot) { Ruby2600::RIOT.new }
 
   it 'should initialize on a working state' do
-    expect { riot.pulse       }.to_not raise_error
+    expect { riot.tick        }.to_not raise_error
     expect { riot[SWCHA].to_i }.to_not raise_error
     expect { riot[SWCHB].to_i }.to_not raise_error
   end
@@ -20,7 +20,7 @@ describe Ruby2600::RIOT do
     end
   end
 
-  describe 'timer (#pulse / INTIM / INSTAT / TIM1T / TIM8T / TIM64T /T1024T)' do
+  describe 'timer (#tick / INTIM / INSTAT / TIM1T / TIM8T / TIM64T /T1024T)' do
     context '1-clock timer' do
       let(:timer_register) { TIM1T }
 

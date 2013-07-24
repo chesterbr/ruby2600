@@ -32,7 +32,7 @@ module Ruby2600
       end
     end
 
-    def pulse
+    def tick
       @cycle_count -= 1
       if @cycle_count == 0
         decrement_timer

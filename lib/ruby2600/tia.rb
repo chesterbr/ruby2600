@@ -101,7 +101,7 @@ module Ruby2600
     # objects, just like the hardware does)
 
     def sync_2600_with(color_clock)
-      riot.pulse if color_clock % 3 == 0
+      riot.tick if color_clock % 3 == 0
       if color_clock % 4 == 0 # FIXME assuming H@1 postition here, might need adjustment
         @p0.apply_hmove
         @p1.apply_hmove

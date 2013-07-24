@@ -8,17 +8,17 @@ shared_examples_for 'a timer with clock interval' do |interval|
 
   it 'should reduce current value (INTM) on every 8th call' do
     10.times do
-      (interval - 1).times { expect{ riot.pulse }.to_not change{ riot[INTIM] } }
-      expect{ riot.pulse }.to change{ riot[INTIM] }.by -1
+      (interval - 1).times { expect{ riot.tick }.to_not change{ riot[INTIM] } }
+      expect{ riot.tick }.to change{ riot[INTIM] }.by -1
     end
   end
 
   it 'should underflow gracefully' do
     riot[timer_register] = 0x02
     riot[INTIM].should == 0x01
-    interval.times { riot.pulse }
+    interval.times { riot.tick }
     riot[INTIM].should == 0x00
-    interval.times { riot.pulse }
+    interval.times { riot.tick }
     riot[INTIM].should == 0xFF
   end
 
@@ -29,9 +29,9 @@ shared_examples_for 'a timer with clock interval' do |interval|
 
   it 'should reset interval to 1 after underflow' do
     riot[timer_register] = 0x01
-    interval.times { riot.pulse }
+    interval.times { riot.tick }
     riot[INTIM].should == 0xFF
-    riot.pulse
+    riot.tick
     riot[INTIM].should == 0xFE
   end
 
@@ -40,7 +40,7 @@ shared_examples_for 'a timer with clock interval' do |interval|
       10.times do
         riot[INSTAT][6].should == 0
         riot[INSTAT][7].should == 0
-        riot.pulse
+        riot.tick
       end
     end
 
@@ -49,11 +49,11 @@ shared_examples_for 'a timer with clock interval' do |interval|
         riot[timer_register] = 0x01
         riot[INSTAT][6].should == 0
         riot[INSTAT][7].should == 0
-        interval.times { riot.pulse }
+        interval.times { riot.tick }
         riot[INSTAT][6].should == 1
         riot[INSTAT][7].should == 1
         10.times do
-          256.times { riot.pulse } # interval now is 1
+          256.times { riot.tick } # interval now is 1
           riot[INSTAT][6].should == 1
           riot[INSTAT][7].should == 1
         end
@@ -62,14 +62,14 @@ shared_examples_for 'a timer with clock interval' do |interval|
 
     it 'should have bit 6 clear after it is read' do
       riot[timer_register] = 0x01
-      interval.times { riot.pulse }
+      interval.times { riot.tick }
       riot[INSTAT][6].should == 1
       riot[INSTAT][6].should == 0
     end
 
     it 'should not have bit 7 affected by a read' do
       riot[timer_register] = 0x01
-      interval.times { riot.pulse }
+      interval.times { riot.tick }
       riot[INSTAT][7].should == 1
       riot[INSTAT][7].should == 1
     end

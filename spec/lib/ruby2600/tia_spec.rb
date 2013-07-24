@@ -5,8 +5,8 @@ describe Ruby2600::TIA do
 
   subject(:tia) do
     tia = Ruby2600::TIA.new
-    tia.cpu = mock('cpu', :step => 2, :tick => nil, :halted= => nil)
-    tia.riot = mock('riot', :pulse => nil)
+    tia.cpu = mock('cpu', :tick => nil, :halted= => nil)
+    tia.riot = mock('riot', :tick => nil)
     tia
   end
 
@@ -41,19 +41,15 @@ describe Ruby2600::TIA do
     end
 
     context 'TIA-RIOT integtation' do
-      it 'should pulse RIOT 76 times while generating a scanline, regardless of CPU timing' do
-        tia.cpu.stub(:step) { rand(5) + 2 }
-        tia.riot.should_receive(:pulse).exactly(76).times
+      it 'should tick RIOT 76 times while generating a scanline, regardless of CPU timing' do
+        tia.riot.should_receive(:tick).exactly(76).times
 
         tia.scanline
       end
 
-      it 'should pulse RIOT even if CPU is frozen by a write to WSYNC' do
-        tia.cpu.stub(:step) do
-          tia[WSYNC] = rand(256)
-          rand(5) + 2
-        end
-        tia.riot.should_receive(:pulse).exactly(76).times
+      it 'should tick RIOT even if CPU is frozen by a write to WSYNC' do
+        tia.cpu.stub(:tick) { tia[WSYNC] = rand(256) }
+        tia.riot.should_receive(:tick).exactly(76).times
 
         tia.scanline
       end
