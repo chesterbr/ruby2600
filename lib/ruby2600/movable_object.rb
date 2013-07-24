@@ -1,12 +1,12 @@
 module Ruby2600
   class MovableObject
 
-    # Movable objects on TIA use counters that go from 0 to 39, but runs at 1/4
-    # of the TIA speed. See http://www.atarihq.com/danb/files/TIA_HW_Notes.txt
+    # Movable objects on TIA use counters that go from 0 to 39, running at 1/4
+    # of TIA speed. See http://www.atarihq.com/danb/files/TIA_HW_Notes.txt
 
-    COUNTER_INITIAL_VALUE = 38*4+1 # FIXME manually adjusted for Pitfall/Frogger
     COUNTER_PERIOD = 40
     COUNTER_DIVIDER = 4
+    COUNTER_RESET_VALUE = 39
     COUNTER_MAX = COUNTER_PERIOD * COUNTER_DIVIDER
 
     def initialize
@@ -14,7 +14,7 @@ module Ruby2600
     end
 
     def reset
-      @counter_inner_value = COUNTER_INITIAL_VALUE
+      @counter_inner_value = COUNTER_RESET_VALUE * COUNTER_PERIOD
     end
 
     def value

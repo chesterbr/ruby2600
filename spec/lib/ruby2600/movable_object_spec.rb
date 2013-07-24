@@ -37,8 +37,10 @@ describe Ruby2600::MovableObject do
   end
 
   describe '#reset' do
-    before { subject.reset }
-    its(:value) { should == 38 }
+    it 'should use RESET value from http://www.atarihq.com/danb/files/TIA_HW_Notes.txt' do
+      subject.reset
+      subject.value.should == 39
+    end
   end
 
   describe '#tick' do

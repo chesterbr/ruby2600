@@ -37,29 +37,33 @@ describe Ruby2600::TIAPlayer do
       300.times { player.pixel.should be_nil }
     end
 
-    context 'player drawing' do
+    context 'player strobing' do
+      COLOR = 2 * (rand(127) + 1)
+      PATTERN_PIXELS = [COLOR, COLOR, nil, nil, COLOR, nil, COLOR, nil]
+      PATTERN_BITS   = 0b11001010
+
       before do
-        tia[GRP0] = 0b01010101             # A checkerboard pattern
+        tia[GRP0]   = PATTERN_BITS
         tia[NUSIZ0] = 0                    # no repetition
-        tia[COLUP0] = 0xEE                 # whatever color
-        rand(160).times { player.pixel }   # at an arbitrary screen position
+        tia[COLUP0] = COLOR
+        rand(160).times { player.pixel }   # arbitrary screen position
         player.strobe
       end
 
-      it 'after a strobe, it should output the player after a full scanline (160pixels) + 1-bit delay' do
-        # Player is drawn on next scanline (160 pixels), delayed by 1 pixel
-        161.times { player.pixel }
-        pixels(player, 1, 8).should == [nil, 0xEE, nil, 0xEE, nil, 0xEE, nil, 0xEE]
+      it 'should output the player after a full scanline (160pixels) + 5-bit delay' do
+        # Player is drawn on next scanline (160 pixels), delayed by 5 pixels
+        165.times { player.pixel }
+        pixels(player, 1, 8).should == PATTERN_PIXELS
       end
 
-      it 'should draw player again on second-after-current scanline' do
-        321.times { player.pixel }
-        pixels(player, 1, 8).should == [nil, 0xEE, nil, 0xEE, nil, 0xEE, nil, 0xEE]
+      xit 'should draw player again on second-after-current scanline' do
+        325.times { player.pixel }
+        pixels(player, 1, 8).should == PATTERN_PIXELS
       end
 
       it 'should draw player on third-after-current scanline' do
-        481.times { player.pixel }
-        pixels(player, 1, 8).should == [nil, 0xEE, nil, 0xEE, nil, 0xEE, nil, 0xEE]
+        485.times { player.pixel }
+        pixels(player, 1, 8).should == PATTERN_PIXELS
       end
 
       context 'two copies' do
@@ -68,8 +72,9 @@ describe Ruby2600::TIAPlayer do
           player.strobe
         end
 
-        xit 'should draw the second copy of the player immediately' do          
-          pixels(player, 17, 24).should == [nil, 0xEE, nil, 0xEE, nil, 0xEE, nil, 0xEE]
+        it 'should draw the second copy of the player on *current* scanline (after 5 bit delay)' do
+          5.times { player.pixel }
+          pixels(player, 17, 24).should == PATTERN_PIXELS
         end
       end
     end
