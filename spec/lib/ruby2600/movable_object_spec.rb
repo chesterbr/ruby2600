@@ -17,42 +17,35 @@ describe Ruby2600::MovableObject do
         (0..39).should cover value
       end
     end
+  end
 
-    describe 'on_counter_change' do
-      before { subject.reset }
+  describe 'on_counter_change' do    
+    it 'should be triggered every 4th call' do
+      subject.value = rand(40)
+      3.times { subject.tick }
+      subject.should_receive(:on_counter_change)
 
-      it 'should not be triggered until the 4th call' do
-        subject.should_not_receive(:on_counter_change)
+      subject.tick
+    end
 
-        3.times { subject.tick }
-      end
+    it 'should be triggered on wrap' do
+      subject.value = 38
+      subject.should_receive(:on_counter_change).twice
 
-      it 'should be triggered on the 4th' do
-        3.times { subject.tick }
-        subject.should_receive(:on_counter_change)
-
-        subject.tick
-      end
-
-      it 'should be triggered on wrap' do
-        subject.value = 38
-        subject.should_receive(:on_counter_change).twice
-
-        8.times { subject.tick }
-      end
+      8.times { subject.tick }
     end
   end
 
   describe '#reset' do
     before { subject.reset }
-    its(:value) { should == 0 }
+    its(:value) { should == 38 }
   end
 
   describe '#tick' do
     context 'ordinary values' do
       before { subject.value = rand(38) }
 
-      it 'should increase once every 4 ticks' do
+      it 'should increase value once every 4 ticks' do
         original_value = subject.value
 
         2.times do

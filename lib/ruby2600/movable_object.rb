@@ -4,6 +4,7 @@ module Ruby2600
     # Movable objects on TIA use counters that go from 0 to 39, but runs at 1/4
     # of the TIA speed. See http://www.atarihq.com/danb/files/TIA_HW_Notes.txt
 
+    COUNTER_INITIAL_VALUE = 38*4+1 # FIXME manually adjusted for Pitfall/Frogger
     COUNTER_PERIOD = 40
     COUNTER_DIVIDER = 4
     COUNTER_MAX = COUNTER_PERIOD * COUNTER_DIVIDER
@@ -13,9 +14,7 @@ module Ruby2600
     end
 
     def reset
-      # FIXME 35 * TIA_COUNTER_DIVIDER works for Pitfall ball; may be an
-      # artifact of lack other implementations
-      @counter_inner_value = 38*4+1
+      @counter_inner_value = COUNTER_INITIAL_VALUE
     end
 
     def value
