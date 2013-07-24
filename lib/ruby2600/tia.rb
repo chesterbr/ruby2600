@@ -5,7 +5,7 @@ module Ruby2600
     include Constants
 
     # A scanline "lasts" 228 "color clocks" (CLKs), of which 68
-    # are the initial blank period, and each of the remai
+    # are the initial blank period
 
     HORIZONTAL_BLANK_CLK_COUNT = 68
     TOTAL_SCANLINE_CLK_COUNT = 228
@@ -75,12 +75,12 @@ module Ruby2600
     end
 
     def wait_horizontal_blank
-      HORIZONTAL_BLANK_CLK_COUNT.times { |color_clock| sync_cpu_with color_clock }
+      HORIZONTAL_BLANK_CLK_COUNT.times { |color_clock| sync_2600_with color_clock }
     end
 
     def draw_scanline
       HORIZONTAL_BLANK_CLK_COUNT.upto TOTAL_SCANLINE_CLK_COUNT - 1 do |color_clock|
-        sync_cpu_with color_clock
+        sync_2600_with color_clock
         if @late_reset_hblank && @pixel < 8
           @pixel += 1
           next
@@ -93,27 +93,20 @@ module Ruby2600
       @scanline
     end
 
-    # The 2600 hardware wiring ensures that we have three color clocks
-    # for each CPU clock, but "freezes" the CPU if WSYNC is set on TIA.
-    #
-    # To keep them in sync, we'll compute a "credit" for each color
-    # clock, and "use" this credit when we have any of it
+    # All Atari chips use the same crystal for their clocks (with RIOT and
+    # CPU running at 1/3 of TIA speed). 
 
-    def sync_cpu_with(color_clock)
+    # Since the emulator's "main loop" is based on TIA#scanline, we'll "tick"
+    # the other chips here (and also apply the horizontal motion on movable
+    # objects, just like the hardware does)
+
+    def sync_2600_with(color_clock)
       riot.pulse if color_clock % 3 == 0
       if color_clock % 4 == 0 # FIXME assuming H@1 postition here, might need adjustment
         @p0.apply_hmove
         @p1.apply_hmove
       end
       cpu.tick if color_clock % 3 == 0
-      # return if @reg[WSYNC]
-      # @cpu_credits += 1 if color_clock % 3 == 0
-      # @cpu_credits -= @cpu.step while @cpu_credits > 1
-    end
-
-    def reset_cpu_sync
-      # @cpu_credits = 0 if @reg[WSYNC]
-      @reg[WSYNC] = nil
     end
 
     def vertical_blank?
