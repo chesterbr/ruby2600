@@ -215,6 +215,12 @@ describe Ruby2600::Player do
           end
         end
       end
+
+      pending 'HMOVE test (unless we make it on movable_object)'
+
+      pending 'VDELPn test'
+
+      pending 'dynamic change of GRPn/REFPn test'
     end
   end
 end
