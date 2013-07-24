@@ -106,7 +106,7 @@ module Ruby2600
         @p0.apply_hmove
         @p1.apply_hmove
       end
-      cpu.tick if color_clock % 3 == 0
+      cpu.tick if color_clock % 3 == 2
     end
 
     def vertical_blank?
