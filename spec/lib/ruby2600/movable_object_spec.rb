@@ -36,9 +36,9 @@ describe Ruby2600::MovableObject do
     end
   end
 
-  describe '#reset' do
-    it 'should use RESET value from http://www.atarihq.com/danb/files/TIA_HW_Notes.txt' do
-      subject.reset
+  describe '#strobe' do
+    it 'should reset counter with RESET value from http://www.atarihq.com/danb/files/TIA_HW_Notes.txt' do
+      subject.strobe
       subject.value.should == 39
     end
   end

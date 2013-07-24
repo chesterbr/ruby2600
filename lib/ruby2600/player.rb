@@ -21,11 +21,6 @@ module Ruby2600
       @tia[@COLUPn] if @pixel_bit == 1
     end
 
-    # FIXME might call reset?
-    def strobe
-      reset
-    end
-
     def start_hmove
       @hmove_counter = 0
       @movement_required = true if moves_to_apply_for_HMPn != 0

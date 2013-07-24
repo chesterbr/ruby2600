@@ -4,8 +4,8 @@ module Ruby2600
     # Movable objects on TIA keep internal counters with behaviour
     # described in  http://www.atarihq.com/danb/files/TIA_HW_Notes.txt
 
-    COUNTER_PERIOD = 40       # Value from 0-39
-    COUNTER_DIVIDER = 4       # Increments every 4 ticks (1/4 of TIA speed)
+    COUNTER_PERIOD = 40       # Internal counter value ranges from 0-39
+    COUNTER_DIVIDER = 4       # It increments every 4 ticks (1/4 of TIA speed)
     COUNTER_RESET_VALUE = 39  # See URL above 
     
     COUNTER_MAX = COUNTER_PERIOD * COUNTER_DIVIDER
@@ -14,7 +14,7 @@ module Ruby2600
       @counter_inner_value = rand(COUNTER_MAX)
     end
 
-    def reset
+    def strobe
       @counter_inner_value = COUNTER_RESET_VALUE * COUNTER_DIVIDER
     end
 
