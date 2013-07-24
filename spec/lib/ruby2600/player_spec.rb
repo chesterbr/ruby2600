@@ -37,7 +37,7 @@ describe Ruby2600::Player do
       300.times { player.pixel.should be_nil }
     end
 
-    context 'drawing (strobe, NUSIZ0)' do
+    context 'drawing (strobe, NUSIZ0, REFP0)' do
       COLOR = 2 * (rand(127) + 1)
       PIXELS = [COLOR, COLOR, nil, nil, COLOR, nil, COLOR, nil]
       PIXELS_2X = PIXELS.map    { |p| [p, p] }.flatten
@@ -61,21 +61,21 @@ describe Ruby2600::Player do
         before do
           tia[NUSIZ0] = 0
           player.strobe
+          5.times { player.pixel }
         end
 
         it 'should not draw anything on current scanline' do
-          5.times { player.pixel }
           pixels(player, 1, 160).should == Array.new(160)
         end
 
         it 'should draw after a full scanline (160pixels) + 5-bit delay' do
-          165.times { player.pixel }
+          160.times { player.pixel }
           pixels(player, 1, 8).should == PIXELS
         end
 
         it 'should draw again on subsequent scanlines' do
-          325.times { player.pixel }
-          5.times { pixels(player, 1, 160).should == PIXELS + Array.new(152) }
+          320.times { player.pixel }
+          10.times { pixels(player, 1, 160).should == PIXELS + Array.new(152) }
         end
       end
 
@@ -83,15 +83,15 @@ describe Ruby2600::Player do
         before do
           tia[NUSIZ0] = 1
           player.strobe
+          5.times { player.pixel }
         end
 
         it 'should only draw second copy on current scanline (after 5 bit delay)' do
-          5.times { player.pixel }
           pixels(player, 1, 24).should == Array.new(16) + PIXELS
         end
 
         it 'should draw both copies on subsequent scanlines' do
-          165.times { player.pixel }
+          160.times { player.pixel }
           pixels(player, 1, 24).should == PIXELS + Array.new(8) + PIXELS
         end
       end
@@ -100,15 +100,15 @@ describe Ruby2600::Player do
         before do
           tia[NUSIZ0] = 2
           player.strobe
+          5.times { player.pixel }
         end
 
         it 'should only draw second copy on current scanline (after 5 bit delay)' do
-          5.times { player.pixel }
           pixels(player, 1, 40).should == Array.new(32) + PIXELS
         end
 
         it 'should draw both copies on subsequent scanlines' do
-          165.times { player.pixel }
+          160.times { player.pixel }
           pixels(player, 1, 40).should == PIXELS + Array.new(24) + PIXELS
         end
       end
@@ -117,15 +117,15 @@ describe Ruby2600::Player do
         before do
           tia[NUSIZ0] = 3
           player.strobe
+          5.times { player.pixel }
         end
 
         it 'should only draw second and third copy on current scanline (after 5 bit delay)' do
-          5.times { player.pixel }
           pixels(player, 1, 40).should == Array.new(16) + PIXELS + Array.new(8) + PIXELS
         end
 
         it 'should draw three copies on subsequent scanlines' do
-          165.times { player.pixel }
+          160.times { player.pixel }
           pixels(player, 1, 40).should == PIXELS + Array.new(8) + PIXELS + Array.new(8) + PIXELS
         end
       end
@@ -134,15 +134,15 @@ describe Ruby2600::Player do
         before do
           tia[NUSIZ0] = 4
           player.strobe
+          5.times { player.pixel }
         end
 
         it 'should only draw second copy on current scanline (after 5 bit delay)' do
-          5.times { player.pixel }
           pixels(player, 1, 72).should == Array.new(64) + PIXELS
         end
 
         it 'should draw both copies on subsequent scanlines' do
-          165.times { player.pixel }
+          160.times { player.pixel }
           pixels(player, 1, 72).should == PIXELS + Array.new(56) + PIXELS
         end
       end
@@ -151,16 +151,16 @@ describe Ruby2600::Player do
         before do
           tia[NUSIZ0] = 5
           player.strobe
+          5.times { player.pixel }
         end
 
         it 'should not draw anything on current scanline' do
-          5.times { player.pixel }
           pixels(player, 1, 160).should == Array.new(160)
         end
 
         it 'should draw on subsequent scanlines' do
-          165.times { player.pixel }
-          5.times { pixels(player, 1, 160).should == PIXELS_2X + Array.new(144) }
+          160.times { player.pixel }
+          pixels(player, 1, 160).should == PIXELS_2X + Array.new(144)
         end
       end
 
@@ -168,23 +168,23 @@ describe Ruby2600::Player do
         before do
           tia[NUSIZ0] = 6
           player.strobe
+          5.times { player.pixel }
         end
 
         it 'should only draw second and third copy on current scanline (after 5 bit delay)' do
-          5.times { player.pixel }
           pixels(player, 1, 72).should == Array.new(32) + PIXELS + Array.new(24) + PIXELS
         end
 
         it 'should draw three copies on subsequent scanlines' do
-          165.times { player.pixel }
+          160.times { player.pixel }
           pixels(player, 1, 72).should == PIXELS + Array.new(24) + PIXELS + Array.new(24) + PIXELS
         end
 
         context 'with REFP0 set' do
-          before { tia[REFP0] = rand(256) | 0b1000 }          
+          before { tia[REFP0] = rand(256) | 0b1000 }
 
           it 'should reflect the drawing' do
-            165.times { player.pixel }
+            160.times { player.pixel }
             pixels(player, 1, 72).should == PIXELS.reverse + Array.new(24) + PIXELS.reverse + Array.new(24) + PIXELS.reverse
           end
         end
@@ -194,24 +194,24 @@ describe Ruby2600::Player do
         before do
           tia[NUSIZ0] = 7
           player.strobe
+          5.times { player.pixel }
         end
 
         it 'should not draw anything on current scanline' do
-          5.times { player.pixel }
           pixels(player, 1, 160).should == Array.new(160)
         end
 
         it 'should draw on subsequent scanlines' do
-          165.times { player.pixel }
-          5.times { pixels(player, 1, 160).should == PIXELS_4X + Array.new(128) }
+          160.times { player.pixel }
+          pixels(player, 1, 160).should == PIXELS_4X + Array.new(128)
         end
 
         context 'with REFP0 set' do
           before { tia[REFP0] = rand(256) | 0b1000 }          
 
           it 'should reflect the drawing' do
-            165.times { player.pixel }
-            5.times { pixels(player, 1, 160).should == PIXELS_4X.reverse + Array.new(128) }
+            160.times { player.pixel }
+            pixels(player, 1, 160).should == PIXELS_4X.reverse + Array.new(128)
           end
         end
       end
