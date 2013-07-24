@@ -1,12 +1,13 @@
 module Ruby2600
   class MovableObject
 
-    # Movable objects on TIA use counters that go from 0 to 39, running at 1/4
-    # of TIA speed. See http://www.atarihq.com/danb/files/TIA_HW_Notes.txt
+    # Movable objects on TIA keep internal counters with behaviour
+    # described in  http://www.atarihq.com/danb/files/TIA_HW_Notes.txt
 
-    COUNTER_PERIOD = 40
-    COUNTER_DIVIDER = 4
-    COUNTER_RESET_VALUE = 39
+    COUNTER_PERIOD = 40       # Value from 0-39
+    COUNTER_DIVIDER = 4       # Increments every 4 ticks (1/4 of TIA speed)
+    COUNTER_RESET_VALUE = 39  # See URL above 
+    
     COUNTER_MAX = COUNTER_PERIOD * COUNTER_DIVIDER
 
     def initialize
@@ -14,7 +15,7 @@ module Ruby2600
     end
 
     def reset
-      @counter_inner_value = COUNTER_RESET_VALUE * COUNTER_PERIOD
+      @counter_inner_value = COUNTER_RESET_VALUE * COUNTER_DIVIDER
     end
 
     def value
@@ -27,15 +28,14 @@ module Ruby2600
 
     def tick
       old_value = value
-      @counter_inner_value += 1
-      @counter_inner_value = 0 if @counter_inner_value == COUNTER_MAX
+      @counter_inner_value = (@counter_inner_value + 1) % COUNTER_MAX
       on_counter_change if value != old_value
     end
 
     private
 
     def on_counter_change
-      # Each object does its own magic by overriding this method
+      # Objects to trigger their "drawing circuits" by overriding this
     end
 
     def nibble_to_decimal(signed_byte)

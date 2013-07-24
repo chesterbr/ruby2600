@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe Ruby2600::TIAPlayer do
+describe Ruby2600::Player do
 
   let(:tia) { Array.new(32, 0) }
-  subject(:player) { Ruby2600::TIAPlayer.new(tia, 0) }
+  subject(:player) { Ruby2600::Player.new(tia, 0) }
 
   def pixels(player, first, last)
     (first-1).times { player.pixel }
@@ -11,7 +11,7 @@ describe Ruby2600::TIAPlayer do
   end
 
   context 'player 1' do
-    subject(:player1) { Ruby2600::TIAPlayer.new(tia, 1) }
+    subject(:player1) { Ruby2600::Player.new(tia, 1) }
 
     before do 
       tia[GRP0] = 0x00

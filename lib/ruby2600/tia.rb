@@ -22,8 +22,8 @@ module Ruby2600
       #@bl_counter = MovableObject.new
       # @bl_counter.on_change { |value| bl_counter_increased(value) }
       #@bl_pixels_to_draw = 0
-      @p0 = TIAPlayer.new(@reg, 0)
-      @p1 = TIAPlayer.new(@reg, 1)
+      @p0 = Player.new(@reg, 0)
+      @p1 = Player.new(@reg, 1)
     end
 
     def [](position)

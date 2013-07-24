@@ -1,5 +1,5 @@
 module Ruby2600
-  class TIAPlayer < MovableObject
+  class Player < MovableObject
     include Constants
 
     attr_accessor :old_GRPn
