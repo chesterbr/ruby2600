@@ -179,6 +179,15 @@ describe Ruby2600::Player do
           165.times { player.pixel }
           pixels(player, 1, 72).should == PIXELS + Array.new(24) + PIXELS + Array.new(24) + PIXELS
         end
+
+        context 'with REFP0 set' do
+          before { tia[REFP0] = rand(256) | 0b1000 }          
+
+          it 'should reflect the drawing' do
+            165.times { player.pixel }
+            pixels(player, 1, 72).should == PIXELS.reverse + Array.new(24) + PIXELS.reverse + Array.new(24) + PIXELS.reverse
+          end
+        end
       end
 
       context 'one copy, quad size' do
@@ -196,7 +205,16 @@ describe Ruby2600::Player do
           165.times { player.pixel }
           5.times { pixels(player, 1, 160).should == PIXELS_4X + Array.new(128) }
         end
-      end      
+
+        context 'with REFP0 set' do
+          before { tia[REFP0] = rand(256) | 0b1000 }          
+
+          it 'should reflect the drawing' do
+            165.times { player.pixel }
+            5.times { pixels(player, 1, 160).should == PIXELS_4X.reverse + Array.new(128) }
+          end
+        end
+      end
     end
   end
 end
