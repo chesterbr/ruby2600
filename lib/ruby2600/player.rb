@@ -35,7 +35,7 @@ module Ruby2600
         if (0..7).include?(@grp_bit)
           @pixel_bit = grp[7 - @grp_bit] 
           @bit_copies_written += 1
-          if @bit_copies_written == player_size
+          if @bit_copies_written == size
             @bit_copies_written = 0
             @grp_bit += 1
           end
@@ -57,7 +57,7 @@ module Ruby2600
       (0..7).inject(0) { |value, n| value + (bits[n] << (7 - n)) }
     end
 
-    def player_size
+    def size
       case @reg[NUSIZ0 + @n]
       when 0b101 then 2
       when 0b111 then 4

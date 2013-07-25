@@ -14,7 +14,7 @@ module Ruby2600
         if (0..7).include?(@grp_bit)
           @pixel_bit = @reg[ENAM0 + @n][1]
           @bit_copies_written += 1
-          if @bit_copies_written == missile_size
+          if @bit_copies_written == size
             @bit_copies_written = 0
             @grp_bit += 1
           end
@@ -27,7 +27,7 @@ module Ruby2600
       end
     end
 
-    def missile_size
+    def size
     	2 ** (@reg[NUSIZ0 + @n][5] * 2 + @reg[NUSIZ0 + @n][4])
     end
   end
