@@ -12,7 +12,7 @@ module Ruby2600
     COUNTER_MAX = COUNTER_PERIOD * COUNTER_DIVIDER
 
     class << self
-      attr_accessor :graphic_delay
+      attr_accessor :graphic_delay, :graphic_size
     end
 
     def initialize(tia_registers = nil, object_number = 0)
@@ -42,7 +42,31 @@ module Ruby2600
       on_counter_change if value != old_value
     end
 
+    def pixel
+      update_pixel_bit
+      tick      
+      @reg[COLUP0 + @n] if @pixel_bit == 1
+    end
+
     private
+
+    def update_pixel_bit
+      if @grp_bit
+        if (0..7).include?(@grp_bit)
+          @pixel_bit = pixel_bit
+          @bit_copies_written += 1
+          if @bit_copies_written == size
+            @bit_copies_written = 0
+            @grp_bit += 1
+          end
+        else
+          @grp_bit += 1
+        end
+        @grp_bit = nil if @grp_bit == self.class.graphic_size
+      else
+        @pixel_bit = nil
+      end
+    end
 
     def on_counter_change
       if (value == 39) ||
