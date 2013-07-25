@@ -24,6 +24,8 @@ module Ruby2600
       #@bl_pixels_to_draw = 0
       @p0 = Player.new(@reg, 0)
       @p1 = Player.new(@reg, 1)
+      @m0 = Missile.new(@reg, 0)
+      @m1 = Missile.new(@reg, 1)
     end
 
     def [](position)
@@ -36,6 +38,10 @@ module Ruby2600
         @p0.strobe
       when RESP1
         @p1.strobe
+      when RESM0
+        @m0.strobe
+      when RESM1
+        @m1.strobe
       when HMOVE
         @late_reset_hblank = true
         @p0.start_hmove
@@ -177,7 +183,9 @@ module Ruby2600
     def player_pixel
       p0_pixel = @p0.pixel
       p1_pixel = @p1.pixel
-      p0_pixel || p1_pixel
+      m0_pixel = @m0.pixel
+      m1_pixel = @m1.pixel
+      p0_pixel || p1_pixel || m0_pixel || m1_pixel
     end
   end
 end
