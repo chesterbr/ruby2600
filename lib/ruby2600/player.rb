@@ -5,7 +5,7 @@ module Ruby2600
     def pixel
       update_pixel_bit
       tick      
-      @reg[@COLUPn] if @pixel_bit == 1
+      @reg[COLUP0 + @n] if @pixel_bit == 1
     end
 
     def start_hmove
@@ -21,8 +21,8 @@ module Ruby2600
     end
 
     def moves_to_apply_for_HMPn
-      return 8 unless @reg[@HMPn]
-      signed = @reg[@HMPn] >> 4
+      return 8 unless @reg[HMP0 + @n]
+      signed = @reg[HMP0 + @n] >> 4
       signed >= 8 ? signed - 8 : signed + 8
     end
 
@@ -30,9 +30,9 @@ module Ruby2600
 
     def on_counter_change
       if (value == 39) ||
-         (value ==  3 && [0b001, 0b011].include?(@reg[@NUSIZn])) ||
-         (value ==  7 && [0b010, 0b011, 0b110].include?(@reg[@NUSIZn])) ||
-         (value == 15 && [0b100, 0b110].include?(@reg[@NUSIZn]))
+         (value ==  3 && [0b001, 0b011].include?(@reg[NUSIZ0 + @n])) ||
+         (value ==  7 && [0b010, 0b011, 0b110].include?(@reg[NUSIZ0 + @n])) ||
+         (value == 15 && [0b100, 0b110].include?(@reg[NUSIZ0 + @n]))
         @grp_bit = -5
         @bit_copies_written = 0
       end
@@ -57,8 +57,8 @@ module Ruby2600
     end
 
     def grp
-      result = @reg[@VDELPn] && @reg[@VDELPn][0] == 1 ? @old_GRPn : @reg[@GRPn]
-      @reg[@REFPn] && @reg[@REFPn][3] == 1 ? reflect(result) : result
+      result = @reg[VDELP0 + @n] && @reg[VDELP0 + @n][0] == 1 ? @old_GRPn : @reg[GRP0 + @n]
+      @reg[REFP0 + @n] && @reg[REFP0 + @n][3] == 1 ? reflect(result) : result
     end
 
     def reflect(bits)
@@ -66,7 +66,7 @@ module Ruby2600
     end
 
     def player_size
-      case @reg[@NUSIZn]
+      case @reg[NUSIZ0 + @n]
       when 0b101 then 2
       when 0b111 then 4
       else 1

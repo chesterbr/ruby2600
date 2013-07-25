@@ -11,17 +11,13 @@ module Ruby2600
     
     COUNTER_MAX = COUNTER_PERIOD * COUNTER_DIVIDER
 
-    def initialize(tia_registers = nil, number = 0)
+    def initialize(tia_registers = nil, object_number = 0)
       @counter_inner_value = rand(COUNTER_MAX)
 
-      @NUSIZn = NUSIZ0 + number
-      @COLUPn = COLUP0 + number
-      @ENAMn  = ENAM0  + number
-      @GRPn   = GRP0   + number
-      @VDELPn = VDELP0 + number
-      @REFPn  = REFP0  + number
-      @HMPn   = HMP0   + number
+      # These will help us use the correct TIA registers for Pn/Mn
+      # Ex.: for Player 1, @reg[NUSIZ0+@n] will be the value of NUSIZ1
       @reg = tia_registers
+      @n   = object_number
     end
 
     def strobe
