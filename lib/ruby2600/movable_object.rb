@@ -13,6 +13,8 @@ module Ruby2600
 
     class << self
       attr_accessor :graphic_delay, :graphic_size
+
+      @graphic_size = @graphic_delay = 0
     end
 
     def initialize(tia_registers = nil, object_number = 0)
