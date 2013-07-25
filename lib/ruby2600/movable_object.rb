@@ -1,5 +1,6 @@
 module Ruby2600
   class MovableObject
+    include Constants
 
     # Movable objects on TIA keep internal counters with behaviour
     # described in  http://www.atarihq.com/danb/files/TIA_HW_Notes.txt
@@ -10,8 +11,17 @@ module Ruby2600
     
     COUNTER_MAX = COUNTER_PERIOD * COUNTER_DIVIDER
 
-    def initialize
+    def initialize(tia_registers = nil, number = 0)
       @counter_inner_value = rand(COUNTER_MAX)
+
+      @NUSIZn = NUSIZ0 + number
+      @COLUPn = COLUP0 + number
+      @ENAMn  = ENAM0  + number
+      @GRPn   = GRP0   + number
+      @VDELPn = VDELP0 + number
+      @REFPn  = REFP0  + number
+      @HMPn   = HMP0   + number
+      @reg = tia_registers
     end
 
     def strobe
