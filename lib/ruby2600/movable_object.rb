@@ -11,6 +11,10 @@ module Ruby2600
     
     COUNTER_MAX = COUNTER_PERIOD * COUNTER_DIVIDER
 
+    class << self
+      attr_accessor :graphic_delay
+    end
+
     def initialize(tia_registers = nil, object_number = 0)
       @counter_inner_value = rand(COUNTER_MAX)
 
@@ -41,7 +45,13 @@ module Ruby2600
     private
 
     def on_counter_change
-      # Objects to trigger their "drawing circuits" by overriding this
+      if (value == 39) ||
+         (value ==  3 && [0b001, 0b011].include?(@reg[NUSIZ0 + @n])) ||
+         (value ==  7 && [0b010, 0b011, 0b110].include?(@reg[NUSIZ0 + @n])) ||
+         (value == 15 && [0b100, 0b110].include?(@reg[NUSIZ0 + @n]))
+        @grp_bit = -self.class.graphic_delay
+        @bit_copies_written = 0
+      end
     end
 
     def nibble_to_decimal(signed_byte)

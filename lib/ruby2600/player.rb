@@ -2,6 +2,8 @@ module Ruby2600
   class Player < MovableObject
     attr_accessor :old_GRPn
 
+    @graphic_delay = 5
+
     def pixel
       update_pixel_bit
       tick      
@@ -27,16 +29,6 @@ module Ruby2600
     end
 
     private
-
-    def on_counter_change
-      if (value == 39) ||
-         (value ==  3 && [0b001, 0b011].include?(@reg[NUSIZ0 + @n])) ||
-         (value ==  7 && [0b010, 0b011, 0b110].include?(@reg[NUSIZ0 + @n])) ||
-         (value == 15 && [0b100, 0b110].include?(@reg[NUSIZ0 + @n]))
-        @grp_bit = -5
-        @bit_copies_written = 0
-      end
-    end
 
     def update_pixel_bit
       if @grp_bit
