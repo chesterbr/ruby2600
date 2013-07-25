@@ -5,11 +5,6 @@ describe Ruby2600::Player do
   let(:tia) { Array.new(32, 0) }
   subject(:player) { Ruby2600::Player.new(tia, 0) }
 
-  def pixels(player, first, last)
-    (first-1).times { player.pixel }
-    (0..(last - first)).map { player.pixel }
-  end
-
   context 'player 1' do
     subject(:player1) { Ruby2600::Player.new(tia, 1) }
 
