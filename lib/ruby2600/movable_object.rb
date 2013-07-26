@@ -17,7 +17,7 @@ module Ruby2600
       @graphic_size = @graphic_delay = @hmove_register = 0
     end
 
-    def initialize(tia_registers = nil, object_number = 0)
+    def initialize(tia_registers, object_number = 0)
       @counter_inner_value = rand(COUNTER_MAX)
 
       # These will help us use the correct TIA registers for Pn/Mn
@@ -52,19 +52,19 @@ module Ruby2600
 
     def start_hmove
       @hmove_counter = 0
-      @movement_required = true if HM_value != 0
+      @movement_required = true if hm_value != 0
     end
 
     def apply_hmove
       return unless @movement_required
       tick
       @hmove_counter += 1
-      @movement_required = false if @hmove_counter == HM_value
+      @movement_required = false if @hmove_counter == hm_value
     end
 
     private
 
-    def HM_value
+    def hm_value
       hm = @reg[self.class.hmove_register + @n]
       return 8 unless hm
       signed = hm >> 4

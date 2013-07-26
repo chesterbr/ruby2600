@@ -2,7 +2,9 @@ require 'spec_helper'
 
 describe Ruby2600::MovableObject do
 
-  let(:sample_of_initial_values) { Array.new(100) { Ruby2600::MovableObject.new.value } }
+  let(:subject) { Ruby2600::MovableObject.new(tia_registers) }
+  let(:tia_registers) { Array.new(32, 0) }
+  let(:sample_of_initial_values) { Array.new(100) { Ruby2600::MovableObject.new(tia_registers).value } }
 
   describe '#initialize' do
     it 'should initialize with a random value' do
