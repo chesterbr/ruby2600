@@ -12,9 +12,9 @@ module Ruby2600
     COUNTER_MAX = COUNTER_PERIOD * COUNTER_DIVIDER
 
     class << self
-      attr_accessor :graphic_delay, :graphic_size
+      attr_accessor :graphic_delay, :graphic_size, :hmove_register
 
-      @graphic_size = @graphic_delay = 0
+      @graphic_size = @graphic_delay = @hmove_register = 0
     end
 
     def initialize(tia_registers = nil, object_number = 0)
@@ -50,7 +50,26 @@ module Ruby2600
       @reg[COLUP0 + @n] if @pixel_bit == 1
     end
 
+    def start_hmove
+      @hmove_counter = 0
+      @movement_required = true if HM_value != 0
+    end
+
+    def apply_hmove
+      return unless @movement_required
+      tick
+      @hmove_counter += 1
+      @movement_required = false if @hmove_counter == HM_value
+    end
+
     private
+
+    def HM_value
+      hm = @reg[self.class.hmove_register + @n]
+      return 8 unless hm
+      signed = hm >> 4
+      signed >= 8 ? signed - 8 : signed + 8
+    end
 
     def update_pixel_bit
       if @grp_bit
@@ -78,10 +97,6 @@ module Ruby2600
         @grp_bit = -self.class.graphic_delay
         @bit_copies_written = 0
       end
-    end
-
-    def nibble_to_decimal(signed_byte)
-      [0, 1, 2, 3, 4, 5, 6, 7, -8, -7, -6, -5, -4, -3, -2, -1][signed_byte & 0b1111]
     end
   end
 end

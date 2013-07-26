@@ -4,30 +4,7 @@ module Ruby2600
 
     @graphic_delay = 5
     @graphic_size = 8
-
-    def pixel
-      update_pixel_bit
-      tick      
-      @reg[COLUP0 + @n] if @pixel_bit == 1
-    end
-
-    def start_hmove
-      @hmove_counter = 0
-      @movement_required = true if moves_to_apply_for_HMPn != 0
-    end
-
-    def apply_hmove
-      return unless @movement_required
-      tick
-      @hmove_counter += 1
-      @movement_required = false if @hmove_counter == moves_to_apply_for_HMPn
-    end
-
-    def moves_to_apply_for_HMPn
-      return 8 unless @reg[HMP0 + @n]
-      signed = @reg[HMP0 + @n] >> 4
-      signed >= 8 ? signed - 8 : signed + 8
-    end
+    @hmove_register = HMP0
 
     private
 
