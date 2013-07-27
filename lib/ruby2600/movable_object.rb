@@ -99,13 +99,16 @@ module Ruby2600
     end
 
     def on_counter_change
-      if (value == 39) ||
-         (value ==  3 && [0b001, 0b011].include?(reg(NUSIZ0))) ||
-         (value ==  7 && [0b010, 0b011, 0b110].include?(reg(NUSIZ0))) ||
-         (value == 15 && [0b100, 0b110].include?(reg(NUSIZ0)))
+      if (value == COUNTER_RESET_VALUE) || should_draw_copy?
         @grp_bit = -self.class.graphic_delay
         @bit_copies_written = 0
       end
+    end
+
+    def should_draw_copy?
+      (value ==  3 && [0b001, 0b011].include?(reg(NUSIZ0))) ||
+      (value ==  7 && [0b010, 0b011, 0b110].include?(reg(NUSIZ0))) ||
+      (value == 15 && [0b100, 0b110].include?(reg(NUSIZ0)))
     end
   end
 end
