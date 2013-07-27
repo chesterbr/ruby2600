@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Ruby2600::Player do
 
-  let(:tia) { Array.new(32, 0) }
+  let(:tia) { Array.new(64, 0) }
   subject(:player) { Ruby2600::Player.new(tia, 0) }
 
   context 'player 1' do

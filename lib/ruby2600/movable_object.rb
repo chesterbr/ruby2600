@@ -2,6 +2,10 @@ module Ruby2600
   class MovableObject
     include Constants
 
+    # Value used by player/balls when vertical delay (VDELP0/VDELP1/VDELBL) is set
+    # GRP1 write triggers copy of GRP0/ENABL to old_value, GRP0 write does same for GRP1
+    attr_accessor :old_value 
+
     # Movable objects on TIA keep internal counters with behaviour
     # described in  http://www.atarihq.com/danb/files/TIA_HW_Notes.txt
 
@@ -12,18 +16,16 @@ module Ruby2600
     COUNTER_MAX = COUNTER_PERIOD * COUNTER_DIVIDER
 
     class << self
-      attr_accessor :graphic_delay, :graphic_size, :hmove_register
+      attr_accessor :graphic_delay, :graphic_size, :hmove_register, :color_register
 
-      @graphic_size = @graphic_delay = @hmove_register = 0
+      @graphic_size = @graphic_delay = @hmove_register = @color_register = 0
     end
 
     def initialize(tia_registers, object_number = 0)
+      @tia_registers = tia_registers
+      @object_number = object_number
       @counter_inner_value = rand(COUNTER_MAX)
-
-      # These will help us use the correct TIA registers for Pn/Mn
-      # Ex.: for Player 1, @reg[NUSIZ0+@n] will be the value of NUSIZ1
-      @reg = tia_registers
-      @n   = object_number
+      @old_value = rand(256)
     end
 
     def strobe
@@ -47,7 +49,7 @@ module Ruby2600
     def pixel
       update_pixel_bit
       tick      
-      @reg[COLUP0 + @n] if @pixel_bit == 1
+      reg(self.class.color_register) if @pixel_bit == 1
     end
 
     def start_hmove
@@ -64,8 +66,15 @@ module Ruby2600
 
     private
 
+    # Value of a register for the current object
+    # Ex.: reg(GRP0) will read GRP0 for P0, but GRP1 for P1;
+    #      reg(HMM0) will read HMM0 for M0, but HMM1 for M1;
+    def reg(register_name)
+      @tia_registers[register_name + @object_number]
+    end
+
     def hm_value
-      hm = @reg[self.class.hmove_register + @n]
+      hm = reg(self.class.hmove_register)
       return 8 unless hm
       signed = hm >> 4
       signed >= 8 ? signed - 8 : signed + 8
@@ -91,9 +100,9 @@ module Ruby2600
 
     def on_counter_change
       if (value == 39) ||
-         (value ==  3 && [0b001, 0b011].include?(@reg[NUSIZ0 + @n])) ||
-         (value ==  7 && [0b010, 0b011, 0b110].include?(@reg[NUSIZ0 + @n])) ||
-         (value == 15 && [0b100, 0b110].include?(@reg[NUSIZ0 + @n]))
+         (value ==  3 && [0b001, 0b011].include?(reg(NUSIZ0))) ||
+         (value ==  7 && [0b010, 0b011, 0b110].include?(reg(NUSIZ0))) ||
+         (value == 15 && [0b100, 0b110].include?(reg(NUSIZ0)))
         @grp_bit = -self.class.graphic_delay
         @bit_copies_written = 0
       end

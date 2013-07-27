@@ -11,7 +11,7 @@ describe Ruby2600::TIA do
   end
 
   def clear_tia_registers
-    0.upto(0x3F) { |reg| tia[reg] = 0 }
+    0x3F.downto(0) { |reg| tia[reg] = 0 }
   end
 
   describe '#initialize' do

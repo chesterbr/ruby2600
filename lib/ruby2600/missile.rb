@@ -4,15 +4,16 @@ module Ruby2600
     @graphic_delay = 4
     @graphic_size = 1
     @hmove_register = HMP0
+    @color_register = COLUP0
 
     private
 
     def pixel_bit
-      @reg[ENAM0 + @n][1]
+      reg(ENAM0)[1]
     end
 
     def size
-    	2 ** (@reg[NUSIZ0 + @n][5] * 2 + @reg[NUSIZ0 + @n][4])
+    	2 ** (reg(NUSIZ0)[5] * 2 + reg(NUSIZ0)[4])
     end
   end
 end

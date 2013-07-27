@@ -17,15 +17,13 @@ module Ruby2600
                        [PF2, 0], [PF2, 1], [PF2, 2], [PF2, 3], [PF2, 4], [PF2, 5], [PF2, 6], [PF2, 7]]
 
     def initialize
-      @reg = Array.new(32) { rand(256) }
+      @reg = Array.new(64) { rand(256) }
       @cpu_credits = 0
-      #@bl_counter = MovableObject.new
-      # @bl_counter.on_change { |value| bl_counter_increased(value) }
-      #@bl_pixels_to_draw = 0
       @p0 = Player.new(@reg, 0)
       @p1 = Player.new(@reg, 1)
       @m0 = Missile.new(@reg, 0)
       @m1 = Missile.new(@reg, 1)
+      @bl = Ball.new(@reg)
     end
 
     def [](position)
@@ -42,20 +40,24 @@ module Ruby2600
         @m0.strobe
       when RESM1
         @m1.strobe
+      when RESBL
+        @bl.strobe
       when HMOVE
         @late_reset_hblank = true
         @p0.start_hmove
         @p1.start_hmove
-        #@bl_counter.move @reg[HMBL]
+        @m0.start_hmove
+        @m1.start_hmove
+        @bl.start_hmove
       when HMCLR
-        @reg[HMP0] = @reg[HMP1] = 0
+        @reg[HMP0] = @reg[HMP1] = @reg[HMM0] = @reg[HMM1] = @reg[HMBL] = 0
       when WSYNC
         @cpu.halted = true
       else
         @reg[position] = value
       end
-      @p1.old_GRPn = @reg[GRP1] if position == GRP0
-      @p0.old_GRPn = @reg[GRP0] if position == GRP1
+      @p1.old_value = @reg[GRP1] if position == GRP0
+      @p0.old_value = @reg[GRP0] if position == GRP1
     end
 
     def scanline
@@ -111,6 +113,9 @@ module Ruby2600
       if color_clock % 4 == 0 # FIXME assuming H@1 postition here, might need adjustment
         @p0.apply_hmove
         @p1.apply_hmove
+        @m0.apply_hmove
+        @m1.apply_hmove
+        @bl.apply_hmove
       end
       cpu.tick if color_clock % 3 == 2
     end
@@ -185,7 +190,8 @@ module Ruby2600
       p1_pixel = @p1.pixel
       m0_pixel = @m0.pixel
       m1_pixel = @m1.pixel
-      p0_pixel || p1_pixel || m0_pixel || m1_pixel
+      bl_pixel = @bl.pixel
+      bl_pixel || p0_pixel || p1_pixel || m0_pixel || m1_pixel
     end
   end
 end
