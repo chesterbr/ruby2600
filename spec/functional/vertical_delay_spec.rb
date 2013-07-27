@@ -13,7 +13,7 @@ describe 'vertical delay registers' do
   end
 
   def ball_on_scanline
-    tia.scanline[0]
+    tia.scanline[4]
   end
 
   before do
@@ -73,17 +73,17 @@ describe 'vertical delay registers' do
       tia.scanline # FIXME remove and should work
 
       # Old register = enable ball, new register = disable ball
-      tia[GRP0] = 0b10
+      tia[ENABL] = 0b10
       tia[GRP1] = rand(256)
-      tia[GRP0] = 0b00
+      tia[ENABL] = 0b00
     end
 
-    xit "should use new register (disabled => BK color) by default" do
+    it "should use new register (disabled => BK color) by default" do
       ball_on_scanline.should == 0x11
     end
 
-    xit "should use old register (enabled => PF color) if VDELP0 bit 0 is set" do
-      tia[VDELP0] = rand(256) | 1
+    it "should use old register (enabled => PF color) if VDELP0 bit 0 is set" do
+      tia[VDELBL] = rand(256) | 1
       ball_on_scanline.should == 0x22
     end
   end
