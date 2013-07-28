@@ -8,17 +8,12 @@ describe 'hello world with CPU, TIA, Cart and Bus' do
   let(:riot) { Ruby2600::RIOT.new }
   let!(:bus) { Ruby2600::Bus.new(cpu, tia, cart, riot) }
 
-  before do
-    2.times { tia.frame } # discard the first few, most likely won't sync right
+  it 'generates frames with hello world' do
+    tia.frame # first frame won't sync, discard it
+    2.times { text(tia.frame).should == hello_world_text }
   end
 
-  it 'generates a series of frames with hello world' do
-    5.times do
-      text_in(tia.frame).should == hello_world_text
-    end
-  end
-
-  def text_in(frame)
+  def text(frame)
     trim_blank_lines( frame.inject('') do |text_frame, scanline|
       text_frame << scanline.map{ |c| c == 0 ? " " : "X" }.join.rstrip << "\n"
     end)
