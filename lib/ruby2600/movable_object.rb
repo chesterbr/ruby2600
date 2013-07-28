@@ -49,7 +49,7 @@ module Ruby2600
     def pixel
       update_pixel_bit
       tick      
-      reg(self.class.color_register) if @pixel_bit == 1
+      reg(self.class.color_register) if @pixel_bit == 1      
     end
 
     def start_hmove

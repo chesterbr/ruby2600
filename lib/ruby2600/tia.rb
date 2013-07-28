@@ -10,20 +10,14 @@ module Ruby2600
     HORIZONTAL_BLANK_CLK_COUNT = 68
     TOTAL_SCANLINE_CLK_COUNT = 228
 
-    # Maps which register/bit should be set for each playfield pixel
-
-    PLAYFIELD_ORDER = [[PF0, 4], [PF0, 5], [PF0, 6], [PF0, 7],
-                       [PF1, 7], [PF1, 6], [PF1, 5], [PF1, 4], [PF1, 3], [PF1, 2], [PF1, 1], [PF1, 0],
-                       [PF2, 0], [PF2, 1], [PF2, 2], [PF2, 3], [PF2, 4], [PF2, 5], [PF2, 6], [PF2, 7]]
-
     def initialize
       @reg = Array.new(64) { rand(256) }
-      @cpu_credits = 0
       @p0 = Player.new(@reg, 0)
       @p1 = Player.new(@reg, 1)
       @m0 = Missile.new(@reg, 0)
       @m1 = Missile.new(@reg, 1)
       @bl = Ball.new(@reg)
+      @pf = Playfield.new(@reg)
     end
 
     def [](position)
@@ -81,6 +75,7 @@ module Ruby2600
       @late_reset_hblank = false
       @scanline = Array.new(160, 0)
       @pixel = 0
+      @pf.value = 0 # Playfield position is fixed
     end
 
     def wait_horizontal_blank
@@ -90,7 +85,7 @@ module Ruby2600
     def draw_scanline
       HORIZONTAL_BLANK_CLK_COUNT.upto TOTAL_SCANLINE_CLK_COUNT - 1 do |color_clock|
         unless vertical_blank? || (@late_reset_hblank && @pixel < 8)
-          @scanline[@pixel] = player_pixel || pf_pixel || bg_pixel
+          @scanline[@pixel] = player_pixel || bg_pixel
         end
         sync_2600_with color_clock
         @pixel += 1
@@ -133,28 +128,6 @@ module Ruby2600
 
     # Playfield
 
-    def pf_pixel
-      pf_color if pf_bit_set?
-    end
-
-    def pf_color
-      @reg[score_mode? ? COLUP0 + @pixel / 80 : COLUPF]
-    end
-
-    def pf_bit_set?
-      pf_pixel = (@pixel / 4) % 20
-      pf_pixel = 19 - pf_pixel if reflect_current_side?
-      register, bit = PLAYFIELD_ORDER[pf_pixel]
-      @reg[register][bit] == 1
-    end
-
-    def reflect_current_side?
-      @reg[CTRLPF][0] == 1 && @pixel > 79
-    end
-
-    def score_mode?
-      @reg[CTRLPF][1] == 1
-    end
 
     # Players
     # (need to request both pixels to keep counters in sync,
@@ -166,7 +139,8 @@ module Ruby2600
       m0_pixel = @m0.pixel
       m1_pixel = @m1.pixel
       bl_pixel = @bl.pixel
-      bl_pixel || p0_pixel || p1_pixel || m0_pixel || m1_pixel
+      pf_pixel = @pf.pixel
+      bl_pixel || p0_pixel || p1_pixel || m0_pixel || m1_pixel || pf_pixel
     end
   end
 end
