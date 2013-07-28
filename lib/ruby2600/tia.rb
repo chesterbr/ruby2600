@@ -89,14 +89,10 @@ module Ruby2600
 
     def draw_scanline
       HORIZONTAL_BLANK_CLK_COUNT.upto TOTAL_SCANLINE_CLK_COUNT - 1 do |color_clock|
-        sync_2600_with color_clock
-        if @late_reset_hblank && @pixel < 8
-          @pixel += 1
-          next
-        end
-        unless vertical_blank?
+        unless vertical_blank? || (@late_reset_hblank && @pixel < 8)
           @scanline[@pixel] = player_pixel || pf_pixel || bg_pixel
         end
+        sync_2600_with color_clock
         @pixel += 1
       end
       @scanline
@@ -159,28 +155,6 @@ module Ruby2600
     def score_mode?
       @reg[CTRLPF][1] == 1
     end
-
-    # Ball
-
-    # def bl_pixel
-    #   return nil unless @reg[ENABL][1]==1 && @bl_pixels_to_draw > 0
-    #   @bl_pixels_to_draw -= 1
-    #   @reg[COLUPF]
-    # end
-
-    # def bl_size
-    #   2 ** (2 * @reg[CTRLPF][5] + @reg[CTRLPF][4])
-    # end
-
-    # def bl_counter_increased(value)
-    #   if value == 0
-    #     @bl_pixels_to_draw = [bl_size, 4].min
-    #   elsif value == 1 && bl_size == 8
-    #     @bl_pixels_to_draw = 4
-    #   else
-    #     @bl_pixels_to_draw = 0
-    #   end
-    # end
 
     # Players
     # (need to request both pixels to keep counters in sync,
