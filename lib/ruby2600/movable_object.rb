@@ -106,9 +106,10 @@ module Ruby2600
     end
 
     def should_draw_copy?
-      (value ==  3 && [0b001, 0b011].include?(reg(NUSIZ0))) ||
-      (value ==  7 && [0b010, 0b011, 0b110].include?(reg(NUSIZ0))) ||
-      (value == 15 && [0b100, 0b110].include?(reg(NUSIZ0)))
+      nusiz_bits = reg(NUSIZ0) & 0b111
+      (value ==  3 && [0b001, 0b011].include?(nusiz_bits)) ||
+      (value ==  7 && [0b010, 0b011, 0b110].include?(nusiz_bits)) ||
+      (value == 15 && [0b100, 0b110].include?(nusiz_bits))
     end
   end
 end

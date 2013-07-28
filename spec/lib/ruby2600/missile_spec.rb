@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Ruby2600::Missile do
 
-  let(:tia) { Array.new(32, 0) }
+  let(:tia) { Array.new(64, 0) }
   subject(:missile) { Ruby2600::Missile.new(tia, 0) }
 
   context 'missile 1' do
@@ -28,7 +28,7 @@ describe Ruby2600::Missile do
 
   describe 'pixel' do
     before do
-      tia[COLUP0] = rand(256)
+      tia[COLUP0] = rand(255) + 1
     end
 
     it 'should never output if ENAM0 is disabled' do
@@ -44,7 +44,7 @@ describe Ruby2600::Missile do
     end
 
     context 'drawing (strobe)' do
-      let(:color) { [rand(256)] }
+      let(:color) { [rand(255) + 1] }
 
       before do
         # Cleanup and pick a random position
@@ -165,6 +165,33 @@ describe Ruby2600::Missile do
           160.times { missile.pixel }
           pixels(missile, 1, 72).should == color + Array.new(7) + Array.new(24) + color + Array.new(7) + Array.new(24) + color + Array.new(7)
         end
+
+        context '2x' do
+          before { tia[NUSIZ0] = 0b00010110 }
+
+          it 'should draw 3 copies with size 2' do
+            160.times { missile.pixel }
+            pixels(missile, 1, 160).should == scanline_with_object(2, color[0], 3)
+          end
+        end
+
+        context '4x' do
+          before { tia[NUSIZ0] = 0b00100110 }
+
+          it 'should draw 3 copies with size 4' do
+            160.times { missile.pixel }
+            pixels(missile, 1, 160).should == scanline_with_object(4, color[0], 3)
+          end
+        end
+
+        context '8x' do
+          before { tia[NUSIZ0] = 0b00110110 }
+
+          it 'should draw 3 copies with size 8' do
+            160.times { missile.pixel }
+            pixels(missile, 1, 160).should == scanline_with_object(8, color[0], 3)
+          end
+        end        
       end
     end
 
