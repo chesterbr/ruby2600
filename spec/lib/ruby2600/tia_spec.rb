@@ -134,7 +134,7 @@ describe Ruby2600::TIA do
 
   describe '#topmost_pixel' do
     context 'CTRLPF priority bit clear' do
-      before { tia[CTRLPF] = rand(256) & 0b100 }
+      before { tia[CTRLPF] = rand(256) & 0b011 }
 
       it { tia.should be_using_priority [:p0, :m0, :p1, :m1, :bl, :pf, :bk] }
     end
@@ -152,10 +152,9 @@ describe Ruby2600::TIA do
         others.each { |p| instance_variable_set "@#{p}_pixel", nil }
         # ...the first one (color = 0) should be the topmost...
         return false unless topmost_pixel == 0
-        puts "DEBUG: Priority checked for #{enabled.first}"
         # ...and we disable it to recursively check the others, until none left
         first = enabled.shift
-        first.nil? ? using_priority?(enabled, others << first) : true
+        enabled.empty? ? true : using_priority?(enabled, others << first)
       end
     end
   end
