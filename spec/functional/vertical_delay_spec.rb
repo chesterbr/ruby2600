@@ -80,7 +80,7 @@ describe 'vertical delay' do
     end
 
     it "should use old register (enabled) if VDELP0 bit 0 is set" do
-      tia[VDELBL] = rand(256) | 1
+      tia[VDELBL] = rand(256) & 1
       puts tia.scanline.to_s
       ball_on_scanline.should == 0x22
     end
