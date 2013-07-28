@@ -1,21 +1,24 @@
+# Playfield isn't really *movable*, and could be drawn directly as the
+# TIA class draws the scanline, but giving it its own class and counter
+# simplifies testing and pushes class TIA towards SRP
+
 module Ruby2600
-  # Of course, the Playfield is not a *movable* object, and its drawing
-  # is synced with the main scanline counter. But moving it to a separate
-  # class with its own counter makes sense, and pushes class TIA towards SRP
   class Playfield < MovableObject
 
-  	# Maps which register/bit should be set for each playfield pixel
+  	@color_register = COLUPF
 
-  	PLAYFIELD_ORDER = [[PF0, 4], [PF0, 5], [PF0, 6], [PF0, 7],
-  	                   [PF1, 7], [PF1, 6], [PF1, 5], [PF1, 4], [PF1, 3], [PF1, 2], [PF1, 1], [PF1, 0],
-  	                   [PF2, 0], [PF2, 1], [PF2, 2], [PF2, 3], [PF2, 4], [PF2, 5], [PF2, 6], [PF2, 7]]
+  	# register+bit map for each playfield pixel
+
+  	REG_AND_BIT_FOR_PIXEL = [[PF0, 4], [PF0, 5], [PF0, 6], [PF0, 7],
+  	                         [PF1, 7], [PF1, 6], [PF1, 5], [PF1, 4], [PF1, 3], [PF1, 2], [PF1, 1], [PF1, 0],
+  	                         [PF2, 0], [PF2, 1], [PF2, 2], [PF2, 3], [PF2, 4], [PF2, 5], [PF2, 6], [PF2, 7]]
 
   	private
 
     def update_pixel_bit
       pf_pixel = value % 20
       pf_pixel = 19 - pf_pixel if reflect?
-      register, bit = PLAYFIELD_ORDER[pf_pixel]
+      register, bit = REG_AND_BIT_FOR_PIXEL[pf_pixel]
       @pixel_bit = reg(register)[bit]
     end
 

@@ -129,6 +129,7 @@ describe Ruby2600::TIA do
       pending "Latches: INPT4-INPT5 bit (6) and INPT6-INPT7 bit(7)"
     end
 
+    it 'late hblank shifts everything'
 
     it 'should get its color ahead of players/missiles if bit 2 is set (priority'
 
