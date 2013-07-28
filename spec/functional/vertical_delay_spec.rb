@@ -1,11 +1,14 @@
 require 'spec_helper'
 
-describe 'vertical delay registers' do
-  let(:tia) do
-    Ruby2600::TIA.new.tap do |tia|
-      tia.cpu  = mock('cpu',  :tick => nil, :halted= => nil)
-      tia.riot = mock('riot', :tick => nil)
-    end
+describe 'vertical delay' do
+  subject(:tia) do
+    tia = Ruby2600::TIA.new
+    tia.cpu = mock('cpu', :tick => nil, :halted= => nil)
+    tia.riot = mock('riot', :tick => nil)
+    tia.scanline
+    0x3F.downto(0) { |reg| tia[reg] = 0 }
+    tia.scanline
+    tia
   end
 
   def grp_on_scanline
@@ -14,11 +17,6 @@ describe 'vertical delay registers' do
 
   def ball_on_scanline
     tia.scanline[4]
-  end
-
-  before do
-    0.upto(63) { |i| tia[i] = 0 }
-    tia.scanline
   end
 
   context 'VDELP0' do
@@ -67,10 +65,8 @@ describe 'vertical delay registers' do
 
   context 'VDELBL' do
     before do
-      tia[COLUBK] = 0x11
       tia[COLUPF] = 0x22
       tia[RESBL] = rand(256)
-      tia.scanline # FIXME remove and should work
 
       # Old register = enable ball, new register = disable ball
       tia[ENABL] = 0b10
@@ -78,12 +74,14 @@ describe 'vertical delay registers' do
       tia[ENABL] = 0b00
     end
 
-    it "should use new register (disabled => BK color) by default" do
-      ball_on_scanline.should == 0x11
+    it "should use new register (disabled) by default" do
+      puts tia.scanline.to_s
+      ball_on_scanline.should_not == 0x22
     end
 
-    it "should use old register (enabled => PF color) if VDELP0 bit 0 is set" do
+    it "should use old register (enabled) if VDELP0 bit 0 is set" do
       tia[VDELBL] = rand(256) | 1
+      puts tia.scanline.to_s
       ball_on_scanline.should == 0x22
     end
   end
