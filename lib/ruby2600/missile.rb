@@ -3,7 +3,7 @@ module Ruby2600
 
     @graphic_delay = 4
     @graphic_size = 1
-    @hmove_register = HMP0
+    @hmove_register = HMM0
     @color_register = COLUP0
 
     private

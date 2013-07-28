@@ -54,7 +54,7 @@ module Ruby2600
 
     def start_hmove
       @hmove_counter = 0
-      @movement_required = true if hm_value != 0
+      @movement_required = !hm_value.zero?
     end
 
     def apply_hmove
@@ -74,10 +74,9 @@ module Ruby2600
     end
 
     def hm_value
-      hm = reg(self.class.hmove_register)
-      return 8 unless hm
-      signed = hm >> 4
-      signed >= 8 ? signed - 8 : signed + 8
+      nibble = reg(self.class.hmove_register) >> 4
+      nibble < 8 ? nibble + 8 : nibble - 8
+      #[8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7][nibble]
     end
 
     def update_pixel_bit

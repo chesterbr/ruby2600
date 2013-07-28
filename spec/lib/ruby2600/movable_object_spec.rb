@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Ruby2600::MovableObject do
 
   let(:subject) { Ruby2600::MovableObject.new(tia_registers) }
-  let(:tia_registers) { Array.new(32, 0) }
+  let(:tia_registers) { Array.new(64, 0) }
   let(:sample_of_initial_values) { Array.new(100) { Ruby2600::MovableObject.new(tia_registers).value } }
 
   describe '#initialize' do
@@ -70,5 +70,114 @@ describe Ruby2600::MovableObject do
       end
     end
   end
+
+  describe '#reg' do
+    context 'p0 / m0 / bl' do
+      let(:subject) { Ruby2600::MovableObject.new(tia_registers, 0) }
+
+      it 'should always read the requested register' do
+        tia_registers.should_receive(:[]).with(HMP0)
+
+        subject.send(:reg, HMP0)
+      end
+    end
+
+    context 'p1 / m1' do
+      let(:subject) { Ruby2600::MovableObject.new(tia_registers, 1) }
+
+      it 'should read the matching register for the other object' do
+        tia_registers.should_receive(:[]).with(HMP1)
+
+        subject.send(:reg, HMP0)
+      end
+    end
+  end
+
+  describe '#start_hmove / #apply_hmove' do
+    before do
+      Ruby2600::MovableObject.hmove_register = HMP0
+      subject.value = 20
+    end
+
+    # When HMOVE is strobed, TIA (and the TIA class here) extends the
+    # horizontal blank (and shortens the visible scanline) by 8 pixels,
+    # pushing every movable object 8 pixels to the right.
+    # Then it compensates by inserting additional clocks, from none
+    # (for a -8 move) to 15 (for a +7 move). THAT is done by #apply_move
+
+    it 'should add no extra CLK ticks for a -8 move' do
+      tia_registers[HMP0] = 0b10000000
+      subject.start_hmove
+
+      subject.should_not_receive(:tick)
+
+      16.times { subject.apply_hmove }
+    end
+
+    it 'should add 1 extra CLK ticks for a -7 move' do
+      tia_registers[HMP0] = 0b10010000
+      subject.start_hmove
+
+      subject.should_receive(:tick).once
+
+      16.times { subject.apply_hmove }
+    end
+
+    it 'should add 2 extra CLK ticks for a -6 move' do
+      tia_registers[HMP0] = 0b10100000
+      subject.start_hmove
+
+      subject.should_receive(:tick).twice
+
+      16.times { subject.apply_hmove }
+    end
+
+    it 'should add 6 extra CLK ticks for a -2 move' do
+      tia_registers[HMP0] = 0b11100000
+      subject.start_hmove
+
+      subject.should_receive(:tick).exactly(6).times
+
+      16.times { subject.apply_hmove }
+    end
+
+    it 'should add 7 extra CLK ticks for a -1 move' do
+      tia_registers[HMP0] = 0b11110000
+      subject.start_hmove
+
+      subject.should_receive(:tick).exactly(7).times
+
+      16.times { subject.apply_hmove }
+    end
+
+
+    it 'should add 8 extra CLK ticks for a 0 move' do
+      tia_registers[HMP0] = 0
+      subject.start_hmove
+
+      subject.should_receive(:tick).exactly(8).times
+
+      16.times { subject.apply_hmove }
+    end
+
+    it 'should add 12 extra CLK ticks for a +4 move' do
+      tia_registers[HMP0] = 0b01000000
+      subject.start_hmove
+
+      subject.should_receive(:tick).exactly(12).times
+
+      16.times { subject.apply_hmove }
+    end
+
+    it 'should add 15 extra CLK ticks for a +7 move' do
+      tia_registers[HMP0] = 0b01110000
+      subject.start_hmove
+
+      subject.should_receive(:tick).exactly(15).times
+
+      16.times { subject.apply_hmove }
+    end
+  end
+
 
 end
