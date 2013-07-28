@@ -63,8 +63,10 @@ module Ruby2600
 
     def frame
       buffer = []
-      scanline while vertical_sync?
-      buffer << scanline until vertical_sync?
+      scanline while vertical_sync?                 # VSync
+      scanline while vertical_blank?                # VBlank
+      buffer << scanline until vertical_blank?      # Picture
+      scanline until vertical_sync?                 # Overscan
       buffer
     end
 
