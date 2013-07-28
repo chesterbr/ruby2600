@@ -5,19 +5,25 @@ module Ruby2600
     include Constants
 
     # A scanline "lasts" 228 "color clocks" (CLKs), of which 68
-    # are the initial blank period
+    # are the horizontal blank period, and 160 are visible pixels
 
     HORIZONTAL_BLANK_CLK_COUNT = 68
-    TOTAL_SCANLINE_CLK_COUNT = 228
+    VISIBLE_CLK_COUNT = 160
 
     def initialize
+      # Real 2600 starts with random values (and Stella comments warn
+      # about games that crash if we start with all zeros)
       @reg = Array.new(64) { rand(256) }
+
       @p0 = Player.new(@reg, 0)
       @p1 = Player.new(@reg, 1)
       @m0 = Missile.new(@reg, 0)
       @m1 = Missile.new(@reg, 1)
       @bl = Ball.new(@reg)
       @pf = Playfield.new(@reg)
+
+      # Playfield position counter is fixed (and never changes)
+      @pf.value = 0 
     end
 
     def [](position)
@@ -74,10 +80,7 @@ module Ruby2600
 
     def intialize_scanline
       @cpu.halted = false
-      @late_reset_hblank = false
-      @scanline = Array.new(160, 0)
-      @pixel = 0
-      @pf.value = 0 # Playfield position is fixed
+      @late_reset_hblank = false      
     end
 
     def wait_horizontal_blank
@@ -85,15 +88,33 @@ module Ruby2600
     end
 
     def draw_scanline
-      HORIZONTAL_BLANK_CLK_COUNT.upto TOTAL_SCANLINE_CLK_COUNT - 1 do |color_clock|
-        pf_pixel = @pf.pixel      
-        unless vertical_blank? || (@late_reset_hblank && @pixel < 8)
-          @scanline[@pixel] = player_pixel || pf_pixel || bg_pixel
+      scanline = Array.new(160, 0)
+      VISIBLE_CLK_COUNT.times do |pixel|
+        fetch_playfield_pixel
+        unless vertical_blank? || (@late_reset_hblank && pixel < 8)
+          fetch_movable_objects_pixels
+          scanline[pixel] = topmost_pixel
         end
+        color_clock = pixel + HORIZONTAL_BLANK_CLK_COUNT
         sync_2600_with color_clock
-        @pixel += 1
       end
-      @scanline
+      scanline
+    end
+
+    def fetch_playfield_pixel
+      @pf_pixel = @pf.pixel
+    end
+
+    def fetch_movable_objects_pixels
+      @p0_pixel = @p0.pixel
+      @p1_pixel = @p1.pixel
+      @m0_pixel = @m0.pixel
+      @m1_pixel = @m1.pixel
+      @bl_pixel = @bl.pixel
+    end
+
+    def topmost_pixel
+      @bl_pixel || @p0_pixel || @p1_pixel || @m0_pixel || @m1_pixel || @pf_pixel || @reg[COLUBK]
     end
 
     # All Atari chips use the same crystal for their clocks (with RIOT and
@@ -101,7 +122,7 @@ module Ruby2600
 
     # Since the emulator's "main loop" is based on TIA#scanline, we'll "tick"
     # the other chips here (and also apply the horizontal motion on movable
-    # objects, just like the hardware does)
+    # objects at 1/4 of TIA speed, just like the hardware does)
 
     def sync_2600_with(color_clock)
       riot.tick if color_clock % 3 == 0
@@ -121,28 +142,6 @@ module Ruby2600
 
     def vertical_sync?
       @reg[VSYNC] & 0b00000010 != 0
-    end
-
-    # Background
-
-    def bg_pixel
-      @reg[COLUBK]
-    end
-
-    # Playfield
-
-
-    # Players
-    # (need to request both pixels to keep counters in sync,
-    #  even if one overrides the other)
-
-    def player_pixel
-      p0_pixel = @p0.pixel
-      p1_pixel = @p1.pixel
-      m0_pixel = @m0.pixel
-      m1_pixel = @m1.pixel
-      bl_pixel = @bl.pixel
-      bl_pixel || p0_pixel || p1_pixel || m0_pixel || m1_pixel
     end
   end
 end
