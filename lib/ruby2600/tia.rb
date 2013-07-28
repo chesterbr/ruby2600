@@ -84,8 +84,9 @@ module Ruby2600
 
     def draw_scanline
       HORIZONTAL_BLANK_CLK_COUNT.upto TOTAL_SCANLINE_CLK_COUNT - 1 do |color_clock|
+        pf_pixel = @pf.pixel      
         unless vertical_blank? || (@late_reset_hblank && @pixel < 8)
-          @scanline[@pixel] = player_pixel || bg_pixel
+          @scanline[@pixel] = player_pixel || pf_pixel || bg_pixel
         end
         sync_2600_with color_clock
         @pixel += 1
@@ -139,8 +140,7 @@ module Ruby2600
       m0_pixel = @m0.pixel
       m1_pixel = @m1.pixel
       bl_pixel = @bl.pixel
-      pf_pixel = @pf.pixel
-      bl_pixel || p0_pixel || p1_pixel || m0_pixel || m1_pixel || pf_pixel
+      bl_pixel || p0_pixel || p1_pixel || m0_pixel || m1_pixel
     end
   end
 end
