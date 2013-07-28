@@ -103,6 +103,8 @@ module Ruby2600
 
     def fetch_playfield_pixel
       @pf_pixel = @pf.pixel
+      @bk_pixel = @reg[COLUBK]
+      @p0_pixel = @p1_pixel = @m0_pixel = @m1_pixel = @bl_pixel = nil
     end
 
     def fetch_movable_objects_pixels
@@ -114,7 +116,11 @@ module Ruby2600
     end
 
     def topmost_pixel
-      @bl_pixel || @p0_pixel || @p1_pixel || @m0_pixel || @m1_pixel || @pf_pixel || @reg[COLUBK]
+      if @reg[CTRLPF][2].zero?
+        @p0_pixel || @m0_pixel || @p1_pixel || @m1_pixel || @bl_pixel || @pf_pixel || @bk_pixel
+      else
+        @pf_pixel || @bl_pixel || @p0_pixel || @m0_pixel || @p1_pixel || @m1_pixel || @bk_pixel
+      end
     end
 
     # All Atari chips use the same crystal for their clocks (with RIOT and

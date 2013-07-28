@@ -130,57 +130,36 @@ describe Ruby2600::TIA do
     end
 
     it 'late hblank shifts everything'
-
-    it 'should get its color ahead of players/missiles if bit 2 is set (priority'
-
-    # context 'RESBL/ENABL' do
-    #   before { tia[COLUPF] = 0xC0 }
-
-    #   def write_register_after_cycles(register, cpu_cycles)
-    #     if @delay_counter.to_i <= cpu_cycles
-    #       @delay_counter = @delay_counter.to_i + 1
-    #       tia[register] = rand(256) if @delay_counter > cpu_cycles
-    #     end
-    #     1
-    #   end
-
-    #   context 'ENABL bit 1 reset' do
-    #     before { tia[ENABL]  = 0 }
-
-    #     it 'should not draw the ball on any scanline' do
-    #       2.times { tia.scanline.should == Array.new(160, 0x00) }
-    #     end
-    #   end
-
-    #   context 'ENABL bit 1 set' do
-    #     before { tia[ENABL]  = 0b00000010 }
-
-    #     context 'set during horizontal blank' do
-    #       it 'should position ball on the left of screen, plus two pixels' do
-    #         tia[RESBL] = rand(256)
-
-    #         tia.scanline[0..2].should == [0x00, 0x00, 0xC0]
-    #       end
-    #     end
-
-    #     context 'set on an arbitrary position' do
-    #       before do
-    #         tia.cpu.stub(:step) do
-    #           write_register_after_cycles RESBL, 28
-    #         end
-    #         tia.scanline
-    #       end
-
-    #       it 'should position ball on the appropriate position of the following scanline' do
-    #         expected = Array.new(160, 0x00)
-    #         expected[15] = 0xC0
-
-    #         tia.scanline.should == expected
-    #       end
-    #     end
-    #   end
-    # end
   end
+
+  describe '#topmost_pixel' do
+    context 'CTRLPF priority bit clear' do
+      before { tia[CTRLPF] = rand(256) & 0b100 }
+
+      it { tia.should be_using_priority [:p0, :m0, :p1, :m1, :bl, :pf, :bk] }
+    end
+
+    context 'CTRLPF priority bit set' do
+      before { tia[CTRLPF] = rand(256) | 0b100 }
+
+      it { tia.should be_using_priority [:pf, :bl, :p0, :m0, :p1, :m1, :bk] }
+    end
+
+    class Ruby2600::TIA
+      def using_priority?(enabled, others = [])
+        # Assuming color = priority for enabled pixels and nil for others...
+        enabled.count.times { |i| instance_variable_set "@#{enabled[i]}_pixel", i }
+        others.each { |p| instance_variable_set "@#{p}_pixel", nil }
+        # ...the first one (color = 0) should be the topmost...
+        return false unless topmost_pixel == 0
+        puts "DEBUG: Priority checked for #{enabled.first}"
+        # ...and we disable it to recursively check the others, until none left
+        first = enabled.shift
+        first.nil? ? using_priority?(enabled, others << first) : true
+      end
+    end
+  end
+
 
   # The "ideal" NTSC frame has 259 scanlines (+3 of vsync, which we don't return),
   # but we should allow some leeway (we won't emulate "screen roll" that TVs do
