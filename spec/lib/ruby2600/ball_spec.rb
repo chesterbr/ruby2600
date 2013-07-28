@@ -35,19 +35,35 @@ describe Ruby2600::Ball do
       end
 
       context '1x' do
-        before do
-          tia[CTRLPF] = 0b00000000
-        end
+        before { tia[CTRLPF] = 0b00000000 }
 
-        it 'should draw immediately' do
-          pixels(ball, 1, 160).should == color + Array.new(159)
+        it 'should draw 1x ball on current scanline' do
+          pixels(ball, 1, 160).should == scanline_with_object(1, color[0])
         end
 
         it 'should NOT be affected by NUSZ0 (it is not player/missile)' do
           tia[NUSIZ0] = 1 
 
-          pixels(ball, 1, 160).should == color + Array.new(159)
+          pixels(ball, 1, 160).should == scanline_with_object(1, color[0])
         end
+      end
+
+      context '2x' do
+        before { tia[CTRLPF] = 0b00010000 }
+
+        it { pixels(ball, 1, 160).should == scanline_with_object(2, color[0]) }
+      end
+
+      context '4x' do
+        before { tia[CTRLPF] = 0b00100000 }
+
+        it { pixels(ball, 1, 160).should == scanline_with_object(4, color[0]) }
+      end
+
+      context '8x' do
+        before { tia[CTRLPF] = 0b00110000 }
+
+        it { pixels(ball, 1, 160).should == scanline_with_object(8, color[0]) }
       end
     end
   end

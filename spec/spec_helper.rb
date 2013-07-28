@@ -37,7 +37,14 @@ def pixels(movable_object, first = 1, last = 160)
   (0..(last - first)).map { movable_object.pixel }
 end
 
+def scanline_with_object(size, color, copies = 1)
+  1.upto(copies).map{ Array.new(size, color) + Array.new(32 - size) }.flatten + Array.new(160 - 32 * copies)
+end
+
 def path_for_ROM(name)
   "spec/fixtures/files/#{name}.bin"
 end
+
+
+
 
