@@ -119,10 +119,9 @@ describe Ruby2600::Bus do
     end
 
     describe '#read' do
-      # FIXME there is a finer-grained mirroring for read, see http://nocash.emubase.de/2k6specs.htm#memorymirrors
-      it 'translates TIA mirror reads to 00-3F' do
+      it 'translates TIA mirror reads to 00-0F' do
         TIA_ADDRESSES.each do |a|
-          bus[a].should == tia[a &  0b0000000000111111]
+          bus[a].should == tia[a &  0b0000000000001111]
         end
       end
 
