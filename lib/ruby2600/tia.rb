@@ -27,7 +27,7 @@ module Ruby2600
     end
 
     def [](position)
-
+      
     end
 
     def []=(position, value)

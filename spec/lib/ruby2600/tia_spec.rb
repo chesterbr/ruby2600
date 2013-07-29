@@ -159,6 +159,30 @@ describe Ruby2600::TIA do
     end
   end
 
+  context 'collisions' do
+    describe 'CXCLR' do
+      it 'should reset flags when written'
+    end
+
+    describe '#update_collision_flags' do
+      it_should 'update collision register bit for objects', CXM0P,  6, :m0, :p1
+      it_should 'update collision register bit for objects', CXM0P,  7, :m0, :p0
+      it_should 'update collision register bit for objects', CXM1P,  6, :m1, :p0
+      it_should 'update collision register bit for objects', CXM1P,  7, :m1, :p1
+      it_should 'update collision register bit for objects', CXP0FB, 6, :p0, :pf
+      it_should 'update collision register bit for objects', CXP0FB, 7, :p0, :bl
+      it_should 'update collision register bit for objects', CXP1FB, 6, :p1, :pf
+      it_should 'update collision register bit for objects', CXP1FB, 7, :p1, :bl
+      it_should 'update collision register bit for objects', CXM0FB, 6, :m0, :pf
+      it_should 'update collision register bit for objects', CXM0FB, 7, :m0, :bl
+      it_should 'update collision register bit for objects', CXM1FB, 6, :m1, :pf
+      it_should 'update collision register bit for objects', CXM1FB, 7, :m1, :bl
+      it_should 'update collision register bit for objects', CXBLPF, 6, :bl, :pf
+      # Bit 7 of CXBLPF is not used
+      it_should 'update collision register bit for objects', CXPPMM, 6, :p0, :p1
+      it_should 'update collision register bit for objects', CXPPMM, 7, :m0, :m1
+    end
+  end
 
   # The "ideal" NTSC frame has 259 scanlines (+3 of vsync, which we don't return),
   # but we should allow some leeway (we won't emulate "screen roll" that TVs do
