@@ -92,24 +92,26 @@ module Ruby2600
     def draw_scanline
       scanline = Array.new(160, 0)
       VISIBLE_CLK_COUNT.times do |pixel|
-        fetch_playfield_pixel
-        unless vertical_blank? || (@late_reset_hblank && pixel < 8)
-          fetch_movable_objects_pixels
-          scanline[pixel] = topmost_pixel
-        end
         color_clock = pixel + HORIZONTAL_BLANK_CLK_COUNT
+        extended_hblank = @late_reset_hblank && pixel < 8
+
+        fetch_fixed_object_pixels
+        fetch_movable_object_pixels unless extended_hblank
+        update_collision_flags
+
+        scanline[pixel] = topmost_pixel unless vertical_blank? || extended_hblank
+        
         sync_2600_with color_clock
       end
       scanline
     end
 
-    def fetch_playfield_pixel
+    def fetch_fixed_object_pixels
       @pf_pixel = @pf.pixel
       @bk_pixel = @reg[COLUBK]
-      @p0_pixel = @p1_pixel = @m0_pixel = @m1_pixel = @bl_pixel = nil
     end
 
-    def fetch_movable_objects_pixels
+    def fetch_movable_object_pixels
       @p0_pixel = @p0.pixel
       @p1_pixel = @p1.pixel
       @m0_pixel = @m0.pixel
