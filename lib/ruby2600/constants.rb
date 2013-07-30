@@ -51,23 +51,21 @@ module Ruby2600
     CXCLR  = 0x2C
 
     # TIA readable registers
-    # (using lower mirror (0x0n) instead of "traditional" (0x3n)
-    # to match Ruby2600::Bus mirroring translation)
 
-    CXM0P  = 0x00
-    CXM1P  = 0x01
-    CXP0FB = 0x02
-    CXP1FB = 0x03
-    CXM0FB = 0x04
-    CXM1FB = 0x05
-    CXBLPF = 0x06
-    CXPPMM = 0x07
-    INPT0  = 0x08
-    INPT1  = 0x09
-    INPT2  = 0x0A
-    INPT3  = 0x0B
-    INPT4  = 0x0C
-    INPT5  = 0x0D
+    CXM0P  = 0x30
+    CXM1P  = 0x31
+    CXP0FB = 0x32
+    CXP1FB = 0x33
+    CXM0FB = 0x34
+    CXM1FB = 0x35
+    CXBLPF = 0x36
+    CXPPMM = 0x37
+    INPT0  = 0x38
+    INPT1  = 0x39
+    INPT2  = 0x3A
+    INPT3  = 0x3B
+    INPT4  = 0x3C
+    INPT5  = 0x3D
 
     # RIOT
 

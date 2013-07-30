@@ -29,7 +29,7 @@ module Ruby2600
           return @riot[address & 0x2FF]
         end
       else
-        return @tia[address & 0x0F]
+        return @tia[address & 0x3F]
       end
     end
 
