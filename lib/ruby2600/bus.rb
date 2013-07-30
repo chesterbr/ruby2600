@@ -47,35 +47,53 @@ module Ruby2600
       end
     end
 
-    def reset_switch=(value)
-      update_switch_bit 0, value
+    def reset_switch=(bool_state)
+      set_riot :portB, 0, bool_state
     end
 
-    def select_switch=(value)
-      update_switch_bit 1, value
+    def select_switch=(bool_state)
+      set_riot :portB, 1, bool_state
     end
 
-    def color_bw_switch=(value)
-      update_switch_bit 3, value
+    def color_bw_switch=(bool_state)
+      set_riot :portB, 3, bool_state
     end
 
-    def p0_difficulty_switch=(value)
-      update_switch_bit 6, value
+    def p0_difficulty_switch=(bool_state)
+      set_riot :portB, 6, bool_state
     end
 
-    def p1_difficulty_switch=(value)
-      update_switch_bit 7, value
+    def p1_difficulty_switch=(bool_state)
+      set_riot :portB, 7, bool_state
+    end
+
+    def p0_joystick_up=(bool_state)
+      set_riot :portA, 4, bool_state
+    end
+
+    def p0_joystick_down=(bool_state)
+      set_riot :portA, 5, bool_state
+    end
+
+    def p0_joystick_left=(bool_state)
+      set_riot :portA, 6, bool_state
+    end
+
+    def p0_joystick_right=(bool_state)
+      set_riot :portA, 7, bool_state
     end
 
     private
 
-    def update_switch_bit(n, value)
-      if value
-        @switch_bits |= 2 ** n
-      else
+    def set_riot(port, n, bool_state)
+      # To press/enable something, we reset the bit, and vice-versa.
+      # Why? Because TIA, that's why.
+      if bool_state
         @switch_bits &= 0xFF - (2 ** n)
+      else
+        @switch_bits |= 2 ** n
       end
-      @riot.portB = @switch_bits
+      @riot.send("#{port}=", @switch_bits)
     end
 
   end

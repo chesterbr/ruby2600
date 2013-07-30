@@ -178,7 +178,7 @@ class GameWindow < Gosu::Window
                              Ruby2600::TIA.new,
                              Ruby2600::Cart.new(filename),
                              Ruby2600::RIOT.new)
-    @bus.color_bw_switch = true
+    @bus.color_bw_switch = false
   end
 
   def update
@@ -199,6 +199,10 @@ class GameWindow < Gosu::Window
 
   def button_down(id)
     case id
+    when Gosu::KbLeft
+      @bus.p0_joystick_left = true
+    when Gosu::KbRight
+      @bus.p0_joystick_right = true
     when Gosu::Kb1
       @bus.select_switch = true
     when Gosu::Kb2
@@ -208,6 +212,10 @@ class GameWindow < Gosu::Window
 
   def button_up(id)
     case id
+    when Gosu::KbLeft
+      @bus.p0_joystick_left = false
+    when Gosu::KbRight
+      @bus.p0_joystick_right = false
     when Gosu::Kb1
       @bus.select_switch = false
     when Gosu::Kb2
