@@ -22,6 +22,9 @@ module Ruby2600
       @bl = Ball.new(@reg)
       @pf = Playfield.new(@reg)
 
+      # FIXME maybe bus should initialize this properly?
+      @reg[INPT4] = 0xFF # Button 0 released
+
       # Playfield position counter is fixed (and never changes)
       @pf.value = 0 
     end
