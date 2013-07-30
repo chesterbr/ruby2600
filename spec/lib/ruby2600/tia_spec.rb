@@ -7,6 +7,12 @@ describe Ruby2600::TIA do
     tia = Ruby2600::TIA.new
     tia.cpu = mock('cpu', :tick => nil, :halted= => nil)
     tia.riot = mock('riot', :tick => nil)
+
+    # Make registers accessible (for easier testing)
+    def tia.reg
+      @reg
+    end
+
     tia
   end
 
@@ -161,26 +167,49 @@ describe Ruby2600::TIA do
 
   context 'collisions' do
     describe 'CXCLR' do
-      it 'should reset flags when written'
+      before do
+        CXM0P.upto(CXPPMM) { |flag_reg| tia.reg[flag_reg] = rand(256) }
+      end
+
+      it 'should reset flags when written' do
+        tia[CXCLR] = 0
+
+        tia[CXM0P][6].should == 0
+        tia[CXM0P][7].should == 0
+        tia[CXM1P][6].should == 0
+        tia[CXM1P][7].should == 0
+        tia[CXP0FB][6].should == 0
+        tia[CXP0FB][7].should == 0
+        tia[CXP1FB][6].should == 0
+        tia[CXP1FB][7].should == 0
+        tia[CXM0FB][6].should == 0
+        tia[CXM0FB][7].should == 0
+        tia[CXM1FB][6].should == 0
+        tia[CXM1FB][7].should == 0
+        # Bit 6 of CXBLPF is not used
+        tia[CXBLPF][7].should == 0
+        tia[CXPPMM][6].should == 0
+        tia[CXPPMM][7].should == 0
+      end
     end
 
     describe '#update_collision_flags' do
-      it_should 'update collision register bit for objects', CXM0P,  6, :m0, :p1
-      it_should 'update collision register bit for objects', CXM0P,  7, :m0, :p0
-      it_should 'update collision register bit for objects', CXM1P,  6, :m1, :p0
-      it_should 'update collision register bit for objects', CXM1P,  7, :m1, :p1
-      it_should 'update collision register bit for objects', CXP0FB, 6, :p0, :pf
-      it_should 'update collision register bit for objects', CXP0FB, 7, :p0, :bl
-      it_should 'update collision register bit for objects', CXP1FB, 6, :p1, :pf
-      it_should 'update collision register bit for objects', CXP1FB, 7, :p1, :bl
-      it_should 'update collision register bit for objects', CXM0FB, 6, :m0, :pf
-      it_should 'update collision register bit for objects', CXM0FB, 7, :m0, :bl
-      it_should 'update collision register bit for objects', CXM1FB, 6, :m1, :pf
-      it_should 'update collision register bit for objects', CXM1FB, 7, :m1, :bl
-      it_should 'update collision register bit for objects', CXBLPF, 6, :bl, :pf
-      # Bit 7 of CXBLPF is not used
-      it_should 'update collision register bit for objects', CXPPMM, 6, :p0, :p1
-      it_should 'update collision register bit for objects', CXPPMM, 7, :m0, :m1
+      it_should 'update collision register bit for objects', CXM0P,  6, :m0, :p0
+      it_should 'update collision register bit for objects', CXM0P,  7, :m0, :p1
+      it_should 'update collision register bit for objects', CXM1P,  6, :m1, :p1
+      it_should 'update collision register bit for objects', CXM1P,  7, :m1, :p0
+      it_should 'update collision register bit for objects', CXP0FB, 6, :p0, :bl
+      it_should 'update collision register bit for objects', CXP0FB, 7, :p0, :pf
+      it_should 'update collision register bit for objects', CXP1FB, 6, :p1, :bl
+      it_should 'update collision register bit for objects', CXP1FB, 7, :p1, :pf
+      it_should 'update collision register bit for objects', CXM0FB, 6, :m0, :bl
+      it_should 'update collision register bit for objects', CXM0FB, 7, :m0, :pf
+      it_should 'update collision register bit for objects', CXM1FB, 6, :m1, :bl
+      it_should 'update collision register bit for objects', CXM1FB, 7, :m1, :pf
+      # Bit 6 of CXBLPF is not used
+      it_should 'update collision register bit for objects', CXBLPF, 7, :bl, :pf
+      it_should 'update collision register bit for objects', CXPPMM, 6, :m0, :m1
+      it_should 'update collision register bit for objects', CXPPMM, 7, :p0, :p1
     end
   end
 

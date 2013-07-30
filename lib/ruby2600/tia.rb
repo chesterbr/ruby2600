@@ -27,7 +27,7 @@ module Ruby2600
     end
 
     def [](position)
-      
+      @reg[position] if position.between?(CXM0P, INPT5)
     end
 
     def []=(position, value)
@@ -51,10 +51,12 @@ module Ruby2600
         @bl.start_hmove
       when HMCLR
         @reg[HMP0] = @reg[HMP1] = @reg[HMM0] = @reg[HMM1] = @reg[HMBL] = 0
+      when CXCLR
+        @reg[CXM0P] = @reg[CXM1P] = @reg[CXP0FB] = @reg[CXP1FB] = @reg[CXM0FB] = @reg[CXM1FB] = @reg[CXBLPF] = @reg[CXPPMM] = 0
       when WSYNC
         @cpu.halted = true
       else
-        @reg[position] = value
+        @reg[position] = value # FIXME it's not the grape party!
       end
       @p0.old_value = @reg[GRP0]  if position == GRP1
       @bl.old_value = @reg[ENABL] if position == GRP1
@@ -121,6 +123,28 @@ module Ruby2600
       else
         @pf_pixel || @bl_pixel || @p0_pixel || @m0_pixel || @p1_pixel || @m1_pixel || @bk_pixel
       end
+    end
+
+    BIT_6 = 0b01000000
+    BIT_7 = 0b10000000
+
+    def update_collision_flags
+      @reg[CXM0P]  |= BIT_6 if @m0_pixel && @p0_pixel
+      @reg[CXM0P]  |= BIT_7 if @m0_pixel && @p1_pixel
+      @reg[CXM1P]  |= BIT_6 if @m1_pixel && @p1_pixel
+      @reg[CXM1P]  |= BIT_7 if @m1_pixel && @p0_pixel
+      @reg[CXP0FB] |= BIT_6 if @p0_pixel && @bl_pixel
+      @reg[CXP0FB] |= BIT_7 if @p0_pixel && @pf_pixel
+      @reg[CXP1FB] |= BIT_6 if @p1_pixel && @bl_pixel
+      @reg[CXP1FB] |= BIT_7 if @p1_pixel && @pf_pixel
+      @reg[CXM0FB] |= BIT_6 if @m0_pixel && @bl_pixel
+      @reg[CXM0FB] |= BIT_7 if @m0_pixel && @pf_pixel
+      @reg[CXM1FB] |= BIT_6 if @m1_pixel && @bl_pixel
+      @reg[CXM1FB] |= BIT_7 if @m1_pixel && @pf_pixel
+      # c-c-c-combo breaker: bit 6 of CXM1FB is unused
+      @reg[CXBLPF] |= BIT_7 if @bl_pixel && @pf_pixel
+      @reg[CXPPMM] |= BIT_6 if @m0_pixel && @m1_pixel
+      @reg[CXPPMM] |= BIT_7 if @p0_pixel && @p1_pixel
     end
 
     # All Atari chips use the same crystal for their clocks (with RIOT and
