@@ -199,6 +199,10 @@ class GameWindow < Gosu::Window
 
   def button_down(id)
     case id
+    when Gosu::KbUp
+      @bus.p0_joystick_up = true
+    when Gosu::KbDown
+      @bus.p0_joystick_down = true
     when Gosu::KbLeft
       @bus.p0_joystick_left = true
     when Gosu::KbRight
@@ -212,6 +216,10 @@ class GameWindow < Gosu::Window
 
   def button_up(id)
     case id
+    when Gosu::KbDown
+      @bus.p0_joystick_up = false
+    when Gosu::KbUp
+      @bus.p0_joystick_down = false
     when Gosu::KbLeft
       @bus.p0_joystick_left = false
     when Gosu::KbRight
