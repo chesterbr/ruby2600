@@ -12,7 +12,12 @@ module Ruby2600
       @tia.cpu = cpu
       @tia.riot = riot
 
-      @switch_bits = 0
+      @riot_bit_states = {
+        :portA => 0xFF,
+        :portB => 0xFF
+      }
+      refresh_riot :portA
+      refresh_riot :portB
 
       cpu.reset
     end
@@ -47,54 +52,60 @@ module Ruby2600
       end
     end
 
-    def reset_switch=(bool_state)
-      set_riot :portB, 0, bool_state
+    def reset_switch=(state)
+      set_riot :portB, 0, state
     end
 
-    def select_switch=(bool_state)
-      set_riot :portB, 1, bool_state
+    def select_switch=(state)
+      set_riot :portB, 1, state
     end
 
-    def color_bw_switch=(bool_state)
-      set_riot :portB, 3, bool_state
+    def color_bw_switch=(state)
+      set_riot :portB, 3, state
     end
 
-    def p0_difficulty_switch=(bool_state)
-      set_riot :portB, 6, bool_state
+    def p0_difficulty_switch=(state)
+      set_riot :portB, 6, state
     end
 
-    def p1_difficulty_switch=(bool_state)
-      set_riot :portB, 7, bool_state
+    def p1_difficulty_switch=(state)
+      set_riot :portB, 7, state
     end
 
-    def p0_joystick_up=(bool_state)
-      set_riot :portA, 4, bool_state
+    def p0_joystick_up=(state)
+      set_riot :portA, 4, state
     end
 
-    def p0_joystick_down=(bool_state)
-      set_riot :portA, 5, bool_state
+    def p0_joystick_down=(state)
+      set_riot :portA, 5, state
     end
 
-    def p0_joystick_left=(bool_state)
-      set_riot :portA, 6, bool_state
+    def p0_joystick_left=(state)
+      set_riot :portA, 6, state
     end
 
-    def p0_joystick_right=(bool_state)
-      set_riot :portA, 7, bool_state
+    def p0_joystick_right=(state)
+      set_riot :portA, 7, state
     end
 
     private
 
-    def set_riot(port, n, bool_state)
+    def set_riot(port, n, state)
       # To press/enable something, we reset the bit, and vice-versa.
       # Why? Because TIA, that's why.
-      if bool_state
-        @switch_bits &= 0xFF - (2 ** n)
+      if state
+        @riot_bit_states[port] &= 0xFF - (2 ** n)
       else
-        @switch_bits |= 2 ** n
+        @riot_bit_states[port] |= 2 ** n
       end
-      @riot.send("#{port}=", @switch_bits)
+      refresh_riot port
     end
+
+    def refresh_riot(port)
+      @riot.send("#{port}=", @riot_bit_states[port])
+    end
+
+
 
   end
 end
