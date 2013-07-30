@@ -14,9 +14,9 @@ Speed and sound are lowest-priority goals ([Stella](http://stella.sourceforge.ne
 
 ## Current status
 
-Right now several games display their initial screen playfields, with right colors!
+Pitfall is almost playable! (at ~1/10 speed, no button, collision detection not working 100% - e.g., no log-Harry collision detected).
 
-Tested: Pitfall!, Oink!, Adventure, Berzerk (initial screen animation works also), Pac-Man, Donkey Kong. Any non-crazy 4K cart should display something by now.
+(need to update screenshots, maybe keep as history)
 
 ![alt text](http://i.imgur.com/9t8D7EV.jpg "Pitfall! on Stella x Ruby2600")
 
