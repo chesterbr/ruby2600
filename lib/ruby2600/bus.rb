@@ -1,5 +1,7 @@
 module Ruby2600
   class Bus
+    include Constants
+
     attr_accessor :tia
 
     def initialize(cpu, tia, cart, riot)
@@ -86,6 +88,10 @@ module Ruby2600
 
     def p0_joystick_right=(state)
       set_riot :portA, 7, state
+    end
+
+    def p0_joystick_fire=(state)
+      @tia.reg[INPT4] = (state ? 0 : 0x80 )
     end
 
     private

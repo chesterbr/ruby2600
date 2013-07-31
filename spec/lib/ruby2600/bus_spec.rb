@@ -1,9 +1,10 @@
 require 'spec_helper'
+include Ruby2600::Constants
 
 describe Ruby2600::Bus do
 
   let(:cpu)  { double('cpu', :memory= => nil, :reset => nil) }
-  let(:tia)  { double('tia', :cpu= => nil, :riot= => nil) }
+  let(:tia)  { double('tia', :cpu= => nil, :riot= => nil, :reg => Array.new(64, rand(256))) }
   let(:cart) { double('cart') }
   let(:riot) { double('riot', :portA= => nil, :portB= => nil) }
 
@@ -52,7 +53,7 @@ describe Ruby2600::Bus do
     end
   end
 
-  context 'p0 joystick' do
+  describe 'p0_joystick' do
     before do
       bus.p0_joystick_up    = false
       bus.p0_joystick_down  = false
@@ -87,6 +88,20 @@ describe Ruby2600::Bus do
       it_should 'set bits on RIOT port after switch is reset/released', :portA, 0b01111111, :p0_joystick_up
       it_should 'set bits on RIOT port after switch is set/pressed',    :portA, 0b01011111, :p0_joystick_down
       it_should 'set bits on RIOT port after switch is reset/released', :portA, 0b01111111, :p0_joystick_down
+    end
+
+    context 'fire button' do
+      context 'pressed' do
+        before { bus.p0_joystick_fire = true }
+
+        it { tia.reg[INPT4][7].should == 0 }
+      end
+
+      context 'released' do
+        before { bus.p0_joystick_fire = false }
+
+        it { tia.reg[INPT4][7].should == 1 }
+      end
     end
   end
 

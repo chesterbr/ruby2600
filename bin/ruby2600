@@ -207,6 +207,8 @@ class GameWindow < Gosu::Window
       @bus.p0_joystick_left = true
     when Gosu::KbRight
       @bus.p0_joystick_right = true
+    when Gosu::KbSpace
+      @bus.p0_joystick_fire = true
     when Gosu::Kb1
       @bus.select_switch = true
     when Gosu::Kb2
@@ -224,6 +226,8 @@ class GameWindow < Gosu::Window
       @bus.p0_joystick_left = false
     when Gosu::KbRight
       @bus.p0_joystick_right = false
+    when Gosu::KbSpace
+      @bus.p0_joystick_fire = false
     when Gosu::Kb1
       @bus.select_switch = false
     when Gosu::Kb2
