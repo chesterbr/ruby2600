@@ -41,7 +41,7 @@ module Ruby2600
       buffer
     end
 
-    # Internal components (such as players and Bus) can access internal
+    # Internal components (MovableObjects, Bus and specs) can access internal
     # register state with TIA#reg. The acessors below are intended for games
     # (as they control results and trigger side effects)
 

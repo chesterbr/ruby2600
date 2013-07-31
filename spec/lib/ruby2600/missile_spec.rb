@@ -2,16 +2,16 @@ require 'spec_helper'
 
 describe Ruby2600::Missile do
 
-  let(:tia) { Array.new(64, 0) }
+  let(:tia) { mock 'tia', :reg => Array.new(64, 0) }
   subject(:missile) { Ruby2600::Missile.new(tia, 0) }
 
   context 'missile 1' do
     subject(:missile1) { Ruby2600::Missile.new(tia, 1) }
 
     before do 
-      tia[ENAM1] = 0
-      tia[COLUP0] = 0x00
-      tia[COLUP1] = 0xFF
+      tia.reg[ENAM1] = 0
+      tia.reg[COLUP0] = 0x00
+      tia.reg[COLUP1] = 0xFF
       missile.strobe
       160.times { missile1.pixel }
     end
@@ -21,26 +21,26 @@ describe Ruby2600::Missile do
     end
 
     it 'should generate some output if ENAM1 is enabled' do
-      tia[ENAM1] = rand(256) | 0b10
+      tia.reg[ENAM1] = rand(256) | 0b10
       pixels(missile1, 1, 160).should include(0xFF)
     end
   end
 
   describe 'pixel' do
     before do
-      tia[COLUP0] = rand(255) + 1
+      tia.reg[COLUP0] = rand(255) + 1
     end
 
     it 'should never output if ENAM0 is disabled' do
-      tia[ENAM0] = 0
+      tia.reg[ENAM0] = 0
       
       pixels(missile, 1, 300).should == Array.new(300)
     end
 
     it 'should generate some output if ENAM0 is enabled' do
-      tia[ENAM0] = rand(256) | 0b10
+      tia.reg[ENAM0] = rand(256) | 0b10
       
-      pixels(missile, 1, 300).should include(tia[COLUP0])
+      pixels(missile, 1, 300).should include(tia.reg[COLUP0])
     end
 
     context 'drawing (strobe)' do
@@ -48,7 +48,7 @@ describe Ruby2600::Missile do
 
       before do
         # Cleanup and pick a random position
-        tia[ENAM0] = 0
+        tia.reg[ENAM0] = 0
         rand(160).times { missile.pixel }
 
         # Preemptive strobe (to ensure we don't have retriggering leftovers)
@@ -56,13 +56,13 @@ describe Ruby2600::Missile do
         80.times { missile.pixel }
 
         # Setup
-        tia[ENAM0] = 0b10
-        tia[COLUP0] = color[0]
+        tia.reg[ENAM0] = 0b10
+        tia.reg[COLUP0] = color[0]
       end
 
       context 'one copy' do
         before do
-          tia[NUSIZ0] = 0
+          tia.reg[NUSIZ0] = 0
           missile.strobe
           4.times { missile.pixel } # 4-bit delay
         end
@@ -84,7 +84,7 @@ describe Ruby2600::Missile do
 
       context 'two copies, close' do
         before do
-          tia[NUSIZ0] = 1
+          tia.reg[NUSIZ0] = 1
           missile.strobe
           4.times { missile.pixel }
         end
@@ -101,7 +101,7 @@ describe Ruby2600::Missile do
 
       context 'two copies, medium' do
         before do
-          tia[NUSIZ0] = 2
+          tia.reg[NUSIZ0] = 2
           missile.strobe
           4.times { missile.pixel }
         end
@@ -118,7 +118,7 @@ describe Ruby2600::Missile do
 
       context 'three copies, close' do
         before do
-          tia[NUSIZ0] = 3
+          tia.reg[NUSIZ0] = 3
           missile.strobe
           4.times { missile.pixel }
         end
@@ -135,7 +135,7 @@ describe Ruby2600::Missile do
 
       context 'two copies, wide' do
         before do
-          tia[NUSIZ0] = 4
+          tia.reg[NUSIZ0] = 4
           missile.strobe
           4.times { missile.pixel }
         end
@@ -152,7 +152,7 @@ describe Ruby2600::Missile do
 
       context 'three copies, medium' do
         before do
-          tia[NUSIZ0] = 6
+          tia.reg[NUSIZ0] = 6
           missile.strobe
           4.times { missile.pixel }
         end
@@ -167,7 +167,7 @@ describe Ruby2600::Missile do
         end
 
         context '2x' do
-          before { tia[NUSIZ0] = 0b00010110 }
+          before { tia.reg[NUSIZ0] = 0b00010110 }
 
           it 'should draw 3 copies with size 2' do
             160.times { missile.pixel }
@@ -176,7 +176,7 @@ describe Ruby2600::Missile do
         end
 
         context '4x' do
-          before { tia[NUSIZ0] = 0b00100110 }
+          before { tia.reg[NUSIZ0] = 0b00100110 }
 
           it 'should draw 3 copies with size 4' do
             160.times { missile.pixel }
@@ -185,7 +185,7 @@ describe Ruby2600::Missile do
         end
 
         context '8x' do
-          before { tia[NUSIZ0] = 0b00110110 }
+          before { tia.reg[NUSIZ0] = 0b00110110 }
 
           it 'should draw 3 copies with size 8' do
             160.times { missile.pixel }

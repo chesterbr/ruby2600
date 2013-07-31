@@ -2,16 +2,16 @@ require 'spec_helper'
 
 describe Ruby2600::Player do
 
-  let(:tia) { Array.new(64, 0) }
+  let(:tia) { mock 'tia', :reg => Array.new(64, 0) }
   subject(:player) { Ruby2600::Player.new(tia, 0) }
 
   context 'player 1' do
     subject(:player1) { Ruby2600::Player.new(tia, 1) }
 
     before do 
-      tia[GRP0] = 0x00
-      tia[COLUP0] = 0x00
-      tia[COLUP1] = 0xFF
+      tia.reg[GRP0] = 0x00
+      tia.reg[COLUP0] = 0x00
+      tia.reg[COLUP1] = 0xFF
       player1.strobe
       160.times { player1.pixel }
     end
@@ -21,14 +21,14 @@ describe Ruby2600::Player do
     end
 
     it 'should draw if GRP1 is set' do
-      tia[GRP1] = 0xFF
+      tia.reg[GRP1] = 0xFF
       pixels(player1, 1, 160).should include(0xFF)
     end
   end
 
   describe 'pixel' do
     it 'should never output if GRP0 is all zeros' do
-      tia[GRP0] = 0
+      tia.reg[GRP0] = 0
       300.times { player.pixel.should be_nil }
     end
 
@@ -40,7 +40,7 @@ describe Ruby2600::Player do
 
       before do
         # Cleanup and pick a random position
-        tia[GRP0] = 0
+        tia.reg[GRP0] = 0
         rand(160).times { player.pixel }
 
         # Preemptive strobe (to ensure we don't have retriggering leftovers)
@@ -48,13 +48,13 @@ describe Ruby2600::Player do
         80.times { player.pixel }
 
         # Setup
-        tia[GRP0] = 0b11001010
-        tia[COLUP0] = COLOR
+        tia.reg[GRP0] = 0b11001010
+        tia.reg[COLUP0] = COLOR
       end
 
       context 'one copy' do
         before do
-          tia[NUSIZ0] = 0
+          tia.reg[NUSIZ0] = 0
           player.strobe
           5.times { player.pixel }
         end
@@ -76,7 +76,7 @@ describe Ruby2600::Player do
 
       context 'two copies, close' do
         before do
-          tia[NUSIZ0] = 1
+          tia.reg[NUSIZ0] = 1
           player.strobe
           5.times { player.pixel }
         end
@@ -93,7 +93,7 @@ describe Ruby2600::Player do
 
       context 'two copies, medium' do
         before do
-          tia[NUSIZ0] = 2
+          tia.reg[NUSIZ0] = 2
           player.strobe
           5.times { player.pixel }
         end
@@ -110,7 +110,7 @@ describe Ruby2600::Player do
 
       context 'three copies, close' do
         before do
-          tia[NUSIZ0] = 3
+          tia.reg[NUSIZ0] = 3
           player.strobe
           5.times { player.pixel }
         end
@@ -127,7 +127,7 @@ describe Ruby2600::Player do
 
       context 'two copies, wide' do
         before do
-          tia[NUSIZ0] = 4
+          tia.reg[NUSIZ0] = 4
           player.strobe
           5.times { player.pixel }
         end
@@ -144,7 +144,7 @@ describe Ruby2600::Player do
 
       context 'one copy, double size' do
         before do
-          tia[NUSIZ0] = 5
+          tia.reg[NUSIZ0] = 5
           player.strobe
           5.times { player.pixel }
         end
@@ -161,7 +161,7 @@ describe Ruby2600::Player do
 
       context 'three copies, medium' do
         before do
-          tia[NUSIZ0] = 6
+          tia.reg[NUSIZ0] = 6
           player.strobe
           5.times { player.pixel }
         end
@@ -176,7 +176,7 @@ describe Ruby2600::Player do
         end
 
         context 'with REFP0 set' do
-          before { tia[REFP0] = rand(256) | 0b1000 }
+          before { tia.reg[REFP0] = rand(256) | 0b1000 }
 
           it 'should reflect the drawing' do
             160.times { player.pixel }
@@ -187,7 +187,7 @@ describe Ruby2600::Player do
 
       context 'one copy, quad size' do
         before do
-          tia[NUSIZ0] = 7
+          tia.reg[NUSIZ0] = 7
           player.strobe
           5.times { player.pixel }
         end
@@ -202,7 +202,7 @@ describe Ruby2600::Player do
         end
 
         context 'with REFP0 set' do
-          before { tia[REFP0] = rand(256) | 0b1000 }          
+          before { tia.reg[REFP0] = rand(256) | 0b1000 }          
 
           it 'should reflect the drawing' do
             160.times { player.pixel }
