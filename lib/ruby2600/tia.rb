@@ -1,6 +1,6 @@
 module Ruby2600
   class TIA
-    attr_accessor :cpu, :riot
+    attr_accessor :cpu, :riot, :reg
 
     include Constants
 
@@ -15,19 +15,35 @@ module Ruby2600
       # about games that crash if we start with all zeros)
       @reg = Array.new(64) { rand(256) }
 
-      @p0 = Player.new(@reg, 0)
-      @p1 = Player.new(@reg, 1)
-      @m0 = Missile.new(@reg, 0)
-      @m1 = Missile.new(@reg, 1)
-      @bl = Ball.new(@reg)
-      @pf = Playfield.new(@reg)
-
-      # FIXME maybe bus should initialize this properly?
-      @reg[INPT4] = 0xFF # Button 0 released
+      @p0 = Player.new(self, 0)
+      @p1 = Player.new(self, 1)
+      @m0 = Missile.new(self, 0)
+      @m1 = Missile.new(self, 1)
+      @bl = Ball.new(self)
+      @pf = Playfield.new(self)
 
       # Playfield position counter is fixed (and never changes)
       @pf.value = 0 
     end
+
+    def scanline
+      intialize_scanline
+      wait_horizontal_blank
+      draw_scanline
+    end
+
+    def frame
+      buffer = []
+      scanline while vertical_sync?                 # VSync
+      scanline while vertical_blank?                # VBlank
+      buffer << scanline until vertical_blank?      # Picture
+      scanline until vertical_sync?                 # Overscan
+      buffer
+    end
+
+    # Internal components (such as players and Bus) can access internal
+    # register state with TIA#reg. The acessors below are intended for games
+    # (as they control results and trigger side effects)
 
     def [](position)
       @reg[position] if position.between?(CXM0P, INPT5)
@@ -64,21 +80,6 @@ module Ruby2600
       @p0.old_value = @reg[GRP0]  if position == GRP1
       @bl.old_value = @reg[ENABL] if position == GRP1
       @p1.old_value = @reg[GRP1]  if position == GRP0
-    end
-
-    def scanline
-      intialize_scanline
-      wait_horizontal_blank
-      draw_scanline
-    end
-
-    def frame
-      buffer = []
-      scanline while vertical_sync?                 # VSync
-      scanline while vertical_blank?                # VBlank
-      buffer << scanline until vertical_blank?      # Picture
-      scanline until vertical_sync?                 # Overscan
-      buffer
     end
 
     private

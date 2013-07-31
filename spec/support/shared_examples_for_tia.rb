@@ -57,16 +57,10 @@ shared_examples_for 'update collision register bit for objects' do |register, bi
   end
 
   def turn_on(object)
-    puts "on @#{object}_pixel"
-    puts tia.instance_variable_get("@#{object}_pixel")
     tia.instance_variable_set("@#{object}_pixel", rand(256))
-    puts tia.instance_variable_get("@#{object}_pixel")
   end
 
   def turn_off(object)
-    puts "off @#{object}_pixel"
-    puts tia.instance_variable_get("@#{object}_pixel")
     tia.instance_variable_set("@#{object}_pixel", nil)
-    puts tia.instance_variable_get("@#{object}_pixel")
   end
 end

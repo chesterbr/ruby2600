@@ -21,8 +21,8 @@ module Ruby2600
       @graphic_size = @graphic_delay = @hmove_register = @color_register = 0
     end
 
-    def initialize(tia_registers, object_number = 0)
-      @tia_registers = tia_registers
+    def initialize(tia, object_number = 0)
+      @tia_registers = tia.reg
       @object_number = object_number
       @counter_inner_value = rand(COUNTER_MAX)
       @old_value = rand(256)
