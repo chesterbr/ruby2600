@@ -11,7 +11,6 @@ require 'support/shared_examples_for_bus.rb'
 require 'support/shared_examples_for_cpu.rb'
 require 'support/shared_examples_for_riot.rb'
 require 'support/shared_examples_for_tia.rb'
-include Ruby2600::Constants
 
 RSpec.configure do |c|
   c.alias_it_should_behave_like_to :it_has_behavior, 'has behavior:'
