@@ -104,6 +104,19 @@ shared_examples_for 'latch port input' do |port|
     tia.set_port_level port, :low
     tia[INPT0 + port][7].should == 0
   end
+
+  it "should return to normal behavior after latching is disabled" do
+    tia[VBLANK] = 0
+
+    tia.set_port_level port, :low
+    tia[INPT0 + port][7].should == 0
+
+    tia.set_port_level port, :high
+    tia[INPT0 + port][7].should == 1
+
+    tia.set_port_level port, :low
+    tia[INPT0 + port][7].should == 0
+  end
 end
 
 shared_examples_for 'dump port to ground' do |port|
