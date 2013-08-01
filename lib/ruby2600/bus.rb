@@ -36,7 +36,7 @@ module Ruby2600
           return @riot[address & 0x2FF]
         end
       else
-        return @tia[address & 0x3F]
+        return @tia[(address & 0x0F) + 0x30]
       end
     end
 
@@ -91,7 +91,7 @@ module Ruby2600
     end
 
     def p0_joystick_fire=(state)
-      @tia.reg[INPT4] = (state ? 0 : 0x80 )
+      @tia.set_port_level 4, (state ? :low : :high)
     end
 
     private

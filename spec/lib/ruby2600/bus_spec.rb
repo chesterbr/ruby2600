@@ -1,5 +1,4 @@
 require 'spec_helper'
-include Ruby2600::Constants
 
 describe Ruby2600::Bus do
 
@@ -91,16 +90,16 @@ describe Ruby2600::Bus do
     end
 
     context 'fire button' do
-      context 'pressed' do
-        before { bus.p0_joystick_fire = true }
+      it 'should put TIA input port 4 on low when pressed' do
+        tia.should_receive(:set_port_level).with(4, :low)
 
-        it { tia.reg[INPT4][7].should == 0 }
+        bus.p0_joystick_fire = true
       end
 
-      context 'released' do
-        before { bus.p0_joystick_fire = false }
+      it 'should put TIA input port 4 on high when released' do
+        tia.should_receive(:set_port_level).with(4, :high)
 
-        it { tia.reg[INPT4][7].should == 1 }
+        bus.p0_joystick_fire = false
       end
     end
   end

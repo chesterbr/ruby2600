@@ -1,6 +1,7 @@
 module Ruby2600
   class TIA
-    attr_accessor :cpu, :riot, :reg
+    attr_accessor :cpu, :riot
+    attr_reader :reg
 
     include Constants
 
@@ -22,6 +23,9 @@ module Ruby2600
       @bl = Ball.new(self)
       @pf = Playfield.new(self)
 
+      @port_level = Array.new(6, false)
+      @latch_level = Array.new(6, true)
+
       # Playfield position counter is fixed (and never changes)
       @pf.value = 0 
     end
@@ -41,12 +45,20 @@ module Ruby2600
       buffer
     end
 
-    # Internal components (MovableObjects, Bus and specs) can access internal
+    def set_port_level(number, level)
+      @port_level[number] = (level == :high)
+      @latch_level[number] = false if level == :low
+    end
+
+    # Internal components (MovableObjects and specs) can manipulate internal
     # register state with TIA#reg. The acessors below are intended for games
-    # (as they control results and trigger side effects)
+    # (as they manage results and trigger side effects)
 
     def [](position)
-      @reg[position] if position.between?(CXM0P, INPT5)
+      case position
+      when CXM0P..CXPPMM then @reg[position]
+      when INPT0..INPT5  then value_for_port(position - INPT0)
+      end
     end
 
     def []=(position, value)
@@ -79,7 +91,8 @@ module Ruby2600
       end
       @p0.old_value = @reg[GRP0]  if position == GRP1
       @bl.old_value = @reg[ENABL] if position == GRP1
-      @p1.old_value = @reg[GRP1]  if position == GRP0
+      @p1.old_value = @reg[GRP1]  if position == GRP0      
+      set_latches_to_logic_one    if position == VBLANK && @reg[VBLANK][6] == 1
     end
 
     private
@@ -172,12 +185,26 @@ module Ruby2600
       cpu.tick if color_clock % 3 == 2
     end
 
+    def set_latches_to_logic_one
+      @latch_level.fill(true)
+    end
+
+    def value_for_port(number)
+      return 0x00 if @reg[VBLANK][7] == 1 && number <= 3
+      if @reg[VBLANK][6] == 1 && number >= 4
+        level = @latch_level[number]
+      else
+        level = @port_level[number]
+      end
+      level ? 0x80 : 0x00
+    end
+
     def vertical_blank?
-      @reg[VBLANK] & 0b00000010 != 0
+      @reg[VBLANK][1] != 0
     end
 
     def vertical_sync?
-      @reg[VSYNC] & 0b00000010 != 0
+      @reg[VSYNC][1] != 0
     end
   end
 end

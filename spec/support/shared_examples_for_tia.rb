@@ -64,3 +64,57 @@ shared_examples_for 'update collision register bit for objects' do |register, bi
     tia.instance_variable_set("@#{object}_pixel", nil)
   end
 end
+
+shared_examples_for 'reflect port input' do |port|
+  it "should set/clear bit 7 on high/low level" do
+    tia.set_port_level port, :low
+    tia[INPT0 + port][7].should == 0
+
+    tia.set_port_level port, :high
+    tia[INPT0 + port][7].should == 1
+
+    tia.set_port_level port, :low
+    tia[INPT0 + port][7].should == 0
+  end
+end
+
+shared_examples_for 'latch port input' do |port|
+  [:high, :low].each do |previous_level|
+    context "previous level was #{previous_level}" do
+      it "INPT#{port} bit 7 should be 1 after enabling latch mode" do
+        tia[VBLANK] = 0
+        tia.set_port_level port, previous_level
+
+        tia[VBLANK] = 0b01000000
+        tia[INPT0 + port][7].should == 1
+      end
+    end
+  end
+
+  it "INPT#{port} bit 7 should latch to 0 once a low is received" do
+    tia.set_port_level port, :high
+    tia[INPT0 + port][7].should == 1
+
+    tia.set_port_level port, :low
+    tia[INPT0 + port][7].should == 0
+
+    tia.set_port_level port, :high
+    tia[INPT0 + port][7].should == 0
+
+    tia.set_port_level port, :low
+    tia[INPT0 + port][7].should == 0
+  end
+end
+
+shared_examples_for 'dump port to ground' do |port|
+  it "INPT#{port} bit 7 should not be affected by input (should always be 0)" do
+    tia.set_port_level port, :low
+    tia[INPT0 + port][7].should == 0
+
+    tia.set_port_level port, :high
+    tia[INPT0 + port][7].should == 0
+
+    tia.set_port_level port, :low
+    tia[INPT0 + port][7].should == 0
+  end
+end

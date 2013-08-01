@@ -213,6 +213,35 @@ describe Ruby2600::TIA do
     end
   end
 
+  describe '#set_port_level / VBLANK register input control' do
+    context 'normal mode' do
+      before { tia[VBLANK] = 0 }
+
+      0.upto(5) { |p| it_should 'reflect port input', p }
+    end
+
+    context 'latched mode' do
+      before { tia[VBLANK] = 0b01000000 }
+
+      0.upto(3) { |p| it_should 'reflect port input', p }
+      4.upto(5) { |p| it_should 'latch port input', p}
+    end
+
+    context 'grounded mode' do
+      before { tia[VBLANK] = 0b10000000 }
+
+      0.upto(3) { |p| it_should 'dump port to ground', p }
+      4.upto(5) { |p| it_should 'reflect port input', p }
+    end
+
+    context 'latched + grounded mode' do
+      before { tia[VBLANK] = 0b11000000 }
+
+      0.upto(3) { |p| it_should 'dump port to ground', p }
+      4.upto(5) { |p| it_should 'latch port input', p}
+    end
+  end
+
   # The "ideal" NTSC frame has 259 scanlines (+3 of vsync, which we don't return),
   # but we should allow some leeway (we won't emulate "screen roll" that TVs do
   # with irregular frames)
