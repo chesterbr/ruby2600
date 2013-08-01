@@ -165,6 +165,40 @@ describe Ruby2600::TIA do
     end
   end
 
+  describe '#[]=' do
+    [
+      VSYNC, VBLANK, RSYNC, NUSIZ0, NUSIZ1, COLUP0, COLUP1, COLUPF,
+      COLUBK, CTRLPF, REFP0, REFP1, PF0, PF1, PF2, AUDC0, AUDC1, AUDF0,
+      AUDF1, AUDV0, AUDV1, GRP0, GRP1, ENAM0, ENAM1, ENABL, HMP0, HMP1,
+      HMM0, HMM1, HMBL, VDELP0, VDELP1, VDELBL
+    ].each do |r|
+      it "should store the value for #{r}" do
+        value = rand(256)
+        tia[r] = value
+
+        tia.reg[r].should == value
+      end
+    end
+
+    [
+      WSYNC, RESP0, RESP1, RESM0, RESM1, RESBL, HMOVE, HMCLR, CXCLR,
+      CXM0P, CXM1P, CXP0FB, CXP1FB, CXM0FB, CXM1FB, CXBLPF, CXPPMM,
+      INPT0, INPT1, INPT2, INPT3, INPT4, INPT5
+    ].each do |r|
+      it "should not store the value for #{r}" do
+        value = rand(256)
+        tia.reg.should_not_receive(:[]=).with(r, value)
+
+        tia[r] = value
+      end
+    end
+
+
+    it 'should not store the value'
+  end
+
+
+
   context 'collisions' do
     describe 'CXCLR' do
       before do

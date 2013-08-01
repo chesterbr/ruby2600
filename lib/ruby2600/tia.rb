@@ -73,6 +73,10 @@ module Ruby2600
         @m1.strobe
       when RESBL
         @bl.strobe
+      when RESMP0
+        # FIXME implement
+      when RESMP1
+        # FIXME implement
       when HMOVE
         @late_reset_hblank = true
         @p0.start_hmove
@@ -86,8 +90,8 @@ module Ruby2600
         @reg[CXM0P] = @reg[CXM1P] = @reg[CXP0FB] = @reg[CXP1FB] = @reg[CXM0FB] = @reg[CXM1FB] = @reg[CXBLPF] = @reg[CXPPMM] = 0
       when WSYNC
         @cpu.halted = true
-      else
-        @reg[position] = value # FIXME it's not the grape party!
+      when VSYNC..VDELBL
+        @reg[position] = value 
       end
       @p0.old_value = @reg[GRP0]  if position == GRP1
       @bl.old_value = @reg[ENABL] if position == GRP1
