@@ -169,7 +169,7 @@ describe Ruby2600::Bus do
     describe '#read' do
       it 'translates TIA mirror reads to 30-3F' do
         TIA_ADDRESSES.each do |a|
-          bus[a].should == tia[a &  0b0000000000111111]
+          bus[a].should == tia[a & 0b1111 | 0b110000]
         end
       end
 
