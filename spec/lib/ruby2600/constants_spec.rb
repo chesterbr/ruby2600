@@ -5,8 +5,6 @@ require 'spec_helper'
 # guaranteeing that chips will work regardless of the mirror used by games
 
 describe Ruby2600::Constants do
-  include Ruby2600::Constants
-
   it 'should use $00-$3F mirror in all TIA constants' do
     [
       VSYNC, VBLANK, WSYNC, RSYNC, NUSIZ0, NUSIZ1, COLUP0, COLUP1, COLUPF,

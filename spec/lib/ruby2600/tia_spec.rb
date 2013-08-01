@@ -1,5 +1,4 @@
 require 'spec_helper'
-include Ruby2600::Constants
 
 describe Ruby2600::TIA do
 
