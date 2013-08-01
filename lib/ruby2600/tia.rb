@@ -25,15 +25,6 @@ module Ruby2600
 
       @port_level = Array.new(6, false)
       @latch_level = Array.new(6, true)
-
-      # Playfield position counter is fixed (and never changes)
-      @pf.value = 0 
-    end
-
-    def scanline
-      intialize_scanline
-      wait_horizontal_blank
-      draw_scanline
     end
 
     def frame
@@ -43,6 +34,12 @@ module Ruby2600
       buffer << scanline until vertical_blank?      # Picture
       scanline until vertical_sync?                 # Overscan
       buffer
+    end
+
+    def scanline
+      intialize_scanline
+      wait_horizontal_blank
+      draw_scanline
     end
 
     def set_port_level(number, level)

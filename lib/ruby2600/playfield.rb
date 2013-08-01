@@ -1,5 +1,5 @@
 # Playfield isn't really *movable*, and could be drawn directly as the
-# TIA class draws the scanline, but giving it its own class and counter
+# TIA class draws the scanline, but giving it its own counter
 # simplifies testing and pushes class TIA towards SRP
 
 module Ruby2600
@@ -12,6 +12,12 @@ module Ruby2600
   	REG_AND_BIT_FOR_PIXEL = [[PF0, 4], [PF0, 5], [PF0, 6], [PF0, 7],
   	                         [PF1, 7], [PF1, 6], [PF1, 5], [PF1, 4], [PF1, 3], [PF1, 2], [PF1, 1], [PF1, 0],
   	                         [PF2, 0], [PF2, 1], [PF2, 2], [PF2, 3], [PF2, 4], [PF2, 5], [PF2, 6], [PF2, 7]]
+
+    # Playfield starts counting at 0 (and never moves)
+    def initialize(*args)
+      super(*args)      
+      self.value = 0
+    end
 
   	private
 
