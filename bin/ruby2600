@@ -167,8 +167,8 @@ end
 
 class GameWindow < Gosu::Window
   def initialize
-    super 640, 440, false, 1
-    stub = EmptyImageStub.new(160,220)
+    super 640, 384, false, 1
+    stub = EmptyImageStub.new(160,192)
     @canvas = Gosu::Image.new(self, stub, true)
     self.caption = "Ruby2600"
   end
@@ -186,7 +186,6 @@ class GameWindow < Gosu::Window
     @canvas.paint do
       frame.each_index do |y|
         frame[y].each_index do |x|
-          # FIXME ignore invisible top/bottom
           pixel x, y, :color => NTSC_COLOR_LUM_TO_SRGB[frame[y][x] / 2]
         end
       end
@@ -199,7 +198,6 @@ class GameWindow < Gosu::Window
 
   def button_down(id)
     case id
-
     when Gosu::KbUp, Gosu::KbW
       @bus.p0_joystick_up = true
       @bus.p0_joystick_down = false
@@ -250,11 +248,6 @@ class GameWindow < Gosu::Window
     when Gosu::Kb8
       @bus.p1_difficulty_switch = false
     end
-  end
-
-  private
-
-  def button_toggle(id, state)
   end
 end
 
