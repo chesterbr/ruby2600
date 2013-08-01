@@ -211,6 +211,19 @@ describe Ruby2600::Player do
         end
       end
 
+      context 'one copy, double size with missile size set' do
+        before do
+          tia.reg[NUSIZ0] = 0b00110101
+          player.strobe
+          5.times { player.pixel }
+        end
+
+        it 'should not be affected (should draw on subsequent scanlines)' do
+          160.times { player.pixel }
+          pixels(player, 1, 160).should == PIXELS_2X + Array.new(144)
+        end
+      end
+
       pending 'HMOVE test (unless we make it on movable_object)'
 
       pending 'VDELPn test'

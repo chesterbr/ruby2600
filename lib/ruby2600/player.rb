@@ -13,7 +13,7 @@ module Ruby2600
     end
 
     def size
-      case reg(NUSIZ0)
+      case reg(NUSIZ0) & 0b111
       when 0b101 then 2
       when 0b111 then 4
       else 1
