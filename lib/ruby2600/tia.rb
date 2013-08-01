@@ -161,7 +161,7 @@ module Ruby2600
       @reg[CXM0FB] |= BIT_7 if @m0_pixel && @pf_pixel
       @reg[CXM1FB] |= BIT_6 if @m1_pixel && @bl_pixel
       @reg[CXM1FB] |= BIT_7 if @m1_pixel && @pf_pixel
-      # c-c-c-combo breaker: bit 6 of CXM1FB is unused
+      # c-c-c-combo breaker: bit 6 of CXLBPF is unused
       @reg[CXBLPF] |= BIT_7 if @bl_pixel && @pf_pixel
       @reg[CXPPMM] |= BIT_6 if @m0_pixel && @m1_pixel
       @reg[CXPPMM] |= BIT_7 if @p0_pixel && @p1_pixel
