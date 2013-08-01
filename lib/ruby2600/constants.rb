@@ -20,7 +20,6 @@ module Ruby2600
     PF1    = 0x0E
     PF2    = 0x0F
     RESP0  = 0x10
-    POSH2  = 0x11
     RESP1  = 0x11
     RESM0  = 0x12
     RESM1  = 0x13
