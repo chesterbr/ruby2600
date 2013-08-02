@@ -22,7 +22,7 @@ module Ruby2600
     end
 
     def initialize(tia, object_number = 0)
-      @tia_registers = tia.reg
+      @tia = tia
       @object_number = object_number
       @counter_inner_value = rand(COUNTER_MAX)
       @old_value = rand(256)
@@ -49,7 +49,7 @@ module Ruby2600
     def pixel
       update_pixel_bit
       tick      
-      reg(self.class.color_register) if @pixel_bit == 1      
+      reg(self.class.color_register) if @pixel_bit == 1
     end
 
     def start_hmove
@@ -70,7 +70,7 @@ module Ruby2600
     # Ex.: reg(GRP0) will read GRP0 for P0, but GRP1 for P1;
     #      reg(HMM0) will read HMM0 for M0, but HMM1 for M1;
     def reg(register_name)
-      @tia_registers[register_name + @object_number]
+      @tia.reg[register_name + @object_number]
     end
 
     def hm_value
