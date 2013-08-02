@@ -16,3 +16,5 @@ test/tmp
 test/version_tmp
 tmp
 .DS_Store
+spec/fixtures/files/vcs.h
+spec/fictures/files/dasm
