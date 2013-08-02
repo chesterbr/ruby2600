@@ -113,28 +113,26 @@ module Ruby2600
         color_clock = pixel + HORIZONTAL_BLANK_CLK_COUNT
         extended_hblank = @late_reset_hblank && pixel < 8
 
-        fetch_fixed_object_pixels
-        fetch_movable_object_pixels unless extended_hblank
+        fetch_pixels extended_hblank
         update_collision_flags
 
-        scanline[pixel] = topmost_pixel unless vertical_blank? || extended_hblank
+        scanline[pixel] = topmost_pixel unless vertical_blank?
         
         sync_2600_with color_clock
       end
       scanline
     end
 
-    def fetch_fixed_object_pixels
+    def fetch_pixels(extended_blank)
+      # Playfield is not subject to extended_hblank delay
+      # (causing the "comb effect")
       @pf_pixel = @pf.pixel
       @bk_pixel = @reg[COLUBK]
-    end
-
-    def fetch_movable_object_pixels
-      @p0_pixel = @p0.pixel
-      @p1_pixel = @p1.pixel
-      @m0_pixel = @m0.pixel
-      @m1_pixel = @m1.pixel
-      @bl_pixel = @bl.pixel
+      @p0_pixel = @p0.pixel extended_blank
+      @p1_pixel = @p1.pixel extended_blank
+      @m0_pixel = @m0.pixel extended_blank
+      @m1_pixel = @m1.pixel extended_blank
+      @bl_pixel = @bl.pixel extended_blank
     end
 
     def topmost_pixel

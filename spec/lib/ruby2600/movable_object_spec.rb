@@ -93,6 +93,67 @@ describe Ruby2600::MovableObject do
     end
   end
 
+  describe '#pixel' do
+    before do
+      subject.stub :tick
+      subject.stub :update_pixel_bit
+      subject.class.color_register = [COLUPF, COLUP0, COLUP1].sample
+      tia.reg[subject.class.color_register] = 0xAB
+    end
+
+    context 'in visible scanline' do
+      it 'should tick the counter' do
+        subject.should_receive(:tick)
+
+        subject.pixel
+      end
+
+      it 'should advance the graphic bit' do
+        subject.should_receive(:update_pixel_bit)
+
+        subject.pixel
+      end
+
+      it 'should return nil if the graphic bit is clear' do
+        subject.instance_variable_set(:@pixel_bit, 0)
+
+        subject.pixel.should == nil
+      end
+
+      it "should return the graphic color register's value if the graphic bit is set" do
+        subject.instance_variable_set(:@pixel_bit, 1)
+
+        subject.pixel.should == 0xAB
+      end
+    end
+
+    context 'in extended hblank (aka "comb effect", caused by HMOVE during hblank)' do
+      it 'should not tick the counter' do
+        subject.should_not_receive(:tick)
+
+        subject.pixel :extended_hblank => true
+      end
+
+      it 'should advance the graphic' do
+        subject.should_receive(:update_pixel_bit)
+
+        subject.pixel :extended_hblank => true
+      end      
+
+      it 'should return nil if the graphic bit is clear' do
+        subject.instance_variable_set(:@pixel_bit, 0)
+
+        subject.pixel(:extended_hblank => true).should == nil
+      end
+
+      it 'should return nil if the graphic bit is set' do
+        subject.instance_variable_set(:@pixel_bit, 1)
+
+        subject.pixel(:extended_hblank => true).should == nil
+      end
+    end
+  end
+
   describe '#start_hmove / #apply_hmove' do
     before do
       Ruby2600::MovableObject.hmove_register = HMP0

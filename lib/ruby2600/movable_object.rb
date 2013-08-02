@@ -46,10 +46,12 @@ module Ruby2600
       on_counter_change if value != old_value
     end
 
-    def pixel
+    def pixel(extended_hblank = false)
       update_pixel_bit
-      tick      
-      reg(self.class.color_register) if @pixel_bit == 1
+      unless extended_hblank
+        tick      
+        reg(self.class.color_register) if @pixel_bit == 1
+      end
     end
 
     def start_hmove
