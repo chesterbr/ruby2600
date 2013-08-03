@@ -116,7 +116,7 @@ module Ruby2600
         fetch_pixels extended_hblank
         update_collision_flags
 
-        scanline[pixel] = topmost_pixel unless vertical_blank?
+        scanline[pixel] = topmost_pixel unless vertical_blank? || extended_hblank
         
         sync_2600_with color_clock
       end
