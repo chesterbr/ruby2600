@@ -233,6 +233,4 @@ describe Ruby2600::MovableObject do
       16.times { subject.apply_hmove }
     end
   end
-
-
 end

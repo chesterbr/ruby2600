@@ -28,6 +28,10 @@ module Ruby2600
       @old_value = rand(256)
     end
 
+    def reset_to(other)
+      @counter_inner_value = other.instance_variable_get(:@counter_inner_value)
+    end
+
     def strobe
       @counter_inner_value = COUNTER_RESET_VALUE * COUNTER_DIVIDER
     end

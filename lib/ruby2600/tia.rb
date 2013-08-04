@@ -71,9 +71,9 @@ module Ruby2600
       when RESBL
         @bl.strobe
       when RESMP0
-        # FIXME implement
+        @m0.reset_to @p0
       when RESMP1
-        # FIXME implement
+        @m1.reset_to @p1
       when HMOVE
         @late_reset_hblank = true
         @p0.start_hmove

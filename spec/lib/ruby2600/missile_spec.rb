@@ -194,7 +194,30 @@ describe Ruby2600::Missile do
         end        
       end
     end
+  end
 
+  describe '#reset_to' do
+    let(:player) { Ruby2600::Player.new(tia, 0) }
 
+    before do 
+      rand(160).times { player.tick }
+    end
+
+    it "should not affect the player" do
+      expect { 
+        missile.reset_to player
+      }.to_not change { player.value }
+    end
+
+    it "should set both objects to the same clock phase (i.e., same value without drifting)" do
+      missile.reset_to player
+
+      4.times do
+        missile.tick
+        player.tick
+
+        subject.value.should == player.value
+      end
+    end
   end
 end
