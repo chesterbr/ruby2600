@@ -46,7 +46,13 @@ There are a couple of test files under `spec/fixtures/files` you can try, but I 
 - Some games (notably early ones from Atari, like Combat/Space Invaders) display a blinking 999x score;
 - Some games display an artifact at the left side where there should be nothing (Freeway, Boxing);
 - Collision detection erratic (Pitfall finds if you hit a log, but not the vine; River Raid has no detection);
-- Some sprites seem off-by-one on specific games (see tip of hidden subs on Seaquest).
+- Some sprites seem off-by-one on specific games (see tip of hidden subs on Seaquest);
+
+Technical debt:
+
+- UI code needs some love (just quickly slapped a [Gosu](http://www.libgosu.org/) script on /bin to make it playable; would seriously consider a JRuby-friendly version);
+- CPU code could be refactored to get rid of the "instruction/operation" difference;
+- Might want to split MovableObject into the Graphic (the real superclass) and Counter (an utility that should be composed).
 
 ## FAQ
 
