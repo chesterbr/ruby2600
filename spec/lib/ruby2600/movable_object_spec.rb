@@ -94,6 +94,20 @@ describe Ruby2600::MovableObject do
   end
 
   describe '#pixel' do
+    shared_examples_for 'reflect graphic bit' do
+      it 'by being nil if the graphic bit is clear' do
+        subject.instance_variable_set(:@pixel_bit, 0)
+
+        subject.pixel.should == nil
+      end
+
+      it "by being the graphic color register's value if the graphic bit is set" do
+        subject.instance_variable_set(:@pixel_bit, 1)
+
+        subject.pixel.should == 0xAB
+      end
+    end
+
     before do
       subject.stub :tick
       subject.stub :update_pixel_bit
@@ -114,17 +128,7 @@ describe Ruby2600::MovableObject do
         subject.pixel
       end
 
-      it 'should return nil if the graphic bit is clear' do
-        subject.instance_variable_set(:@pixel_bit, 0)
-
-        subject.pixel.should == nil
-      end
-
-      it "should return the graphic color register's value if the graphic bit is set" do
-        subject.instance_variable_set(:@pixel_bit, 1)
-
-        subject.pixel.should == 0xAB
-      end
+      it_should 'reflect graphic bit'
     end
 
     context 'in extended hblank (aka "comb effect", caused by HMOVE during hblank)' do
@@ -140,17 +144,7 @@ describe Ruby2600::MovableObject do
         subject.pixel :extended_hblank => true
       end      
 
-      it 'should return nil if the graphic bit is clear' do
-        subject.instance_variable_set(:@pixel_bit, 0)
-
-        subject.pixel(:extended_hblank => true).should == nil
-      end
-
-      it 'should return nil if the graphic bit is set' do
-        subject.instance_variable_set(:@pixel_bit, 1)
-
-        subject.pixel(:extended_hblank => true).should == nil
-      end
+      it_should 'reflect graphic bit'
     end
   end
 
