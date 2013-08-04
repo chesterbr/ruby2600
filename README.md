@@ -1,57 +1,97 @@
 # Ruby2600
 
-A (work-in-progress) Atari 2600 emulator, 100% written in Ruby.
-
-## Motivation
-
-Emulator development and the "Ruby way" of writing code were two areas that I wanted to explore, and this project allowed me to do both.
-
-The main focus is to avoid "writing C in Ruby". Instead, the code is geared towards clarity and compatibility, by means of means of strict, RSpec-based TDD.
-
-This will (hopefully) result in specs that can  used in other contexts (e.g., testing other 650x CPU emulators, or using the current one in other projects).
-
-Speed and sound are lowest-priority goals ([Stella](http://stella.sourceforge.net/) or [z26](http://www.whimsey.com/z26/) can suit most needs in those respects right now). Once (and if) it reaches reasonable compatibility with general games we can look at those aspects.
+An experimental Atari 2600 emulator, 100% written in Ruby.
 
 ## Current status
 
-Pitfall is almost playable! (at ~1/10 speed, no button, collision detection not working 100% - e.g., no log-Harry collision detected).
+Mow most 2K and 4K games show at least their title screens. Some (e.g., *Pitfall!™*, *River Raid™*) are quite playable (at what feels like ~1/10 speed of an Atari on my Mac Mini). But check *Known Issues* and the *FAQ* below.
 
-(need to update screenshots, maybe keep as history)
-
-![alt text](http://i.imgur.com/9t8D7EV.jpg "Pitfall! on Stella x Ruby2600")
-
-A more recent comparsion (after a spike rethinking the CPU-TIA sync): background priority not yet implemented, but HMOVE is good and positioning got *way* better:
-
-![alt text](http://i.imgur.com/vqOznWI.png "Frogger on Stella x Ruby2600")
-
-The blurry visual is due to Gosu bitmap stetch - easy to fix, but it reminds me so much of how TVs got Atari RF that I decided to keep it that way for now.
-
-Console switches are mapped inspired on the [Stella Keys Layout](http://stella.sourceforge.net/docs/#Keyboard), but using (laptop-friendly) Mac keys instead of function keys. Right now select (1) and Reset (2) need to be held for about a second, so they can be picked up by the slow frame generator, the others are picked up naturally.
-
-
-### Details
-
-- Full 650x instruction set emulation, [cloc](http://cloc.sourceforge.net/)-ing around 350 lines of code. (hardware interrupts not emulated, as the 2600 does not have them)
-- TIA emulation covers basic VSYNC/VBLANK, playfield registers and CPU sync (including WSYNC), being able to generate an entire scanline or even a full frame (in Atari colors)
-- RIOT RAM and timers implemented
-- Every single aspect of the emulated code is spec-ed.
-- Rudimentary [Gosu](http://www.libgosu.org/)-based command-line interface allows playfield-booting some games.
+![alt text](http://i.imgur.com/kN9Yxsi.png "Pitfall! on Stella x Ruby2600")
 
 ## Installation
 
-Once this gem is published), you'll be able to just install it:
+Once this gem is published, you'll be able to install it with:
 
-    $ gem install ruby2600
+    gem install ruby2600
 
-For now, clone the project and `bundle install` the dependencies.
+For now, do this:
+
+    git clone git@github.com:chesterbr/ruby2600.git
+    cd ruby2600
+    bundle install
 
 ## Usage
 
-You can use then `bundle exec rspec` or `bundle exec guard` to run the tests, or go wild on `irb`/`pry` (disassembler/debug tools will come soon).
+	bundle exec ruby -Ilib bin/ruby2600 /path/of/your/romfile.bin
 
-Command line is pretty minimal now, and most likely only runs the Hello World cart (with funky colors). You can run straight from a clone/fork with:
+(it will be `ruby2600 /path/of/your/romfile.bin` once the gem is published)
+    
+There are a couple of test files under `spec/fixtures/files` you can try, but I suggest that you obtain a 2K or 4K .BIN file (for which you have the legal right to play, say, by owning the original cart).
 
-    $ bundle exec ruby -Ilib bin/ruby2600 spec/fixtures/files/hello.bin
+### Keys
+
+- *↑ ← ↓ →* - Player 0 joystick
+- *Space* - Player 0 fire button
+- *1* - GAME SELECT switch
+- *2* - GAME RESET switch
+- *3*/*4* - Color switch (3 = Color; 4 = black and white)
+- *5*/*6* - Player 0 difficulty switch (5 = Beginner, 6 = Advanced)
+- *7*/*8* - Player 1 difficulty switch (7 = Beginner, 8 = Advanced)
+- *W/A/S/D* - "Sticky" Player 0 joystick (to stop moving, press the non-sticky arrow)
+
+## Known issues
+
+- Objects rendered close to the left side sometimes render in wrong positon (see diagonal.bin test);
+- Some games are extending to long frames (River Raid, Boxing, Space Invaders);
+- Some games (notably early ones from Atari, like Combat/Space Invaders) display a blinking 999x score;
+- Some games display an artifact at the left side where there should be nothing (Freeway, Boxing);
+- Collision detection erratic (Pitfall finds if you hit a log, but not the vine; River Raid has no detection);
+- Some sprites seem off-by-one on specific games (see tip of hidden subs on Seaquest).
+
+## FAQ
+
+#### Why?
+
+I had two (somewhat) unrelated goals for this year:
+
+- Learning more about the 2600 (to write a game in the future);
+- Getting more proficient with Ruby and RSpec.
+
+The emulator is the way I found to tackle to do both at once.
+
+#### Emulator in Ruby? Is that possible?
+
+Yes, it is, and ruby2600 shows that.
+
+#### And how good it is?
+
+Not really good if your goal is playing games. Keep in mind that:
+
+- It is **slow** (~1/10 of a real Atari on my computer).
+- It has **no sound**.
+- It has **a few glitches** (see ).
+
+It is good, however, if you want to learn more about the 2600, as the lack of concerns with speed makes the code more accessible than the average emulator.
+
+#### Will you make it faster/add sound?
+
+Once (and if) ruby2600 reaches reasonable compatibility with general games, these aspects can be looked after. For now, I'm focused on fixing the glitches, making the code clear, and improve the specs as much as possible.
+
+If you want a full-speed emulator with sound and compatible with every single game under the sun, I wholehartedly recommend [Stella](http://stella.sourceforge.net/) - which has been an invaluable source of inspiration, debug help and implementation reference. It's what I use to play (other than my real Atari).
+
+#### What is the current status?
+
+It boots almost every 2K/4K cart I've tried, and you can play quite a few of them (reeeeaaaalyyy slooowwwwlyyyy). Tech details:
+
+- Full 650x instruction set emulation, [cloc](http://cloc.sourceforge.net/)-ing less than 380 lines of code. (hardware interrupts not emulated, as the 2600 does not have them);
+- RIOT fully implemented;
+- TIA registers are all emulated, with the exception of audio (AU*) and hardware test (RSYNC);
+- Every single aspect of the emulated code is spec-ed, except for some TIA parts I am still figuring out.
+
+## Changelog
+
+##### 0.1.0
+- First release with full (sans sound) TIA emulation
 
 ## License
 
@@ -61,6 +101,6 @@ Once released (planned for [RubyConf BR 2013](http://cfp.rubyconf.com.br/)), thi
 
 Copyright (c) 2013 Carlos Duarte do Nascimento (Chester) <cd@pobox.com>
 
-Atari word mark and logo are trademarks owned by Atari Interactive, Inc.
+Atari™ word trademarks owned by Atari Interactive, Inc., which this software and its authors do not claim to hold or represent in any way. Any other software mentioned is property of his/her respective owners.
 
 See the file LICENSE.txt for copying permission.
