@@ -46,15 +46,19 @@ module Ruby2600
       2, 5, 0, 8, 4, 4, 6, 6, 2, 4, 2, 7, 4, 4, 7, 7
     ]
 
-    # Synertek's 65xx programming manual divides instructions in three groups, and
-    # http://www.llx.com/~nparker/a2/opcodes.html goes into detail on their bitnary
-    # footprint. The tables below represent that info in order to simplify decoding
+    # The 6507 recognizes 151 different opcodes. These have implicit addressing,
+    # (that is, map to a single logical instruction) and can be decoded directly:
 
-    INSTRUCTION_GROUPS = [
-      %w'xxx BIT JMP JMPabs STY LDY CPY CPX',
-      %w'ORA AND EOR ADC    STA LDA CMP SBC',
-      %w'ASL ROL LSR ROR    STX LDX DEC INC'
-    ]
+    BRK = 0x00; PHP = 0x08; JSR = 0x20; PLP = 0x28; RTI = 0x40;
+    PHA = 0x48; RTS = 0x60; PLA = 0x68; DEY = 0x88; TXA = 0x8A;
+    TYA = 0x98; TXS = 0x9A; TAY = 0xA8; TAX = 0xAA; CLV = 0xB8;
+    TSX = 0xBA; INY = 0xC8; DEX = 0xCA; INX = 0xE8; NOP = 0xEA
+
+    # The remaining logical instructions map to different opcodes, depending on
+    # the type of parameter they will be taking (a memory address, a value, etc.)
+    #
+    # We'll use info from from http://www.llx.com/~nparker/a2/opcodes.html) to build
+    # bitmask constants that will ease decoding the opcodes into instructions:
 
     ADDRESSING_MODE_GROUPS = [
       [ :immediate, :zero_page, nil, :absolute, nil, :zero_page_indexed_x, nil, :absolute_indexed_x ],
@@ -62,7 +66,11 @@ module Ruby2600
       [ :immediate, :zero_page, :accumulator, :absolute, nil, :zero_page_indexed_x_or_y, nil, :absolute_indexed_x_or_y ]
     ]
 
-    # Build instruction-named constants from the tables above
+    INSTRUCTION_GROUPS = [
+      %w'xxx BIT JMP JMPabs STY LDY CPY CPX',
+      %w'ORA AND EOR ADC    STA LDA CMP SBC',
+      %w'ASL ROL LSR ROR    STX LDX DEC INC'
+    ]
 
     INSTRUCTION_GROUPS.each_with_index do |names, cc|
       names.each_with_index do |name, aaa|
@@ -72,17 +80,17 @@ module Ruby2600
 
     # Conditional branches (BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ) and the symmetric
     # set/clear flag instructions (SEC, SEI, SED, CLD, CLI, CLD) also follow bit
-    # patterns (for target flag and expected/set value).
-    #
-    # We'll generalize them as "BXX" and SCX"
+    # patterns (for target flag and expected/set value) and will be generalized
+    # as "BXX" and SCX":
 
     BXX = 0b00010000
     SCX = 0b00011000
     BXX_FLAGS = [:@n, :@v, :@c, :@z]
-    SCX_FLAGS = [:@c, :@i, :@v, :@d] # @v not really used, it behaves differently
+    SCX_FLAGS = [:@c, :@i, :@v, :@d] # @v not (officially) used
 
-    # Some instructions take an extra cycle if memory access crosses a page boundary.
-    # (STA/STX/STY are notable exceptions, see: http://bit.ly/10JNkOR)
+    # Instructions that index (non-zero-page) memory have a 1-cycle penality if
+    # the resulting address crosses page boundaries (trivia: it is, in fact, an
+    # optimization of the non-crossing cases: http://bit.ly/10JNkOR)
 
     INSTRUCTIONS_WITH_PAGE_PENALTY = [ORA, AND, EOR, ADC, LDA, CMP, SBC, LDX, LDY]
 
@@ -97,15 +105,15 @@ module Ruby2600
     def step
       fetch
       decode
-      execute   
-      @time_in_cycles   
+      execute
+      @time_in_cycles
     end
 
     def tick
       return if @halted
       if !@time_in_cycles
         fetch
-        decode        
+        decode
       end
       @time_in_cycles -= 1
       if @time_in_cycles == 0
@@ -116,7 +124,7 @@ module Ruby2600
 
     private
 
-    # 6502 has an internal "T-state" that gets incremented as each clock cycle
+    # 6507 has an internal "T-state" that gets incremented as each clock cycle
     # advances within an instruction (cf. http://www.pagetable.com/?p=39).
     #
     # For simplicity, let's stick to the fetch-decode-execute cycle and advance
@@ -146,11 +154,6 @@ module Ruby2600
       @time_in_cycles = time_in_cycles
     end
 
-    def execute
-      # Try individual opcodes first, then instructions
-      execute_instruction unless execute_opcode
-    end
-
     # These helpers allow us to "tag" operations with affected flags
 
     def flag_nz(value)
@@ -165,59 +168,59 @@ module Ruby2600
 
     # Core execution logic
 
-    def execute_opcode
+    def execute
       case @opcode
-      when 0xEA # NOP
-      when 0xE8 # INX
+      when NOP
+      when INX
         flag_nz @x = byte(@x + 1)
-      when 0xC8 # INY
+      when INY
         flag_nz @y = byte(@y + 1)
-      when 0xCA # DEX
+      when DEX
         flag_nz @x = byte(@x - 1)
-      when 0x88 # DEY
+      when DEY
         flag_nz @y = byte(@y - 1)
-      when 0xAA # TAX
+      when TAX
         flag_nz @x = @a
-      when 0xA8 # TAY
+      when TAY
         flag_nz @y = @a
-      when 0x8A # TXA
+      when TXA
         flag_nz @a = @x
-      when 0x98 # TYA
+      when TYA
         flag_nz @a = @y
-      when 0xBA # TSX
+      when TSX
         flag_nz @x = @s
-      when 0x9A # TXS
+      when TXS
         @s = @x
-      when 0xB8 # CLV
+      when CLV
         @v = false
-      when 0x08 # PHP
+      when PHP
         push p
-      when 0x28 # PLP
+      when PLP
         self.p = pop
-      when 0x48 # PHA
+      when PHA
         push @a
-      when 0x68 # PLA
+      when PLA
         flag_nz @a = pop
-      when 0x20 # JSR
+      when JSR
         push_word @pc - 1
         @pc = @param
-      when 0x60 # RTS
+      when RTS
         @pc = word(pop_word + 1)
-      when 0x00 # BRK
+      when BRK
         push_word @pc
         push p
         @i = true
         @pc = memory_word(BRK_VECTOR)
-      when 0x40 # RTI
+      when RTI
         self.p = pop
         @pc = pop_word
       else
-        return false
+        # Not an implicit addressing instruction
+        execute_with_addressing_mode
       end
-      true
     end
 
-    def execute_instruction
+    def execute_with_addressing_mode
       case @instruction
       when AND
         flag_nz @a = @a & load
