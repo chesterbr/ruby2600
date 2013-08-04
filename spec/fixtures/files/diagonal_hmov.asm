@@ -14,6 +14,28 @@
 
     ORG $F000
 
+Initialize:             ; Cleanup from macro.h (by Andrew Davie/DASM)
+    sei
+    cld
+    ldx #0
+    txa
+    tay
+CleanStack:
+    dex
+    txs
+    pha
+    bne CleanStack
+
+InitialValues:
+    lda #$02
+    sta ENABL
+    lda #$F0
+    sta HMBL
+    lda #$FF
+    sta COLUPF
+    lda #$30
+    sta CTRLPF
+
 StartFrame:
     lda #%00000010
     sta VSYNC
@@ -23,35 +45,18 @@ StartFrame:
     lda #0
     sta VSYNC
 
-PreparePlayfield:
-    lda #$02
-    sta ENABL
-    lda #$00
-    sta ENAM0
-    sta ENAM1
-    sta GRP0
-    sta GRP1
-    sta COLUBK
-    sta PF0
-    sta PF1
-    sta PF2
-    lda #$F0
-    sta HMBL
-    lda #$FF
-    sta COLUPF
-    lda #$30
-    sta CTRLPF
-    ldx #0
+VBlank:
     sta WSYNC
     REPEAT 35
         nop
     REPEND
     sta RESBL
+    sta WSYNC      ; First line positioned the ball
     REPEAT 36
         sta WSYNC
     REPEND
-    lda #0
-    sta VBLANK
+    ldx #0         ; scanline counter
+    stx VBLANK
 
 Scanline:
     sta HMOVE
@@ -71,9 +76,9 @@ Overscan:
 
     ORG $FFFA
 
-    .WORD StartFrame
-    .WORD StartFrame
-    .WORD StartFrame
+    .WORD Initialize
+    .WORD Initialize
+    .WORD Initialize
 
     END
 
