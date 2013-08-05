@@ -27,7 +27,7 @@ For now, do this:
 	bundle exec ruby -Ilib bin/ruby2600 /path/of/your/romfile.bin
 
 (it will be `ruby2600 /path/of/your/romfile.bin` once the gem is published)
-    
+
 There are a couple of test files under `spec/fixtures/files` you can try, but I suggest that you obtain a 2K or 4K .BIN file (for which you have the legal right to play, say, by owning the original cart).
 
 ### Keys
@@ -47,7 +47,6 @@ There are a couple of test files under `spec/fixtures/files` you can try, but I 
 - Some games are extending to long frames (River Raid, Boxing, Space Invaders);
 - Some games (notably early ones from Atari, like Combat/Space Invaders) display a blinking 999x score;
 - Some games display an artifact at the left side where there should be nothing (Freeway, Boxing);
-- Collision detection erratic (Pitfall finds if you hit a log, but not the vine; River Raid has no detection);
 - Some sprites seem off-by-one on specific games (see tip of hidden subs on Seaquest);
 
 Technical debt:
