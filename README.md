@@ -38,9 +38,9 @@ There are a couple of test files under `spec/fixtures/files` you can try, but I 
 - *Space* - Player 0 fire button
 - *1* - GAME SELECT switch
 - *2* - GAME RESET switch
-- *3*/*4* - Color switch (3 = Color; 4 = black and white)
-- *5*/*6* - Player 0 difficulty switch (5 = Beginner, 6 = Advanced)
-- *7*/*8* - Player 1 difficulty switch (7 = Beginner, 8 = Advanced)
+- *3/4* - Color switch (3 = Color; 4 = black and white)
+- *5/6* - Player 0 difficulty switch (5 = Beginner, 6 = Advanced)
+- *7/8* - Player 1 difficulty switch (7 = Beginner, 8 = Advanced)
 - *W/A/S/D* - "Sticky" Player 0 joystick (to stop moving, press the non-sticky arrow)
 
 ## Known issues
