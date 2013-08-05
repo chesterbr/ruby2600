@@ -43,6 +43,18 @@ There are a couple of test files under `spec/fixtures/files` you can try, but I 
 - *7/8* - Player 1 difficulty switch (7 = Beginner, 8 = Advanced)
 - *W/A/S/D* - "Sticky" Player 0 joystick (to stop moving, press the non-sticky arrow)
 
+## Current Status
+
+It boots almost every 2K/4K cart I've tried, and you can play quite a few of them (reeeeaaaalyyy slooowwwwlyyyy).
+
+Some details:
+
+- Full 650x CPU instruction set emulation, [cloc](http://cloc.sourceforge.net/)-ing less than 380 lines of code. (hardware interrupts not emulated, since the 2600 does not have those);
+- RIOT fully implemented;
+- All bus mirrorings implemented; console switches and P0 joystick bindings available for any pluggable front-end.
+- TIA registers are all emulated, with the exception of audio (AU*) and hardware test (RSYNC);
+- Every single aspect of the emulated code is spec-ed, except for some TIA parts I am still figuring out. CPU/RIOT are pretty final, TIA might still be refactored since it suffered a lot of crazy stabs due to the lack of documentation (see below).
+
 ## Known issues
 
 - Objects rendered close to the left side (counter zeroing during HBLANK)sometimes render in wrong positon (see diagonal.bin test);
@@ -86,15 +98,6 @@ It is good, however, if you want to learn more about the 2600, as the lack of co
 Once (and if) ruby2600 reaches reasonable compatibility with general games, these aspects can be looked after. For now, I'm focused on fixing the glitches, making the code clear, and improve the specs as much as possible.
 
 If you want a full-speed emulator with sound and compatible with every single game under the sun, I wholehartedly recommend [Stella](http://stella.sourceforge.net/) - which has been an invaluable source of inspiration, debug help and implementation reference. It's what I use to play (other than my real Atari).
-
-#### What is the current status?
-
-It boots almost every 2K/4K cart I've tried, and you can play quite a few of them (reeeeaaaalyyy slooowwwwlyyyy). Tech details:
-
-- Full 650x instruction set emulation, [cloc](http://cloc.sourceforge.net/)-ing less than 380 lines of code. (hardware interrupts not emulated, as the 2600 does not have them);
-- RIOT fully implemented;
-- TIA registers are all emulated, with the exception of audio (AU*) and hardware test (RSYNC);
-- Every single aspect of the emulated code is spec-ed, except for some TIA parts I am still figuring out.
 
 ## Changelog
 
