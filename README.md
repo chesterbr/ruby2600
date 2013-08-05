@@ -65,7 +65,7 @@ I had two (somewhat) unrelated goals for this year:
 - Learning more about the 2600 (to write a game in the future);
 - Getting more proficient with Ruby and RSpec.
 
-The emulator is the way I found to tackle to do both at once.
+The emulator is the way I found to tackle both at once.
 
 #### Emulator in Ruby? Is that possible?
 
