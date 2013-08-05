@@ -1,12 +1,14 @@
-# Ruby2600
+# ruby2600
 
 An experimental Atari 2600 emulator, 100% written in Ruby.
 
+![ruby2600](http://i.imgur.com/Zjgibpr.png "ruby2600")
+
 ## Current status
 
-Mow most 2K and 4K games show at least their title screens. Some (e.g., *Pitfall!™*, *River Raid™*) are quite playable (at what feels like ~1/10 speed of an Atari on my Mac Mini). But check *Known Issues* and the *FAQ* below.
+Most 2K and 4K games show at least their title screens. Some (e.g., *Pitfall!™*, *River Raid™*) are quite playable (at what feels like ~1/10 speed of an Atari on my Mac Mini). Check the [Known Issues](#known-issues) and  [FAQ](#faq) below.
 
-![alt text](http://i.imgur.com/kN9Yxsi.png "Pitfall! on Stella x Ruby2600")
+![screenshot](http://i.imgur.com/kN9Yxsi.png "Pitfall! on Ruby2600, as of Aug 4")
 
 ## Installation
 
