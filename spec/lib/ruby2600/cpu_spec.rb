@@ -629,18 +629,28 @@ describe Ruby2600::CPU do
 
         it { expect{ cpu.step }.to_not change{ cpu.a } }
 
-        context 'resulting in bit 6 set' do
+        context 'memory position with bit 6 set (even if AND result has it reset)' do
           before do
-            cpu.memory[0..1] = 0x24, 0xA4 # BIT $A4
-            cpu.a = 0x70
+            cpu.memory[0..1] = 0x24, 0x07 # BIT $07
+            cpu.a = 0x00
           end
 
           it_should 'set V flag'
         end
 
+        context 'memory position with bit 7 set (even if AND result has it reset)' do
+          before do
+            cpu.memory[0..1] = 0x24, 0x11 # BIT $11
+            cpu.a = 0x00
+          end
+
+          it_should 'set N flag'
+        end
+
         context 'resulting in zero' do
           before do
-            cpu.memory[0..1] = 0x24, 0x10 # BIT $10
+            cpu.memory[0..1] = 0x24, 0xA8 # BIT $A8
+            cpu.a = 0x01
           end
 
           it_should 'set Z flag'

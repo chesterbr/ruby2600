@@ -229,8 +229,9 @@ module Ruby2600
       when EOR
         flag_nz @a = @a ^ load
       when BIT
-        flag_nz (@a & load)
-        @v = @a[6] & load[6] != 0
+        @z = (@a & load).zero?
+        @v = load[6] != 0
+        @n = load[7] != 0
       when LDA
         flag_nz @a = load
       when LDX
