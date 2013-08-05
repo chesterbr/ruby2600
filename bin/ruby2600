@@ -170,7 +170,7 @@ class GameWindow < Gosu::Window
     super 640, 384, false, 1
     stub = EmptyImageStub.new(160,192)
     @canvas = Gosu::Image.new(self, stub, true)
-    self.caption = "Ruby2600"
+    self.caption = "ruby2600"
   end
 
   def load_cart(filename)

@@ -8,7 +8,7 @@ An experimental Atari 2600 emulator, 100% written in Ruby.
 
 Most 2K and 4K games show at least their title screens. Some (e.g., *Pitfall!™*, *River Raid™*) are quite playable (at what feels like ~1/10 speed of an Atari on my Mac Mini). Check the [Known Issues](#known-issues) and  [FAQ](#faq) below.
 
-![screenshot](http://i.imgur.com/kN9Yxsi.png "Pitfall! on Ruby2600, as of Aug 4")
+![screenshot](http://i.imgur.com/kN9Yxsi.png "Pitfall! on ruby2600, as of Aug 4")
 
 ## Installation
 
