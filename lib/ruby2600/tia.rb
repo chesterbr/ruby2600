@@ -88,11 +88,11 @@ module Ruby2600
       when WSYNC
         @cpu.halted = true
       when VSYNC..VDELBL
-        @reg[position] = value 
+        @reg[position] = value
       end
       @p0.old_value = @reg[GRP0]  if position == GRP1
       @bl.old_value = @reg[ENABL] if position == GRP1
-      @p1.old_value = @reg[GRP1]  if position == GRP0      
+      @p1.old_value = @reg[GRP1]  if position == GRP0
       set_latches_to_logic_one    if position == VBLANK && @reg[VBLANK][6] == 1
     end
 
@@ -100,7 +100,7 @@ module Ruby2600
 
     def intialize_scanline
       @cpu.halted = false
-      @late_reset_hblank = false      
+      @late_reset_hblank = false
     end
 
     def wait_horizontal_blank
@@ -117,7 +117,7 @@ module Ruby2600
         update_collision_flags
 
         scanline[pixel] = topmost_pixel unless vertical_blank? || extended_hblank
-        
+
         sync_2600_with color_clock
       end
       scanline
@@ -166,7 +166,7 @@ module Ruby2600
     end
 
     # All Atari chips use the same crystal for their clocks (with RIOT and
-    # CPU running at 1/3 of TIA speed). 
+    # CPU running at 1/3 of TIA speed).
 
     # Since the emulator's "main loop" is based on TIA#scanline, we'll "tick"
     # the other chips here (and also apply the horizontal motion on movable
