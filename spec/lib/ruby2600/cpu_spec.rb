@@ -61,6 +61,7 @@ describe Ruby2600::CPU do
       cpu.memory[0x00A9] = 0xFF
       cpu.memory[0x00B5] = 0x66
       cpu.memory[0x00B6] = 0x02
+      cpu.memory[0x0100] = 0xAB
       cpu.memory[0x0151] = 0xB7
       cpu.memory[0x0160] = 0xFF
       cpu.memory[0x0161] = 0x77
@@ -2212,6 +2213,8 @@ describe Ruby2600::CPU do
 
       context 'wrap' do
         before { cpu.s = 0xFF }
+
+        it_should 'set A value', 0xAB
 
         it_should 'set S value', 0x00
       end

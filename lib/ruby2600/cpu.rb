@@ -157,8 +157,8 @@ module Ruby2600
     # These helpers allow us to "tag" operations with affected flags
 
     def flag_nz(value)
-      @z = (value == 0)
-      @n = (value & 0b10000000 != 0)
+      @z = value.zero?
+      @n = value[7] != 0
     end
 
     def flag_nzc(value)
