@@ -6,7 +6,17 @@ An experimental Atari™ 2600 emulator, 100% written in Ruby.
 
 ## Current status
 
-Most 2K and 4K games show at least their title screens. Some (e.g., *Pitfall!™*, *Space Invaders™*, , *Boxing™*) are quite playable (at what feels like ~1/30 of the speed of a real Atari on my "late 2012" Mac Mini).
+Games **working** with no noticeable screen artifacts or glitches:
+
+- *Pitfall!*
+- *Space Invaders*
+- *River Raid*
+- *Pac-Man*
+- *Boxing*
+
+Speed is very low: about ~2 FPS (from the expected 60) on a 2.3Ghz computer.
+
+Also, no sound is emulated, nor any controllers other than the console switches and player 0 joystick.
 
 Check the [Known Issues](#known-issues) and [FAQ](#faq) below for more information.
 
