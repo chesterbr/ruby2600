@@ -178,6 +178,15 @@ class GameWindow < Gosu::Window
                              Ruby2600::TIA.new,
                              Ruby2600::Cart.new(filename),
                              Ruby2600::RIOT.new)
+    @bus.p0_joystick_up = false
+    @bus.p0_joystick_down = false
+    @bus.p0_joystick_left = false
+    @bus.p0_joystick_right = false
+    @bus.p0_joystick_fire = false
+    @bus.select_switch = false
+    @bus.reset_switch = false
+    @bus.p0_difficulty_switch = true
+    @bus.p1_difficulty_switch = true
     @bus.color_bw_switch = false
   end
 
