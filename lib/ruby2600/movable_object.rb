@@ -4,15 +4,15 @@ module Ruby2600
 
     # Value used by player/balls when vertical delay (VDELP0/VDELP1/VDELBL) is set
     # GRP1 write triggers copy of GRP0/ENABL to old_value, GRP0 write does same for GRP1
-    attr_accessor :old_value 
+    attr_accessor :old_value
 
     # Movable objects on TIA keep internal counters with behaviour
     # described in  http://www.atarihq.com/danb/files/TIA_HW_Notes.txt
 
     COUNTER_PERIOD = 40       # Internal counter value ranges from 0-39
     COUNTER_DIVIDER = 4       # It increments every 4 ticks (1/4 of TIA speed)
-    COUNTER_RESET_VALUE = 39  # See URL above 
-    
+    COUNTER_RESET_VALUE = 39  # See URL above
+
     COUNTER_MAX = COUNTER_PERIOD * COUNTER_DIVIDER
 
     class << self
@@ -51,8 +51,10 @@ module Ruby2600
     end
 
     def pixel(without_ticking_counter = false)
-      update_pixel_bit
-      tick unless without_ticking_counter
+      unless without_ticking_counter
+        update_pixel_bit
+        tick
+      end
       reg(self.class.color_register) if @pixel_bit == 1
     end
 

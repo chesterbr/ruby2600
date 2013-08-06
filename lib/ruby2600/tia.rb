@@ -126,6 +126,7 @@ module Ruby2600
     def fetch_pixels(extended_blank)
       # Playfield is not subject to extended_hblank delay
       # (causing the "comb effect")
+      # (this is not correct, in fact ^)
       @pf_pixel = @pf.pixel
       @bk_pixel = @reg[COLUBK]
       @p0_pixel = @p0.pixel extended_blank
@@ -174,13 +175,11 @@ module Ruby2600
 
     def sync_2600_with(color_clock)
       riot.tick if color_clock % 3 == 0
-      if color_clock % 4 == 0 # FIXME assuming H@1 postition here, might need adjustment
-        @p0.apply_hmove
-        @p1.apply_hmove
-        @m0.apply_hmove
-        @m1.apply_hmove
-        @bl.apply_hmove
-      end
+      @p0.apply_hmove
+      @p1.apply_hmove
+      @m0.apply_hmove
+      @m1.apply_hmove
+      @bl.apply_hmove
       cpu.tick if color_clock % 3 == 2
     end
 
