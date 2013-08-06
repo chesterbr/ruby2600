@@ -12,7 +12,6 @@ Games **working** with no noticeable screen artifacts or glitches:
 - *Space Invaders*
 - *River Raid*
 - *Pac-Man*
-- *Boxing*
 
 Speed is very low: about ~2 FPS (from the expected 60) on a 2.3Ghz computer.
 
