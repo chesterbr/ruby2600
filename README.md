@@ -6,7 +6,7 @@ An experimental Atari 2600 emulator, 100% written in Ruby.
 
 ## Current status
 
-Most 2K and 4K games show at least their title screens. Some (e.g., *Pitfall!™*, *River Raid™*) are quite playable (at what feels like ~1/30 of the speed of a real Atari on my "late 2012" Mac Mini).
+Most 2K and 4K games show at least their title screens. Some (e.g., *Pitfall!™*, *River Raid™*, *Space Invaders™*, , *Boxing™*) are quite playable (at what feels like ~1/30 of the speed of a real Atari on my "late 2012" Mac Mini).
 
 Check the [Known Issues](#known-issues) and [FAQ](#faq) below for more information.
 
@@ -59,13 +59,12 @@ Some details:
 
 - Objects rendered close to the left side (counter zeroing during HBLANK)sometimes render in wrong positon (see diagonal.bin test);
 - Some games display an artifact at the left side (late hblank area) where there should be nothing (Freeway, Boxing);
-- Some games are extending to long frames (River Raid, Boxing, Space Invaders);
 - Some sprites seem off-by-one on specific games (see tip of hidden subs on Seaquest);
 - Most likely HMOV is being "over-applied" - no harm done, but could hamper games trying to do special effects by changing HMxx registers while HMOV is being applied.
 
 Technical debt:
 
-- UI code needs some love (just quickly slapped a [Gosu](http://www.libgosu.org/) script on /bin to make it playable; would seriously consider a JRuby-friendly version);
+- UI code needs some love (just quickly slapped a [Gosu](http://www.libgosu.org/) script on /bin to make it playable; would seriously consider a JRuby-friendly version); should dynamically adjust to games that generate larger/smaller frames.
 - Might want to split MovableObject into the Graphic (the real superclass) and Counter (an utility that should be composed). Consider composition for both.
 
 ## FAQ

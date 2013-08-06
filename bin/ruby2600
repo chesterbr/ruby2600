@@ -167,8 +167,8 @@ end
 
 class GameWindow < Gosu::Window
   def initialize
-    super 640, 384, false, 1
-    stub = EmptyImageStub.new(160,192)
+    super 640, 400, false, 1
+    stub = EmptyImageStub.new(160,200)
     @canvas = Gosu::Image.new(self, stub, true)
     self.caption = "ruby2600"
   end
