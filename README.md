@@ -1,6 +1,6 @@
 # ruby2600
 
-An experimental Atari 2600 emulator, 100% written in Ruby.
+An experimental Atari™ 2600 emulator, 100% written in Ruby.
 
 ![ruby2600](http://i.imgur.com/Zjgibpr.png "ruby2600")
 
@@ -86,9 +86,9 @@ Yes, it is, and ruby2600 shows that.
 
 Not really good if your goal is playing games. Keep in mind that:
 
-- It is **slow** (~1/10 of a real Atari on my computer).
+- It is **slow** (~1/30 of a real Atari on my computer).
 - It has **no sound**.
-- It has **a few glitches** (see ).
+- It has **a few glitches**.
 
 It is good, however, if you want to learn more about the 2600, as the lack of concerns with speed makes the code more accessible than the average emulator.
 
@@ -114,6 +114,6 @@ Once released (planned for [RubyConf BR 2013](http://cfp.rubyconf.com.br/)), thi
 
 Copyright (c) 2013 Carlos Duarte do Nascimento (Chester) <cd@pobox.com>
 
-Atari™ word trademarks owned by Atari Interactive, Inc., which this software and its authors do not claim to hold or represent in any way. Any other software mentioned is property of his/her respective owners.
+Atari™ word trademarks owned by Atari Interactive, Inc., which this software and its authors do not claim to hold or represent in any way. Any other software mentioned is also property of its respective owners, being mentioned solely for reference purposes.
 
 See the file LICENSE.txt for copying permission.
