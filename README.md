@@ -6,7 +6,7 @@ An experimental Atari™ 2600 emulator, 100% written in Ruby.
 
 ## Current status
 
-Most 2K and 4K games show at least their title screens. Some (e.g., *Pitfall!™*, *River Raid™*, *Space Invaders™*, , *Boxing™*) are quite playable (at what feels like ~1/30 of the speed of a real Atari on my "late 2012" Mac Mini).
+Most 2K and 4K games show at least their title screens. Some (e.g., *Pitfall!™*, *Space Invaders™*, , *Boxing™*) are quite playable (at what feels like ~1/30 of the speed of a real Atari on my "late 2012" Mac Mini).
 
 Check the [Known Issues](#known-issues) and [FAQ](#faq) below for more information.
 
@@ -57,10 +57,10 @@ Some details:
 
 ## Known issues
 
-- Objects rendered close to the left side (counter zeroing during HBLANK)sometimes render in wrong positon (see diagonal.bin test);
+- Objects rendered close to the left side (counter zeroing during HBLANK)sometimes render in wrong positon (see diagonal.bin test and Seaquest);
 - Some games display an artifact at the left side (late hblank area) where there should be nothing (Freeway, Boxing);
-- Some sprites seem off-by-one on specific games (see tip of hidden subs on Seaquest);
 - Most likely HMOV is being "over-applied" - no harm done, but could hamper games trying to do special effects by changing HMxx registers while HMOV is being applied.
+- P0 fire button has something wrong: it fires all the time on River Raid, never on Donkey Kong (not allowing the game to start, but fine on River Raid and Space Invaders.
 
 Technical debt:
 
