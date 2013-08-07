@@ -21,7 +21,7 @@ describe Ruby2600::MovableObject do
     end
   end
 
-  describe 'on_counter_change' do    
+  describe 'on_counter_change' do
     it 'should be triggered every 4th call' do
       subject.value = rand(40)
       3.times { subject.tick }
@@ -138,13 +138,13 @@ describe Ruby2600::MovableObject do
         subject.pixel :extended_hblank => true
       end
 
-      it 'should advance the graphic' do
-        subject.should_receive(:update_pixel_bit)
+      it 'should not advance the graphic' do
+        subject.should_not_receive(:update_pixel_bit)
 
         subject.pixel :extended_hblank => true
-      end      
+      end
 
-      it_should 'reflect graphic bit'
+      it_should 'reflect graphic bit' # (won't be displayed, but needed for collision checking)
     end
   end
 
