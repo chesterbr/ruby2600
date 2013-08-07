@@ -79,43 +79,85 @@ shared_examples_for 'reflect port input' do |port|
 end
 
 shared_examples_for 'latch port input' do |port|
-  [:high, :low].each do |previous_level|
-    context "previous level was #{previous_level}" do
-      it "INPT#{port} bit 7 should be 1 after enabling latch mode" do
-        tia[VBLANK] = 0
-        tia.set_port_level port, previous_level
+  context "- with the level initially high" do
+    it "INPT#{port} bit 7 should latch to 0 once a low is received" do
+      tia[VBLANK] = 0
+      tia.set_port_level port, :high
+      tia[VBLANK] = 0b01000000
 
-        tia[VBLANK] = 0b01000000
-        tia[INPT0 + port][7].should == 1
-      end
+      tia[INPT0 + port][7].should == 1
+
+      tia.set_port_level port, :high
+      tia[INPT0 + port][7].should == 1
+
+      tia.set_port_level port, :low
+      tia[INPT0 + port][7].should == 0
+
+      tia.set_port_level port, :high
+      tia[INPT0 + port][7].should == 0
+
+      tia.set_port_level port, :low
+      tia[INPT0 + port][7].should == 0
+    end
+
+    it "- INPT#{port} bit 7 should return to normal behavior after latching is disabled" do
+      tia[VBLANK] = 0b01000000
+      tia.set_port_level port, :high
+      tia[VBLANK] = 0
+
+      tia[INPT0 + port][7].should == 1
+
+      tia.set_port_level port, :low
+      tia[INPT0 + port][7].should == 0
+
+      tia.set_port_level port, :high
+      tia[INPT0 + port][7].should == 1
+
+      tia.set_port_level port, :low
+      tia[INPT0 + port][7].should == 0
     end
   end
 
-  it "INPT#{port} bit 7 should latch to 0 once a low is received" do
-    tia.set_port_level port, :high
-    tia[INPT0 + port][7].should == 1
+  # Both the Stella manual and http://nocash.emubase.de/2k6specs.htm#controllersjoysticks
+  # are imprecise on the real behaviour. This one is what Stella does, and it
+  # is the only that simultaneously work with Pitfall, Donkey Kong and River Raid
+  context "- with the level initially low" do
+    it "INPT#{port} bit 7 should stay low, allow one high, then keep low" do
+      tia[VBLANK] = 0
+      tia.set_port_level port, :low
+      tia[VBLANK] = 0b01000000
 
-    tia.set_port_level port, :low
-    tia[INPT0 + port][7].should == 0
+      tia[INPT0 + port][7].should == 0
 
-    tia.set_port_level port, :high
-    tia[INPT0 + port][7].should == 0
+      tia.set_port_level port, :high
+      tia[INPT0 + port][7].should == 1
 
-    tia.set_port_level port, :low
-    tia[INPT0 + port][7].should == 0
-  end
+      tia.set_port_level port, :low
+      tia[INPT0 + port][7].should == 0
 
-  it "should return to normal behavior after latching is disabled" do
-    tia[VBLANK] = 0
+      tia.set_port_level port, :high
+      tia[INPT0 + port][7].should == 0
 
-    tia.set_port_level port, :low
-    tia[INPT0 + port][7].should == 0
+      tia.set_port_level port, :low
+      tia[INPT0 + port][7].should == 0
+    end
 
-    tia.set_port_level port, :high
-    tia[INPT0 + port][7].should == 1
+    it "- INPT#{port} bit 7 should return to normal behavior after latching is disabled" do
+      tia.set_port_level port, :low
+      tia[VBLANK] = 0b01000000
+      tia[VBLANK] = 0
 
-    tia.set_port_level port, :low
-    tia[INPT0 + port][7].should == 0
+      tia[INPT0 + port][7].should == 0
+
+      tia.set_port_level port, :low
+      tia[INPT0 + port][7].should == 0
+
+      tia.set_port_level port, :high
+      tia[INPT0 + port][7].should == 1
+
+      tia.set_port_level port, :low
+      tia[INPT0 + port][7].should == 0
+    end
   end
 end
 

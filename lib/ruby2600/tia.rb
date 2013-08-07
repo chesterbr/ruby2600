@@ -47,9 +47,7 @@ module Ruby2600
       @latch_level[number] = false if level == :low
     end
 
-    # Internal components (MovableObjects and specs) can manipulate internal
-    # register state with TIA#reg. The acessors below are intended for games
-    # (as they manage results and trigger side effects)
+    # Accessors for games (other classes should use :reg to avoid side effects)
 
     def [](position)
       case position
@@ -93,7 +91,7 @@ module Ruby2600
       @p0.old_value = @reg[GRP0]  if position == GRP1
       @bl.old_value = @reg[ENABL] if position == GRP1
       @p1.old_value = @reg[GRP1]  if position == GRP0
-      set_latches_to_logic_one    if position == VBLANK && @reg[VBLANK][6] == 1
+      @latch_level.fill(true)     if position == VBLANK && value[6] == 1
     end
 
     private
@@ -183,18 +181,19 @@ module Ruby2600
       cpu.tick if color_clock % 3 == 2
     end
 
-    def set_latches_to_logic_one
-      @latch_level.fill(true)
+    def value_for_port(number)
+      return 0x00 if grounded_port?(number)
+      level =   @port_level[number]
+      level &&= @latch_level[number] if latched_port?(number)
+      level ? 0x80 : 0x00
     end
 
-    def value_for_port(number)
-      return 0x00 if @reg[VBLANK][7] == 1 && number <= 3
-      if @reg[VBLANK][6] == 1 && number >= 4
-        level = @latch_level[number]
-      else
-        level = @port_level[number]
-      end
-      level ? 0x80 : 0x00
+    def grounded_port?(number)
+      @reg[VBLANK][7] == 1 && number <= 3
+    end
+
+    def latched_port?(number)
+      @reg[VBLANK][6] == 1 && number >= 4
     end
 
     def vertical_blank?
