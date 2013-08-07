@@ -13,6 +13,7 @@ Games **working** with no noticeable screen artifacts or glitches:
 - *River Raid*
 - *Pac-Man*
 - *Tennis*
+- *Donkey Kong*
 
 Speed is very low: about ~2 FPS (from the expected 60) on a 2.3Ghz computer.
 
