@@ -15,25 +15,25 @@ module Ruby2600
 
     # Playfield starts counting at 0 (and never moves)
     def initialize(*args)
-      super(*args)      
-      self.value = 0
+      super(*args)
+      counter.value = 0
     end
 
   	private
 
     def update_pixel_bit
-      pf_pixel = value % 20
+      pf_pixel = counter.value % 20
       pf_pixel = 19 - pf_pixel if reflect?
       register, bit = REG_AND_BIT_FOR_PIXEL[pf_pixel]
       @pixel_bit = reg(register)[bit]
     end
 
     def on_counter_change
-   	  self.class.color_register = score_mode? ? COLUP0 + value / 20 : COLUPF
+   	  self.class.color_register = score_mode? ? COLUP0 + counter.value / 20 : COLUPF
     end
 
     def reflect?
-      reg(CTRLPF)[0] == 1 && value > 19
+      reg(CTRLPF)[0] == 1 && counter.value > 19
     end
 
     def score_mode?

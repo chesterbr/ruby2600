@@ -5,6 +5,7 @@ require 'ruby2600/cart'
 require 'ruby2600/riot'
 
 require 'ruby2600/tia'
+require 'ruby2600/counter'
 require 'ruby2600/movable_object'
 require 'ruby2600/player'
 require 'ruby2600/missile'

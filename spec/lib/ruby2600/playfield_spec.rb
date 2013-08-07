@@ -6,7 +6,7 @@ describe Ruby2600::Playfield do
   subject(:playfield) { Ruby2600::Playfield.new(tia, 0) }
 
   def scanline
-    playfield.value = 0
+    playfield.counter.value = 0
     (0..159).map{ playfield.pixel }
   end
 

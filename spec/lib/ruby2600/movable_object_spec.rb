@@ -4,72 +4,6 @@ describe Ruby2600::MovableObject do
 
   let(:subject) { Ruby2600::MovableObject.new(tia) }
   let(:tia) { mock 'tia', :reg => Array.new(64, 0) }
-  let(:sample_of_initial_values) { Array.new(100) { Ruby2600::MovableObject.new(tia).value } }
-
-  describe '#initialize' do
-    it 'should initialize with a random value' do
-      unique_value_count = sample_of_initial_values.uniq.length
-
-      unique_value_count.should be > 1
-    end
-
-    it 'should initialize with valid values' do
-      sample_of_initial_values.each do |value|
-        value.should be_an Integer
-        (0..39).should cover value
-      end
-    end
-  end
-
-  describe 'on_counter_change' do
-    it 'should be triggered every 4th call' do
-      subject.value = rand(40)
-      3.times { subject.tick }
-      subject.should_receive(:on_counter_change)
-
-      subject.tick
-    end
-
-    it 'should be triggered on wrap' do
-      subject.value = 38
-      subject.should_receive(:on_counter_change).twice
-
-      8.times { subject.tick }
-    end
-  end
-
-  describe '#strobe' do
-    it 'should reset counter with RESET value from http://www.atarihq.com/danb/files/TIA_HW_Notes.txt' do
-      subject.strobe
-      subject.value.should == 39
-    end
-  end
-
-  describe '#tick' do
-    context 'ordinary values' do
-      before { subject.value = rand(38) }
-
-      it 'should increase value once every 4 ticks' do
-        original_value = subject.value
-
-        2.times do
-          3.times { subject.tick }
-          expect { subject.tick }.to change { subject.value }.by 1
-        end
-
-        subject.value.should == original_value + 2
-      end
-    end
-
-    context 'upper boundary (39)' do
-      before { subject.value = 39 }
-
-      it 'should wrap to 0' do
-        3.times { subject.tick }
-        expect { subject.tick }.to change { subject.value }.to 0
-      end
-    end
-  end
 
   describe '#reg' do
     context 'p0 / m0 / bl' do
@@ -117,7 +51,7 @@ describe Ruby2600::MovableObject do
 
     context 'in visible scanline' do
       it 'should tick the counter' do
-        subject.should_receive(:tick)
+        subject.counter.should_receive(:tick)
 
         subject.pixel
       end
@@ -133,7 +67,7 @@ describe Ruby2600::MovableObject do
 
     context 'in extended hblank (aka "comb effect", caused by HMOVE during hblank)' do
       it 'should not tick the counter' do
-        subject.should_not_receive(:tick)
+        subject.counter.should_not_receive(:tick)
 
         subject.pixel :extended_hblank => true
       end
@@ -151,7 +85,7 @@ describe Ruby2600::MovableObject do
   describe '#start_hmove / #apply_hmove' do
     before do
       Ruby2600::MovableObject.hmove_register = HMP0
-      subject.value = 20
+      subject.counter.value = 20
     end
 
     # When HMOVE is strobed, TIA (and the TIA class here) extends the

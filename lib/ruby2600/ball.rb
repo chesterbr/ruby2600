@@ -8,9 +8,9 @@ module Ruby2600
 
     # Ball draws immediately when strobed (other objects only do it
     # when their counter wraps around, i.e., on next scanline)
-    def strobe
-      super()
-      on_counter_change
+    def initialize(tia)
+      super(tia)
+      counter.notify_change_on_strobe = true
     end
 
     private

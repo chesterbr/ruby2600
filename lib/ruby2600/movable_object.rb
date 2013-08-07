@@ -2,18 +2,12 @@ module Ruby2600
   class MovableObject
     include Constants
 
+    extend Forwardable
+    def_delegators :@counter, :tick
+
     # Value used by player/balls when vertical delay (VDELP0/VDELP1/VDELBL) is set
     # GRP1 write triggers copy of GRP0/ENABL to old_value, GRP0 write does same for GRP1
-    attr_accessor :old_value
-
-    # Movable objects on TIA keep internal counters with behaviour
-    # described in  http://www.atarihq.com/danb/files/TIA_HW_Notes.txt
-
-    COUNTER_PERIOD = 40       # Internal counter value ranges from 0-39
-    COUNTER_DIVIDER = 4       # It increments every 4 ticks (1/4 of TIA speed)
-    COUNTER_RESET_VALUE = 39  # See URL above
-
-    COUNTER_MAX = COUNTER_PERIOD * COUNTER_DIVIDER
+    attr_accessor :old_value, :counter
 
     class << self
       attr_accessor :graphic_delay, :graphic_size, :hmove_register, :color_register
@@ -24,36 +18,16 @@ module Ruby2600
     def initialize(tia, object_number = 0)
       @tia = tia
       @object_number = object_number
-      @counter_inner_value = rand(COUNTER_MAX)
       @old_value = rand(256)
+
+      @counter = Counter.new
+      @counter.on_change { on_counter_change }
     end
 
-    def reset_to(other)
-      @counter_inner_value = other.instance_variable_get(:@counter_inner_value)
-    end
-
-    def strobe
-      @counter_inner_value = COUNTER_RESET_VALUE * COUNTER_DIVIDER
-    end
-
-    def value
-      @counter_inner_value / COUNTER_DIVIDER
-    end
-
-    def value=(x)
-      @counter_inner_value = x * COUNTER_DIVIDER
-    end
-
-    def tick
-      old_value = value
-      @counter_inner_value = (@counter_inner_value + 1) % COUNTER_MAX
-      on_counter_change if value != old_value
-    end
-
-    def pixel(without_ticking_counter = false)
-      unless without_ticking_counter
+    def pixel(dont_tick_counter = false)
+      unless dont_tick_counter
         update_pixel_bit
-        tick
+        counter.tick
       end
       reg(self.class.color_register) if @pixel_bit == 1
     end
@@ -104,17 +78,21 @@ module Ruby2600
     end
 
     def on_counter_change
-      if (value == COUNTER_RESET_VALUE) || should_draw_copy?
+      if should_draw_graphic? || should_draw_copy?
         @grp_bit = -self.class.graphic_delay
         @bit_copies_written = 0
       end
     end
 
+    def should_draw_graphic?
+      counter.value == 39
+    end
+
     def should_draw_copy?
       nusiz_bits = reg(NUSIZ0) & 0b111
-      (value ==  3 && [0b001, 0b011].include?(nusiz_bits)) ||
-      (value ==  7 && [0b010, 0b011, 0b110].include?(nusiz_bits)) ||
-      (value == 15 && [0b100, 0b110].include?(nusiz_bits))
+      (counter.value ==  3 && [0b001, 0b011].include?(nusiz_bits)) ||
+      (counter.value ==  7 && [0b010, 0b011, 0b110].include?(nusiz_bits)) ||
+      (counter.value == 15 && [0b100, 0b110].include?(nusiz_bits))
     end
   end
 end

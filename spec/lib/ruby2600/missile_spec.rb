@@ -8,15 +8,15 @@ describe Ruby2600::Missile do
   context 'missile 1' do
     subject(:missile1) { Ruby2600::Missile.new(tia, 1) }
 
-    before do 
+    before do
       tia.reg[ENAM1] = 0
       tia.reg[COLUP0] = 0x00
       tia.reg[COLUP1] = 0xFF
-      missile.strobe
+      missile.counter.strobe
       160.times { missile1.pixel }
     end
 
-    it 'should never output if ENAM1 is disabled' do      
+    it 'should never output if ENAM1 is disabled' do
       pixels(missile1, 1, 160).should_not include(0xFF)
     end
 
@@ -33,13 +33,13 @@ describe Ruby2600::Missile do
 
     it 'should never output if ENAM0 is disabled' do
       tia.reg[ENAM0] = 0
-      
+
       pixels(missile, 1, 300).should == Array.new(300)
     end
 
     it 'should generate some output if ENAM0 is enabled' do
       tia.reg[ENAM0] = rand(256) | 0b10
-      
+
       pixels(missile, 1, 300).should include(tia.reg[COLUP0])
     end
 
@@ -52,7 +52,7 @@ describe Ruby2600::Missile do
         rand(160).times { missile.pixel }
 
         # Preemptive strobe (to ensure we don't have retriggering leftovers)
-        missile.strobe
+        missile.counter.strobe
         80.times { missile.pixel }
 
         # Setup
@@ -63,7 +63,7 @@ describe Ruby2600::Missile do
       context 'one copy' do
         before do
           tia.reg[NUSIZ0] = 0
-          missile.strobe
+          missile.counter.strobe
           4.times { missile.pixel } # 4-bit delay
         end
 
@@ -85,7 +85,7 @@ describe Ruby2600::Missile do
       context 'two copies, close' do
         before do
           tia.reg[NUSIZ0] = 1
-          missile.strobe
+          missile.counter.strobe
           4.times { missile.pixel }
         end
 
@@ -102,7 +102,7 @@ describe Ruby2600::Missile do
       context 'two copies, medium' do
         before do
           tia.reg[NUSIZ0] = 2
-          missile.strobe
+          missile.counter.strobe
           4.times { missile.pixel }
         end
 
@@ -119,7 +119,7 @@ describe Ruby2600::Missile do
       context 'three copies, close' do
         before do
           tia.reg[NUSIZ0] = 3
-          missile.strobe
+          missile.counter.strobe
           4.times { missile.pixel }
         end
 
@@ -136,7 +136,7 @@ describe Ruby2600::Missile do
       context 'two copies, wide' do
         before do
           tia.reg[NUSIZ0] = 4
-          missile.strobe
+          missile.counter.strobe
           4.times { missile.pixel }
         end
 
@@ -153,7 +153,7 @@ describe Ruby2600::Missile do
       context 'three copies, medium' do
         before do
           tia.reg[NUSIZ0] = 6
-          missile.strobe
+          missile.counter.strobe
           4.times { missile.pixel }
         end
 
@@ -191,7 +191,7 @@ describe Ruby2600::Missile do
             160.times { missile.pixel }
             pixels(missile, 1, 160).should == scanline_with_object(8, color[0], 3)
           end
-        end        
+        end
       end
     end
   end
@@ -199,24 +199,24 @@ describe Ruby2600::Missile do
   describe '#reset_to' do
     let(:player) { Ruby2600::Player.new(tia, 0) }
 
-    before do 
+    before do
       rand(160).times { player.tick }
     end
 
-    it "should not affect the player" do
-      expect { 
-        missile.reset_to player
-      }.to_not change { player.value }
+    it "should not affect the player's counter" do
+      expect {
+        missile.counter.reset_to player.counter
+      }.to_not change { player.counter.value }
     end
 
     it "should set both objects to the same clock phase (i.e., same value without drifting)" do
-      missile.reset_to player
+      missile.counter.reset_to player.counter
 
       4.times do
         missile.tick
         player.tick
 
-        subject.value.should == player.value
+        missile.counter.value.should == player.counter.value
       end
     end
   end

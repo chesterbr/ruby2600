@@ -10,18 +10,18 @@ describe Ruby2600::Ball do
 
     before do
       tia.reg[COLUPF] = color[0]
-      ball.strobe
+      ball.counter.strobe
     end
 
     it 'should never output if ENABL is disabled' do
       tia.reg[ENABL] = 0
-      
+
       pixels(ball, 1, 300).should == Array.new(300)
     end
 
     it 'should generate some output if ENABL is enabled' do
       tia.reg[ENABL] = rand(256) | 0b10
-      
+
       pixels(ball, 1, 300).should include(color[0])
     end
 
@@ -30,7 +30,7 @@ describe Ruby2600::Ball do
         # Enable and strobe from an arbitrary position
         tia.reg[ENABL] = rand(256) | 0b10
         rand(160).times { ball.pixel }
-        ball.strobe
+        ball.counter.strobe
         4.times { ball.pixel } # 4-bit delay
       end
 
@@ -42,7 +42,7 @@ describe Ruby2600::Ball do
         end
 
         it 'should NOT be affected by NUSZ0 (it is not player/missile)' do
-          tia.reg[NUSIZ0] = 1 
+          tia.reg[NUSIZ0] = 1
 
           pixels(ball, 1, 160).should == scanline_with_object(1, color[0])
         end

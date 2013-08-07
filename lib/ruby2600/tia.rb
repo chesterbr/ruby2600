@@ -59,19 +59,19 @@ module Ruby2600
     def []=(position, value)
       case position
       when RESP0
-        @p0.strobe
+        @p0.counter.strobe
       when RESP1
-        @p1.strobe
+        @p1.counter.strobe
       when RESM0
-        @m0.strobe
+        @m0.counter.strobe
       when RESM1
-        @m1.strobe
+        @m1.counter.strobe
       when RESBL
-        @bl.strobe
+        @bl.counter.strobe
       when RESMP0
-        @m0.reset_to @p0
+        @m0.counter.reset_to @p0.counter
       when RESMP1
-        @m1.reset_to @p1
+        @m1.counter.reset_to @p1.counter
       when HMOVE
         @late_reset_hblank = true
         @p0.start_hmove

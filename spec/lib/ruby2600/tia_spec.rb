@@ -202,7 +202,7 @@ describe Ruby2600::TIA do
         let(:player)  { tia.instance_variable_get "@p#{n}" }
         let(:missile) { tia.instance_variable_get "@m#{n}" }
         it "should reset m#{n}'s counter to p#{n}'s when strobed" do
-          missile.should_receive(:reset_to).with(player)
+          missile.counter.should_receive(:reset_to).with(player.counter)
 
           tia[RESMP0 + n] = rand(256)
         end
@@ -300,7 +300,7 @@ describe Ruby2600::TIA do
       when 0, lines + 3 then tia[VSYNC] = rand_with_bit(1, :set)   # Begin frame
       when 3            then tia[VSYNC] = rand_with_bit(1, :clear) # End frame
       end
-      tia[WSYNC] = 255 # Finish scanline      
+      tia[WSYNC] = 255 # Finish scanline
     end
 
     258.upto(260).each do |lines|
