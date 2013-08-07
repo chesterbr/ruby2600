@@ -108,7 +108,6 @@ module Ruby2600
     def draw_scanline
       scanline = Array.new(160, 0)
       VISIBLE_CLK_COUNT.times do |pixel|
-        color_clock = pixel + HORIZONTAL_BLANK_CLK_COUNT
         extended_hblank = @late_reset_hblank && pixel < 8
 
         fetch_pixels extended_hblank
@@ -116,22 +115,19 @@ module Ruby2600
 
         scanline[pixel] = topmost_pixel unless vertical_blank? || extended_hblank
 
-        sync_2600_with color_clock
+        sync_2600_with pixel + HORIZONTAL_BLANK_CLK_COUNT
       end
       scanline
     end
 
-    def fetch_pixels(extended_blank)
-      # Playfield is not subject to extended_hblank delay
-      # (causing the "comb effect")
-      # (this is not correct, in fact ^)
+    def fetch_pixels(with_tick)
       @pf_pixel = @pf.pixel
       @bk_pixel = @reg[COLUBK]
-      @p0_pixel = @p0.pixel extended_blank
-      @p1_pixel = @p1.pixel extended_blank
-      @m0_pixel = @m0.pixel extended_blank
-      @m1_pixel = @m1.pixel extended_blank
-      @bl_pixel = @bl.pixel extended_blank
+      @p0_pixel = @p0.pixel with_tick
+      @p1_pixel = @p1.pixel with_tick
+      @m0_pixel = @m0.pixel with_tick
+      @m1_pixel = @m1.pixel with_tick
+      @bl_pixel = @bl.pixel with_tick
     end
 
     def topmost_pixel
