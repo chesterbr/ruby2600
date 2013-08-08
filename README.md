@@ -111,6 +111,9 @@ If you want a full-speed emulator with sound and compatible with every single ga
 
 ## Changelog
 
+##### 0.1.2
+- Separated MovableObject: now Player, Missile, Ball and Playfield are subclasses of Graphic (which only deals with drawing), which is composed from Counter (focused on position and movement) with no delegation. This design clarifies intentions on TIA ("reset this object's counter" = object.counter.reset) which is fundamental now.
+
 ##### 0.1.1
 - BIT instruction bug fixed; Pitfall, River Raid and Space Invaders playable (except for some artifacts)
 
