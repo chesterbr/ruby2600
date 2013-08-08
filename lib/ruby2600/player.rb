@@ -1,5 +1,5 @@
 module Ruby2600
-  class Player < MovableObject
+  class Player < Graphic
 
     @graphic_delay = 5
     @graphic_size = 8
@@ -9,7 +9,7 @@ module Ruby2600
     private
 
     def pixel_bit
-      grp[7 - @grp_bit] 
+      grp[7 - @grp_bit]
     end
 
     def size

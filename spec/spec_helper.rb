@@ -34,9 +34,9 @@ def rand_with_bit(bit, status)
   status == :set ? mask | rand(256) : (0xFF ^ mask) & rand(256)
 end
 
-def pixels(movable_object, first = 1, last = 160)
-  (first-1).times { movable_object.pixel }
-  (0..(last - first)).map { movable_object.pixel }
+def pixels(graphic, first = 1, last = 160)
+  (first-1).times { graphic.pixel }
+  (0..(last - first)).map { graphic.pixel }
 end
 
 def scanline_with_object(size, color, copies = 1)

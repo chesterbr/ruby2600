@@ -3,7 +3,7 @@
 # simplifies testing and pushes class TIA towards SRP
 
 module Ruby2600
-  class Playfield < MovableObject
+  class Playfield < Graphic
 
   	@color_register = COLUPF
 

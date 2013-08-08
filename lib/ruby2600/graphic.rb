@@ -1,15 +1,14 @@
 module Ruby2600
-  class MovableObject
+  class Graphic
     include Constants
 
     # Value used by player/balls when vertical delay (VDELP0/VDELP1/VDELBL) is set
     # GRP1 write triggers copy of GRP0/ENABL to old_value, GRP0 write does same for GRP1
     attr_accessor :old_value, :counter
 
+    # These parameters are specific to each type of graphic (player, missile, ball or playfield)
     class << self
       attr_accessor :graphic_delay, :graphic_size, :hmove_register, :color_register
-
-      @graphic_size = @graphic_delay = @hmove_register = @color_register = 0
     end
 
     def initialize(tia, object_number = 0)

@@ -1,13 +1,13 @@
 require 'spec_helper'
 
-describe Ruby2600::MovableObject do
+describe Ruby2600::Graphic do
 
-  let(:subject) { Ruby2600::MovableObject.new(tia) }
+  let(:subject) { Ruby2600::Graphic.new(tia) }
   let(:tia) { mock 'tia', :reg => Array.new(64, 0) }
 
   describe '#reg' do
     context 'p0 / m0 / bl' do
-      let(:subject) { Ruby2600::MovableObject.new(tia, 0) }
+      let(:subject) { Ruby2600::Graphic.new(tia, 0) }
 
       it 'should always read the requested register' do
         tia.reg.should_receive(:[]).with(HMP0)
@@ -17,7 +17,7 @@ describe Ruby2600::MovableObject do
     end
 
     context 'p1 / m1' do
-      let(:subject) { Ruby2600::MovableObject.new(tia, 1) }
+      let(:subject) { Ruby2600::Graphic.new(tia, 1) }
 
       it 'should read the matching register for the other object' do
         tia.reg.should_receive(:[]).with(HMP1)

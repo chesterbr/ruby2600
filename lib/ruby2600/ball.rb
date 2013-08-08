@@ -1,5 +1,5 @@
 module Ruby2600
-  class Ball < MovableObject
+  class Ball < Graphic
 
     @graphic_delay = 4
     @graphic_size = 1

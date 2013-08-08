@@ -224,7 +224,7 @@ describe Ruby2600::Player do
         end
       end
 
-      pending 'HMOVE test (unless we make it on movable_object)'
+      pending 'HMOVE test (unless we make it on graphic)'
 
       pending 'VDELPn test'
 
