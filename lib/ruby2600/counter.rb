@@ -1,6 +1,9 @@
 module Ruby2600
-  # Movable objects on TIA keep internal counters, which this class implements
-  # as described in http://www.atarihq.com/danb/files/TIA_HW_Notes.txt
+  # Internal counters used by all TIA graphics to trigger drawing at appropriate time.
+  # Horizontal position is implicitly tracked by the counter value, and movement is
+  # implemented by making its cycle higher or lower than the current scanline.
+  #
+  # See: http://www.atarihq.com/danb/files/TIA_HW_Notes.txt
   class Counter
     attr_accessor :old_value,               # Stored for vertical delay (VDELxx) modes
                   :notify_change_on_reset   # Allows ball to trigger immediately
