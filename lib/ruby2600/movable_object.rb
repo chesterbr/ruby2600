@@ -2,9 +2,6 @@ module Ruby2600
   class MovableObject
     include Constants
 
-    extend Forwardable
-    def_delegators :@counter, :tick
-
     # Value used by player/balls when vertical delay (VDELP0/VDELP1/VDELBL) is set
     # GRP1 write triggers copy of GRP0/ENABL to old_value, GRP0 write does same for GRP1
     attr_accessor :old_value, :counter
@@ -33,15 +30,11 @@ module Ruby2600
     end
 
     def start_hmove
-      @hmove_counter = 0
-      @movement_required = !hm_value.zero?
+      counter.start_hmove reg(self.class.hmove_register)
     end
 
     def apply_hmove
-      return unless @movement_required
-      tick
-      @hmove_counter += 1
-      @movement_required = false if @hmove_counter == hm_value
+      counter.apply_hmove reg(self.class.hmove_register)
     end
 
     private
@@ -51,12 +44,6 @@ module Ruby2600
     #      reg(HMM0) will read HMM0 for M0, but HMM1 for M1;
     def reg(register_name)
       @tia.reg[register_name + @object_number]
-    end
-
-    def hm_value
-      nibble = reg(self.class.hmove_register) >> 4
-      nibble < 8 ? nibble + 8 : nibble - 8
-      #[8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7][nibble]
     end
 
     def update_pixel_bit

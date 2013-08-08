@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Ruby2600::MovableObject do
+describe Ruby2600::Counter do
 
   let(:subject) { Ruby2600::Counter.new }
   let(:sample_of_initial_values) { Array.new(100) { Ruby2600::Counter.new.value } }
@@ -70,6 +70,89 @@ describe Ruby2600::MovableObject do
         3.times { subject.tick }
         expect { subject.tick }.to change { subject.value }.to 0
       end
+    end
+  end
+
+  describe '#start_hmove / #apply_hmove' do
+    before { subject.value = 20 }
+
+    # When HMOVE is strobed, TIA (and the TIA class here) extends the
+    # horizontal blank (and shortens the visible scanline) by 8 pixels,
+    # pushing every movable object 8 pixels to the right.
+    # Then it compensates by inserting additional clocks, from none
+    # (for a -8 move) to 15 (for a +7 move). THAT is done by #apply_move
+
+    it 'should add no extra CLK ticks for a -8 move' do
+      value = 0b10000000
+      subject.start_hmove value
+
+      subject.should_not_receive(:tick)
+
+      16.times { subject.apply_hmove value }
+    end
+
+    it 'should add 1 extra CLK ticks for a -7 move' do
+      value = 0b10010000
+      subject.start_hmove value
+
+      subject.should_receive(:tick).once
+
+      16.times { subject.apply_hmove value }
+    end
+
+    it 'should add 2 extra CLK ticks for a -6 move' do
+      value = 0b10100000
+      subject.start_hmove value
+
+      subject.should_receive(:tick).twice
+
+      16.times { subject.apply_hmove value }
+    end
+
+    it 'should add 6 extra CLK ticks for a -2 move' do
+      value = 0b11100000
+      subject.start_hmove value
+
+      subject.should_receive(:tick).exactly(6).times
+
+      16.times { subject.apply_hmove value }
+    end
+
+    it 'should add 7 extra CLK ticks for a -1 move' do
+      value = 0b11110000
+      subject.start_hmove value
+
+      subject.should_receive(:tick).exactly(7).times
+
+      16.times { subject.apply_hmove value }
+    end
+
+
+    it 'should add 8 extra CLK ticks for a 0 move' do
+      value = 0
+      subject.start_hmove value
+
+      subject.should_receive(:tick).exactly(8).times
+
+      16.times { subject.apply_hmove value }
+    end
+
+    it 'should add 12 extra CLK ticks for a +4 move' do
+      value = 0b01000000
+      subject.start_hmove value
+
+      subject.should_receive(:tick).exactly(12).times
+
+      16.times { subject.apply_hmove value }
+    end
+
+    it 'should add 15 extra CLK ticks for a +7 move' do
+      value = 0b01110000
+      subject.start_hmove value
+
+      subject.should_receive(:tick).exactly(15).times
+
+      16.times { subject.apply_hmove value }
     end
   end
 end

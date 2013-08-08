@@ -200,7 +200,7 @@ describe Ruby2600::Missile do
     let(:player) { Ruby2600::Player.new(tia, 0) }
 
     before do
-      rand(160).times { player.tick }
+      rand(160).times { player.counter.tick }
     end
 
     it "should not affect the player's counter" do
@@ -213,8 +213,8 @@ describe Ruby2600::Missile do
       missile.counter.reset_to player.counter
 
       4.times do
-        missile.tick
-        player.tick
+        missile.counter.tick
+        player.counter.tick
 
         missile.counter.value.should == player.counter.value
       end
