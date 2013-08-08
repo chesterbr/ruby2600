@@ -68,15 +68,14 @@ Some details:
 
 ## Known issues
 
-- Objects rendered close to the left side (counter zeroing during HBLANK)sometimes render in wrong positon (see diagonal.bin test and Seaquest);
+- Objects rendered close to the left side (counter zeroing during HBLANK, I suppose) sometimes render in wrong positon (see diagonal.bin test, Seaquest and Pitfall no-movement when close to the left edge);
 - Some games display an artifact at the left side (late hblank area) where there should be nothing (Freeway, Boxing);
 - Most likely HMOV is being "over-applied" - no harm done, but could hamper games trying to do special effects by changing HMxx registers while HMOV is being applied.
-- P0 fire button has something wrong: it fires all the time on River Raid, never on Donkey Kong (not allowing the game to start, but fine on River Raid and Space Invaders.
 
 Technical debt:
 
 - UI code needs some love (just quickly slapped a [Gosu](http://www.libgosu.org/) script on /bin to make it playable; would seriously consider a JRuby-friendly version); should dynamically adjust to games that generate larger/smaller frames.
-- Might want to split MovableObject into the Graphic (the real superclass) and Counter (an utility that should be composed). Consider composition for both.
+- TIA tests don't cover a few aspects (see "Pending" specs)
 
 ## FAQ
 
