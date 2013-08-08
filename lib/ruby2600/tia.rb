@@ -22,6 +22,7 @@ module Ruby2600
       @m1 = Missile.new(self, 1)
       @bl = Ball.new(self)
       @pf = Playfield.new(self)
+      @movable_graphics = [@p0, @p1, @m0, @m1, @bl]
 
       @port_level = Array.new(6, false)
       @latch_level = Array.new(6, true)
@@ -74,11 +75,7 @@ module Ruby2600
         @m1.counter.reset_to @p1.counter
       when HMOVE
         @late_reset_hblank = true
-        @p0.start_hmove
-        @p1.start_hmove
-        @m0.start_hmove
-        @m1.start_hmove
-        @bl.start_hmove
+        @movable_graphics.each &:start_hmove
       when HMCLR
         @reg[HMP0] = @reg[HMP1] = @reg[HMM0] = @reg[HMM1] = @reg[HMBL] = 0
       when CXCLR
@@ -165,15 +162,11 @@ module Ruby2600
 
     # Since the emulator's "main loop" is based on TIA#scanline, we'll "tick"
     # the other chips here (and also apply the horizontal motion on movable
-    # objects at 1/4 of TIA speed, just like the hardware does)
+    # objects, just like the hardware does)
 
     def sync_2600_with(color_clock)
       riot.tick if color_clock % 3 == 0
-      @p0.apply_hmove
-      @p1.apply_hmove
-      @m0.apply_hmove
-      @m1.apply_hmove
-      @bl.apply_hmove
+      @movable_graphics.each &:apply_hmove
       cpu.tick if color_clock % 3 == 2
     end
 

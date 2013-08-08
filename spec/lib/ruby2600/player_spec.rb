@@ -224,8 +224,6 @@ describe Ruby2600::Player do
         end
       end
 
-      pending 'HMOVE test (unless we make it on graphic)'
-
       pending 'VDELPn test'
 
       pending 'dynamic change of GRPn/REFPn test'
