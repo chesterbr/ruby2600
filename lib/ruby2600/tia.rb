@@ -60,15 +60,15 @@ module Ruby2600
     def []=(position, value)
       case position
       when RESP0
-        @p0.counter.strobe
+        @p0.counter.reset
       when RESP1
-        @p1.counter.strobe
+        @p1.counter.reset
       when RESM0
-        @m0.counter.strobe
+        @m0.counter.reset
       when RESM1
-        @m1.counter.strobe
+        @m1.counter.reset
       when RESBL
-        @bl.counter.strobe
+        @bl.counter.reset
       when RESMP0
         @m0.counter.reset_to @p0.counter
       when RESMP1
@@ -92,6 +92,14 @@ module Ruby2600
     end
 
     private
+
+    def vertical_blank?
+      @reg[VBLANK][1] != 0
+    end
+
+    def vertical_sync?
+      @reg[VSYNC][1] != 0
+    end
 
     def intialize_scanline
       @cpu.halted = false
@@ -159,7 +167,7 @@ module Ruby2600
 
     # All Atari chips use the same crystal for their clocks (with RIOT and
     # CPU running at 1/3 of TIA speed).
-
+    #
     # Since the emulator's "main loop" is based on TIA#scanline, we'll "tick"
     # the other chips here (and also apply the horizontal motion on movable
     # objects, just like the hardware does)
@@ -169,6 +177,8 @@ module Ruby2600
       @movable_graphics.each &:apply_hmove
       cpu.tick if color_clock % 3 == 2
     end
+
+    # INPTx (I/O ports) helpers
 
     def value_for_port(number)
       return 0x00 if grounded_port?(number)
@@ -183,14 +193,6 @@ module Ruby2600
 
     def latched_port?(number)
       @reg[VBLANK][6] == 1 && number >= 4
-    end
-
-    def vertical_blank?
-      @reg[VBLANK][1] != 0
-    end
-
-    def vertical_sync?
-      @reg[VSYNC][1] != 0
     end
   end
 end

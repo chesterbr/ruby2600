@@ -2,7 +2,7 @@
 # as described in http://www.atarihq.com/danb/files/TIA_HW_Notes.txt
 module Ruby2600
   class Counter
-    attr_accessor :notify_change_on_strobe
+    attr_accessor :notify_change_on_reset
 
     PERIOD = 40       # "Visible" counter value ranges from 0-39...
     DIVIDER = 4       # ...incrementing every 4 "ticks" from TIA (1/4 of TIA clock)
@@ -12,7 +12,7 @@ module Ruby2600
 
     def initialize
       @internal_value = rand(INTERNAL_PERIOD)
-      @notify_change_on_strobe = false
+      @notify_change_on_reset = false
     end
 
     def value
@@ -37,9 +37,9 @@ module Ruby2600
       @change_listener.call if @change_listener && value != old_value
     end
 
-    def strobe
+    def reset
       @internal_value = RESET_VALUE * DIVIDER
-      @change_listener.call if @notify_change_on_strobe
+      @change_listener.call if @notify_change_on_reset
     end
 
     def reset_to(other_counter)

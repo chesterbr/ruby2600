@@ -12,7 +12,7 @@ describe Ruby2600::Player do
       tia.reg[GRP0] = 0x00
       tia.reg[COLUP0] = 0x00
       tia.reg[COLUP1] = 0xFF
-      player1.counter.strobe
+      player1.counter.reset
       160.times { player1.pixel }
     end
 
@@ -44,7 +44,7 @@ describe Ruby2600::Player do
         rand(160).times { player.pixel }
 
         # Preemptive strobe (to ensure we don't have retriggering leftovers)
-        player.counter.strobe
+        player.counter.reset
         80.times { player.pixel }
 
         # Setup
@@ -55,7 +55,7 @@ describe Ruby2600::Player do
       context 'one copy' do
         before do
           tia.reg[NUSIZ0] = 0
-          player.counter.strobe
+          player.counter.reset
           5.times { player.pixel }
         end
 
@@ -77,7 +77,7 @@ describe Ruby2600::Player do
       context 'two copies, close' do
         before do
           tia.reg[NUSIZ0] = 1
-          player.counter.strobe
+          player.counter.reset
           5.times { player.pixel }
         end
 
@@ -94,7 +94,7 @@ describe Ruby2600::Player do
       context 'two copies, medium' do
         before do
           tia.reg[NUSIZ0] = 2
-          player.counter.strobe
+          player.counter.reset
           5.times { player.pixel }
         end
 
@@ -111,7 +111,7 @@ describe Ruby2600::Player do
       context 'three copies, close' do
         before do
           tia.reg[NUSIZ0] = 3
-          player.counter.strobe
+          player.counter.reset
           5.times { player.pixel }
         end
 
@@ -128,7 +128,7 @@ describe Ruby2600::Player do
       context 'two copies, wide' do
         before do
           tia.reg[NUSIZ0] = 4
-          player.counter.strobe
+          player.counter.reset
           5.times { player.pixel }
         end
 
@@ -145,7 +145,7 @@ describe Ruby2600::Player do
       context 'one copy, double size' do
         before do
           tia.reg[NUSIZ0] = 5
-          player.counter.strobe
+          player.counter.reset
           5.times { player.pixel }
         end
 
@@ -162,7 +162,7 @@ describe Ruby2600::Player do
       context 'three copies, medium' do
         before do
           tia.reg[NUSIZ0] = 6
-          player.counter.strobe
+          player.counter.reset
           5.times { player.pixel }
         end
 
@@ -188,7 +188,7 @@ describe Ruby2600::Player do
       context 'one copy, quad size' do
         before do
           tia.reg[NUSIZ0] = 7
-          player.counter.strobe
+          player.counter.reset
           5.times { player.pixel }
         end
 
@@ -214,7 +214,7 @@ describe Ruby2600::Player do
       context 'one copy, double size with missile size set' do
         before do
           tia.reg[NUSIZ0] = 0b00110101
-          player.counter.strobe
+          player.counter.reset
           5.times { player.pixel }
         end
 

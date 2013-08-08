@@ -12,7 +12,7 @@ describe Ruby2600::Missile do
       tia.reg[ENAM1] = 0
       tia.reg[COLUP0] = 0x00
       tia.reg[COLUP1] = 0xFF
-      missile.counter.strobe
+      missile.counter.reset
       160.times { missile1.pixel }
     end
 
@@ -52,7 +52,7 @@ describe Ruby2600::Missile do
         rand(160).times { missile.pixel }
 
         # Preemptive strobe (to ensure we don't have retriggering leftovers)
-        missile.counter.strobe
+        missile.counter.reset
         80.times { missile.pixel }
 
         # Setup
@@ -63,7 +63,7 @@ describe Ruby2600::Missile do
       context 'one copy' do
         before do
           tia.reg[NUSIZ0] = 0
-          missile.counter.strobe
+          missile.counter.reset
           4.times { missile.pixel } # 4-bit delay
         end
 
@@ -85,7 +85,7 @@ describe Ruby2600::Missile do
       context 'two copies, close' do
         before do
           tia.reg[NUSIZ0] = 1
-          missile.counter.strobe
+          missile.counter.reset
           4.times { missile.pixel }
         end
 
@@ -102,7 +102,7 @@ describe Ruby2600::Missile do
       context 'two copies, medium' do
         before do
           tia.reg[NUSIZ0] = 2
-          missile.counter.strobe
+          missile.counter.reset
           4.times { missile.pixel }
         end
 
@@ -119,7 +119,7 @@ describe Ruby2600::Missile do
       context 'three copies, close' do
         before do
           tia.reg[NUSIZ0] = 3
-          missile.counter.strobe
+          missile.counter.reset
           4.times { missile.pixel }
         end
 
@@ -136,7 +136,7 @@ describe Ruby2600::Missile do
       context 'two copies, wide' do
         before do
           tia.reg[NUSIZ0] = 4
-          missile.counter.strobe
+          missile.counter.reset
           4.times { missile.pixel }
         end
 
@@ -153,7 +153,7 @@ describe Ruby2600::Missile do
       context 'three copies, medium' do
         before do
           tia.reg[NUSIZ0] = 6
-          missile.counter.strobe
+          missile.counter.reset
           4.times { missile.pixel }
         end
 

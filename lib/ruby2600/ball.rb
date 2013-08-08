@@ -10,7 +10,7 @@ module Ruby2600
     # when their counter wraps around, i.e., on next scanline)
     def initialize(tia)
       super(tia)
-      counter.notify_change_on_strobe = true
+      counter.notify_change_on_reset = true
     end
 
     private
