@@ -30,13 +30,13 @@ describe Ruby2600::Graphic do
   describe '#pixel' do
     shared_examples_for 'reflect graphic bit' do
       it 'by being nil if the graphic bit is clear' do
-        subject.instance_variable_set(:@pixel_bit, 0)
+        subject.instance_variable_set(:@graphic_bit_value, 0)
 
         subject.pixel.should == nil
       end
 
       it "by being the graphic color register's value if the graphic bit is set" do
-        subject.instance_variable_set(:@pixel_bit, 1)
+        subject.instance_variable_set(:@graphic_bit_value, 1)
 
         subject.pixel.should == 0xAB
       end
@@ -44,7 +44,7 @@ describe Ruby2600::Graphic do
 
     before do
       subject.stub :tick
-      subject.stub :update_pixel_bit
+      subject.stub :update_graphic_bit_and_value
       subject.class.color_register = [COLUPF, COLUP0, COLUP1].sample
       tia.reg[subject.class.color_register] = 0xAB
     end
@@ -57,7 +57,7 @@ describe Ruby2600::Graphic do
       end
 
       it 'should advance the graphic bit' do
-        subject.should_receive(:update_pixel_bit)
+        subject.should_receive(:update_graphic_bit_and_value)
 
         subject.pixel
       end
@@ -73,7 +73,7 @@ describe Ruby2600::Graphic do
       end
 
       it 'should not advance the graphic' do
-        subject.should_not_receive(:update_pixel_bit)
+        subject.should_not_receive(:update_graphic_bit_and_value)
 
         subject.pixel :extended_hblank => true
       end

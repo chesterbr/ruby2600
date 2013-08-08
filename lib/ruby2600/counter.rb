@@ -1,8 +1,9 @@
-# Movable objects on TIA keep internal counters, which this class implements
-# as described in http://www.atarihq.com/danb/files/TIA_HW_Notes.txt
 module Ruby2600
+  # Movable objects on TIA keep internal counters, which this class implements
+  # as described in http://www.atarihq.com/danb/files/TIA_HW_Notes.txt
   class Counter
-    attr_accessor :notify_change_on_reset
+    attr_accessor :old_value,               # Stored for vertical delay (VDELxx) modes
+                  :notify_change_on_reset   # Allows ball to trigger immediately
 
     PERIOD = 40       # "Visible" counter value ranges from 0-39...
     DIVIDER = 4       # ...incrementing every 4 "ticks" from TIA (1/4 of TIA clock)
@@ -11,7 +12,7 @@ module Ruby2600
     INTERNAL_PERIOD = PERIOD * DIVIDER
 
     def initialize
-      @internal_value = rand(INTERNAL_PERIOD)
+      @old_value = @internal_value = rand(INTERNAL_PERIOD)
       @notify_change_on_reset = false
     end
 
@@ -32,9 +33,9 @@ module Ruby2600
     end
 
     def tick
-      old_value = value
+      previous_value = value
       @internal_value = (@internal_value + 1) % INTERNAL_PERIOD
-      @change_listener.call if @change_listener && value != old_value
+      @change_listener.call if @change_listener && value != previous_value
     end
 
     def reset

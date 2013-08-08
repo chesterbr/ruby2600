@@ -21,11 +21,11 @@ module Ruby2600
 
   	private
 
-    def update_pixel_bit
+    def update_graphic_bit_and_value
       pf_pixel = counter.value % 20
       pf_pixel = 19 - pf_pixel if reflect?
       register, bit = REG_AND_BIT_FOR_PIXEL[pf_pixel]
-      @pixel_bit = reg(register)[bit]
+      @graphic_bit_value = reg(register)[bit]
     end
 
     def on_counter_change

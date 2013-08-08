@@ -9,7 +9,7 @@ module Ruby2600
     private
 
     def pixel_bit
-      grp[7 - @grp_bit]
+      grp[7 - @graphic_bit]
     end
 
     def size
@@ -21,7 +21,7 @@ module Ruby2600
     end
 
     def grp
-      result = reg(VDELP0)[0] == 1 ? @old_value : reg(GRP0)
+      result = reg(VDELP0)[0] == 1 ? counter.old_value : reg(GRP0)
       reg(REFP0)[3] == 1 ? reflect(result) : result
     end
 

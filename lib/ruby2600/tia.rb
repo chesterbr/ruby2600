@@ -85,10 +85,10 @@ module Ruby2600
       when VSYNC..VDELBL
         @reg[position] = value
       end
-      @p0.old_value = @reg[GRP0]  if position == GRP1
-      @bl.old_value = @reg[ENABL] if position == GRP1
-      @p1.old_value = @reg[GRP1]  if position == GRP0
-      @latch_level.fill(true)     if position == VBLANK && value[6] == 1
+      @p0.counter.old_value = @reg[GRP0]  if position == GRP1
+      @bl.counter.old_value = @reg[ENABL] if position == GRP1
+      @p1.counter.old_value = @reg[GRP1]  if position == GRP0
+      @latch_level.fill(true) if position == VBLANK && value[6] == 1
     end
 
     private

@@ -6,7 +6,7 @@ module Ruby2600
     @hmove_register = HMBL
     @color_register = COLUPF
 
-    # Ball draws immediately when strobed (other objects only do it
+    # Ball draws immediately when RESBL is strobed (other objects only do it
     # when their counter wraps around, i.e., on next scanline)
     def initialize(tia)
       super(tia)
@@ -16,7 +16,7 @@ module Ruby2600
     private
 
     def pixel_bit
-      reg(VDELBL)[0] == 1 ? @old_value[1] : reg(ENABL)[1]
+      reg(VDELBL)[0] == 1 ? counter.old_value[1] : reg(ENABL)[1]
     end
 
     def size
