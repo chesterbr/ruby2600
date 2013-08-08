@@ -54,11 +54,7 @@ There are a couple of test files under `spec/fixtures/files` you can try, but I 
 - *7/8* - Player 1 difficulty switch (7 = Beginner, 8 = Advanced)
 - *W/A/S/D* - "Sticky" Player 0 joystick (to stop moving, press the non-sticky arrow)
 
-## Current Status
-
-It boots almost every 2K/4K cart I've tried, and you can play quite a few of them (reeeeaaaalyyy slooowwwwlyyyy).
-
-Some details:
+## Technical details
 
 - Full 650x CPU instruction set emulation, [cloc](http://cloc.sourceforge.net/)-ing less than 380 lines of code. (hardware interrupts not emulated, since the 2600 does not have those);
 - RIOT fully implemented;
@@ -72,7 +68,7 @@ Some details:
 - Some games display an artifact at the left side (late hblank area) where there should be nothing (Freeway, Boxing);
 - Most likely HMOV is being "over-applied" - no harm done, but could hamper games trying to do special effects by changing HMxx registers while HMOV is being applied.
 
-Technical debt:
+### Technical debt:
 
 - UI code needs some love (just quickly slapped a [Gosu](http://www.libgosu.org/) script on /bin to make it playable; would seriously consider a JRuby-friendly version); should dynamically adjust to games that generate larger/smaller frames.
 - TIA tests don't cover a few aspects (see "Pending" specs)
