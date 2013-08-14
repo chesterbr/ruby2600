@@ -70,6 +70,7 @@ module Ruby2600
       tick
       @ticks_added += 1
       @movement_required = false if @ticks_added == ticks_to_add(register_value)
+      true
     end
 
     private

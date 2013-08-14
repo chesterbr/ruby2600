@@ -30,7 +30,8 @@ module Ruby2600
     end
 
     def apply_hmove
-      counter.apply_hmove reg(self.class.hmove_register)
+      applied = counter.apply_hmove reg(self.class.hmove_register)
+      update_graphic_bit_and_value if applied
     end
 
     private
