@@ -35,8 +35,8 @@ def rand_with_bit(bit, status)
 end
 
 def pixels(graphic, first = 1, last = 160)
-  (first-1).times { graphic.pixel }
-  (0..(last - first)).map { graphic.pixel }
+  (first-1).times { graphic.tick }
+  (0..(last - first)).map { graphic.tick; graphic.pixel }
 end
 
 def scanline_with_object(size, color, copies = 1)

@@ -17,21 +17,21 @@ module Ruby2600
       @counter.on_change { on_counter_change }
     end
 
-    def pixel(dont_tick_counter = false)
-      unless dont_tick_counter
-        update_graphic_bit_and_value
+    def tick
+      if @tia.scanline_stage == :visible
+        tick_graphic_circuit
         counter.tick
+      else
+        apply_hmove
       end
+    end
+
+    def pixel
       reg(self.class.color_register) if @graphic_bit_value == 1
     end
 
     def start_hmove
       counter.start_hmove reg(self.class.hmove_register)
-    end
-
-    def apply_hmove
-      applied = counter.apply_hmove reg(self.class.hmove_register)
-      update_graphic_bit_and_value if applied
     end
 
     private
@@ -43,7 +43,12 @@ module Ruby2600
       @tia.reg[register_name + @graphic_number]
     end
 
-    def update_graphic_bit_and_value
+    def apply_hmove
+      applied = counter.apply_hmove reg(self.class.hmove_register)
+      tick_graphic_circuit if applied
+    end
+
+    def tick_graphic_circuit
       if @graphic_bit
         if (0..7).include?(@graphic_bit)
           @graphic_bit_value = pixel_bit

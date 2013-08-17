@@ -1,7 +1,7 @@
 module Ruby2600
   class TIA
     attr_accessor :cpu, :riot
-    attr_reader :reg
+    attr_reader :reg, :scanline_stage
 
     include Constants
 
@@ -22,7 +22,7 @@ module Ruby2600
       @m1 = Missile.new(self, 1)
       @bl = Ball.new(self)
       @pf = Playfield.new(self)
-      @movable_graphics = [@p0, @p1, @m0, @m1, @bl]
+      @graphics = [@p0, @p1, @m0, @m1, @bl, @pf]
 
       @port_level = Array.new(6, false)
       @latch_level = Array.new(6, true)
@@ -75,7 +75,7 @@ module Ruby2600
         @m1.counter.reset_to @p1.counter
       when HMOVE
         @late_reset_hblank = true
-        @movable_graphics.each &:start_hmove
+        @graphics.each &:start_hmove
       when HMCLR
         @reg[HMP0] = @reg[HMP1] = @reg[HMM0] = @reg[HMM1] = @reg[HMBL] = 0
       when CXCLR
@@ -107,39 +107,29 @@ module Ruby2600
     end
 
     def wait_horizontal_blank
+      @scanline_stage = :hblank
       HORIZONTAL_BLANK_CLK_COUNT.times { |color_clock| sync_2600_with color_clock }
     end
 
     def draw_scanline
       scanline = Array.new(160, 0)
       VISIBLE_CLK_COUNT.times do |pixel|
-        extended_hblank = @late_reset_hblank && pixel < 8
+        @scanline_stage = @late_reset_hblank && pixel < 8 ? :late_hblank : :visible
 
-        fetch_pixels extended_hblank
         update_collision_flags
-
-        scanline[pixel] = topmost_pixel unless vertical_blank? || extended_hblank
-
         sync_2600_with pixel + HORIZONTAL_BLANK_CLK_COUNT
+
+        scanline[pixel] = topmost_pixel if @scanline_stage == :visible && !vertical_blank?
+
       end
       scanline
     end
 
-    def fetch_pixels(with_tick)
-      @pf_pixel = @pf.pixel
-      @bk_pixel = @reg[COLUBK]
-      @p0_pixel = @p0.pixel with_tick
-      @p1_pixel = @p1.pixel with_tick
-      @m0_pixel = @m0.pixel with_tick
-      @m1_pixel = @m1.pixel with_tick
-      @bl_pixel = @bl.pixel with_tick
-    end
-
     def topmost_pixel
       if @reg[CTRLPF][2].zero?
-        @p0_pixel || @m0_pixel || @p1_pixel || @m1_pixel || @bl_pixel || @pf_pixel || @bk_pixel
+        @p0.pixel || @m0.pixel || @p1.pixel || @m1.pixel || @bl.pixel || @pf.pixel || @reg[COLUBK]
       else
-        @pf_pixel || @bl_pixel || @p0_pixel || @m0_pixel || @p1_pixel || @m1_pixel || @bk_pixel
+        @pf.pixel || @bl.pixel || @p0.pixel || @m0.pixel || @p1.pixel || @m1.pixel || @reg[COLUBK]
       end
     end
 
@@ -147,34 +137,33 @@ module Ruby2600
     BIT_7 = 0b10000000
 
     def update_collision_flags
-      @reg[CXM0P]  |= BIT_6 if @m0_pixel && @p0_pixel
-      @reg[CXM0P]  |= BIT_7 if @m0_pixel && @p1_pixel
-      @reg[CXM1P]  |= BIT_6 if @m1_pixel && @p1_pixel
-      @reg[CXM1P]  |= BIT_7 if @m1_pixel && @p0_pixel
-      @reg[CXP0FB] |= BIT_6 if @p0_pixel && @bl_pixel
-      @reg[CXP0FB] |= BIT_7 if @p0_pixel && @pf_pixel
-      @reg[CXP1FB] |= BIT_6 if @p1_pixel && @bl_pixel
-      @reg[CXP1FB] |= BIT_7 if @p1_pixel && @pf_pixel
-      @reg[CXM0FB] |= BIT_6 if @m0_pixel && @bl_pixel
-      @reg[CXM0FB] |= BIT_7 if @m0_pixel && @pf_pixel
-      @reg[CXM1FB] |= BIT_6 if @m1_pixel && @bl_pixel
-      @reg[CXM1FB] |= BIT_7 if @m1_pixel && @pf_pixel
+      @reg[CXM0P]  |= BIT_6 if @m0.pixel && @p0.pixel
+      @reg[CXM0P]  |= BIT_7 if @m0.pixel && @p1.pixel
+      @reg[CXM1P]  |= BIT_6 if @m1.pixel && @p1.pixel
+      @reg[CXM1P]  |= BIT_7 if @m1.pixel && @p0.pixel
+      @reg[CXP0FB] |= BIT_6 if @p0.pixel && @bl.pixel
+      @reg[CXP0FB] |= BIT_7 if @p0.pixel && @pf.pixel
+      @reg[CXP1FB] |= BIT_6 if @p1.pixel && @bl.pixel
+      @reg[CXP1FB] |= BIT_7 if @p1.pixel && @pf.pixel
+      @reg[CXM0FB] |= BIT_6 if @m0.pixel && @bl.pixel
+      @reg[CXM0FB] |= BIT_7 if @m0.pixel && @pf.pixel
+      @reg[CXM1FB] |= BIT_6 if @m1.pixel && @bl.pixel
+      @reg[CXM1FB] |= BIT_7 if @m1.pixel && @pf.pixel
       # c-c-c-combo breaker: bit 6 of CXLBPF is unused
-      @reg[CXBLPF] |= BIT_7 if @bl_pixel && @pf_pixel
-      @reg[CXPPMM] |= BIT_6 if @m0_pixel && @m1_pixel
-      @reg[CXPPMM] |= BIT_7 if @p0_pixel && @p1_pixel
+      @reg[CXBLPF] |= BIT_7 if @bl.pixel && @pf.pixel
+      @reg[CXPPMM] |= BIT_6 if @m0.pixel && @m1.pixel
+      @reg[CXPPMM] |= BIT_7 if @p0.pixel && @p1.pixel
     end
 
     # All Atari chips use the same crystal for their clocks (with RIOT and
     # CPU running at 1/3 of TIA speed).
     #
     # Since the emulator's "main loop" is based on TIA#scanline, we'll "tick"
-    # the other chips here (and also apply the horizontal motion on movable
-    # objects, just like the hardware does)
+    # the other chips here
 
     def sync_2600_with(color_clock)
       riot.tick if color_clock % 3 == 0
-      @movable_graphics.each &:apply_hmove
+      @graphics.each &:tick
       cpu.tick if color_clock % 3 == 2
     end
 

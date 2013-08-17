@@ -1,7 +1,3 @@
-# Playfield isn't really *movable*, and could be drawn directly as the
-# TIA class draws the scanline, but giving it its own counter
-# simplifies testing and pushes class TIA towards SRP
-
 module Ruby2600
   class Playfield < Graphic
 
@@ -13,15 +9,30 @@ module Ruby2600
   	                         [PF1, 7], [PF1, 6], [PF1, 5], [PF1, 4], [PF1, 3], [PF1, 2], [PF1, 1], [PF1, 0],
   	                         [PF2, 0], [PF2, 1], [PF2, 2], [PF2, 3], [PF2, 4], [PF2, 5], [PF2, 6], [PF2, 7]]
 
-    # Playfield starts counting at 0 (and never moves)
+    # Playfield starts counting at 0
     def initialize(*args)
       super(*args)
       counter.value = 0
     end
 
+    def tick
+      unless @tia.scanline_stage == :hblank
+        tick_graphic_circuit
+        counter.tick
+      end
+    end
+
+    def start_hmove
+      # Playfield doesn't move
+    end
+
+    def apply_hmove
+      # Playfield doesn't move
+    end
+
   	private
 
-    def update_graphic_bit_and_value
+    def tick_graphic_circuit
       pf_pixel = counter.value % 20
       pf_pixel = 19 - pf_pixel if reflect?
       register, bit = REG_AND_BIT_FOR_PIXEL[pf_pixel]

@@ -2,12 +2,12 @@ require 'spec_helper'
 
 describe Ruby2600::Playfield do
 
-  let(:tia) { mock 'tia', :reg => Array.new(64, 0) }
+  let(:tia) { mock 'tia', :reg => Array.new(64, 0), :scanline_stage => :visible }
   subject(:playfield) { Ruby2600::Playfield.new(tia, 0) }
 
   def scanline
     playfield.counter.value = 0
-    (0..159).map{ playfield.pixel }
+    (0..159).map{ playfield.tick; playfield.pixel }
   end
 
   describe 'pixel' do
