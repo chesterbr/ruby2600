@@ -217,6 +217,10 @@ describe 'hello world with CPU, TIA, Cart and Bus' do
                     XXXXXXXX
                      XXXXXXXX
                       XXXXXXXX
+                       XXXXXXXX
+                        XXXXXXXX
+                         XXXXXXXX
+                          XXXXXXXX
     END
   end
 end
