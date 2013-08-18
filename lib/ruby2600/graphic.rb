@@ -19,8 +19,8 @@ module Ruby2600
 
     def tick
       if @tia.scanline_stage == :visible
-        tick_graphic_circuit
         counter.tick
+        tick_graphic_circuit
       else
         apply_hmove
       end
