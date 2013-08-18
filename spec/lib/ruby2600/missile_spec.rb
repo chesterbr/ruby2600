@@ -13,7 +13,7 @@ describe Ruby2600::Missile do
       tia.reg[COLUP0] = 0x00
       tia.reg[COLUP1] = 0xFF
       missile.counter.reset
-      160.times { missile1.pixel }
+      160.times { missile1.tick }
     end
 
     it 'should never output if ENAM1 is disabled' do
@@ -49,11 +49,11 @@ describe Ruby2600::Missile do
       before do
         # Cleanup and pick a random position
         tia.reg[ENAM0] = 0
-        rand(160).times { missile.pixel }
+        rand(160).times { missile.tick }
 
         # Preemptive strobe (to ensure we don't have retriggering leftovers)
         missile.counter.reset
-        80.times { missile.pixel }
+        80.times { missile.tick }
 
         # Setup
         tia.reg[ENAM0] = 0b10
@@ -64,7 +64,7 @@ describe Ruby2600::Missile do
         before do
           tia.reg[NUSIZ0] = 0
           missile.counter.reset
-          4.times { missile.pixel } # 4-bit delay
+          4.times { missile.tick } # 4-bit delay
         end
 
         it 'should not draw anything on current scanline' do
@@ -72,12 +72,12 @@ describe Ruby2600::Missile do
         end
 
         it 'should draw after a full scanline (160pixels) + 4-bit delay' do
-          160.times { missile.pixel }
+          160.times { missile.tick }
           pixels(missile, 1, 160).should == color + Array.new(159)
         end
 
         it 'should draw again on subsequent scanlines' do
-          320.times { missile.pixel }
+          320.times { missile.tick }
           10.times { pixels(missile, 1, 160).should == color + Array.new(159) }
         end
       end
@@ -86,7 +86,7 @@ describe Ruby2600::Missile do
         before do
           tia.reg[NUSIZ0] = 1
           missile.counter.reset
-          4.times { missile.pixel }
+          4.times { missile.tick }
         end
 
         it 'should only draw second copy on current scanline (after 4 bit delay)' do
@@ -94,7 +94,7 @@ describe Ruby2600::Missile do
         end
 
         it 'should draw both copies on subsequent scanlines' do
-          160.times { missile.pixel }
+          160.times { missile.tick }
           pixels(missile, 1, 24).should == color + Array.new(15) + color + Array.new(7)
         end
       end
@@ -103,7 +103,7 @@ describe Ruby2600::Missile do
         before do
           tia.reg[NUSIZ0] = 2
           missile.counter.reset
-          4.times { missile.pixel }
+          4.times { missile.tick }
         end
 
         it 'should only draw second copy on current scanline (after 4 bit delay)' do
@@ -111,7 +111,7 @@ describe Ruby2600::Missile do
         end
 
         it 'should draw both copies on subsequent scanlines' do
-          160.times { missile.pixel }
+          160.times { missile.tick }
           pixels(missile, 1, 40).should == color + Array.new(7) + Array.new(24) + color + Array.new(7)
         end
       end
@@ -120,7 +120,7 @@ describe Ruby2600::Missile do
         before do
           tia.reg[NUSIZ0] = 3
           missile.counter.reset
-          4.times { missile.pixel }
+          4.times { missile.tick }
         end
 
         it 'should only draw second and third copy on current scanline (after 4 bit delay)' do
@@ -128,7 +128,7 @@ describe Ruby2600::Missile do
         end
 
         it 'should draw three copies on subsequent scanlines' do
-          160.times { missile.pixel }
+          160.times { missile.tick }
           pixels(missile, 1, 40).should == color + Array.new(7) + Array.new(8) + color + Array.new(7) + Array.new(8) + color + Array.new(7)
         end
       end
@@ -137,7 +137,7 @@ describe Ruby2600::Missile do
         before do
           tia.reg[NUSIZ0] = 4
           missile.counter.reset
-          4.times { missile.pixel }
+          4.times { missile.tick }
         end
 
         it 'should only draw second copy on current scanline (after 4 bit delay)' do
@@ -145,7 +145,7 @@ describe Ruby2600::Missile do
         end
 
         it 'should draw both copies on subsequent scanlines' do
-          160.times { missile.pixel }
+          160.times { missile.tick }
           pixels(missile, 1, 72).should == color + Array.new(7) + Array.new(56) + color + Array.new(7)
         end
       end
@@ -154,7 +154,7 @@ describe Ruby2600::Missile do
         before do
           tia.reg[NUSIZ0] = 6
           missile.counter.reset
-          4.times { missile.pixel }
+          4.times { missile.tick }
         end
 
         it 'should only draw second and third copy on current scanline (after 4 bit delay)' do
@@ -162,7 +162,7 @@ describe Ruby2600::Missile do
         end
 
         it 'should draw three copies on subsequent scanlines' do
-          160.times { missile.pixel }
+          160.times { missile.tick }
           pixels(missile, 1, 72).should == color + Array.new(7) + Array.new(24) + color + Array.new(7) + Array.new(24) + color + Array.new(7)
         end
 
@@ -170,7 +170,7 @@ describe Ruby2600::Missile do
           before { tia.reg[NUSIZ0] = 0b00010110 }
 
           it 'should draw 3 copies with size 2' do
-            160.times { missile.pixel }
+            160.times { missile.tick }
             pixels(missile, 1, 160).should == scanline_with_object(2, color[0], 3)
           end
         end
@@ -179,7 +179,7 @@ describe Ruby2600::Missile do
           before { tia.reg[NUSIZ0] = 0b00100110 }
 
           it 'should draw 3 copies with size 4' do
-            160.times { missile.pixel }
+            160.times { missile.tick }
             pixels(missile, 1, 160).should == scanline_with_object(4, color[0], 3)
           end
         end
@@ -188,7 +188,7 @@ describe Ruby2600::Missile do
           before { tia.reg[NUSIZ0] = 0b00110110 }
 
           it 'should draw 3 copies with size 8' do
-            160.times { missile.pixel }
+            160.times { missile.tick }
             pixels(missile, 1, 160).should == scanline_with_object(8, color[0], 3)
           end
         end
@@ -200,7 +200,7 @@ describe Ruby2600::Missile do
     let(:player) { Ruby2600::Player.new(tia, 0) }
 
     before do
-      rand(160).times { player.counter.tick }
+      rand(160).times { player.tick }
     end
 
     it "should not affect the player's counter" do
@@ -213,8 +213,8 @@ describe Ruby2600::Missile do
       missile.counter.reset_to player.counter
 
       4.times do
-        missile.counter.tick
-        player.counter.tick
+        missile.tick
+        player.tick
 
         missile.counter.value.should == player.counter.value
       end

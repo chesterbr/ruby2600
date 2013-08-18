@@ -16,7 +16,7 @@ describe Ruby2600::Ball do
     it 'should never output if ENABL is disabled' do
       tia.reg[ENABL] = 0
 
-      pixels(ball, 1, 300).should == Array.new(300)
+      pixels(ball, 1, 300).  == Array.new(300)
     end
 
     it 'should generate some output if ENABL is enabled' do
@@ -29,9 +29,9 @@ describe Ruby2600::Ball do
       before do
         # Enable and strobe from an arbitrary position
         tia.reg[ENABL] = rand(256) | 0b10
-        rand(160).times { ball.pixel }
+        rand(160).times { ball.tick }
         ball.counter.reset
-        4.times { ball.pixel } # 4-bit delay
+        4.times { ball.tick } # 4-bit delay
       end
 
       context '1x' do

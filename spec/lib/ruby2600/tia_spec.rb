@@ -141,34 +141,35 @@ describe Ruby2600::TIA do
     context 'CTRLPF priority bit clear' do
       before { tia[CTRLPF] = rand(256) & 0b011 }
 
-      it { tia.should be_using_priority [:p0, :m0, :p1, :m1, :bl, :pf, :bk] }
+      it { tia.should be_using_priority [:p0, :m0, :p1, :m1, :bl, :pf] }
     end
 
     context 'CTRLPF priority bit set' do
       before { tia[CTRLPF] = rand(256) | 0b100 }
 
-      it { tia.should be_using_priority [:pf, :bl, :p0, :m0, :p1, :m1, :bk] }
+      it { tia.should be_using_priority [:pf, :bl, :p0, :m0, :p1, :m1] }
     end
 
+    # Checks priority by injecting
     class Ruby2600::TIA
       def using_priority?(enabled, others = [])
         # Assuming color = priority for enabled pixels and nil for others...
-        enabled.count.times { |i| instance_variable_get("@#{enabled[i]}").stub(:pixel).and_return "@#{enabled[i]}_pixel", i }
-        others.each { |p| instance_variable_get("@#{p}").stub(:pixel).and_return(nil) }
+        enabled.count.times { |i| turn_on(enabled[i], i) }
+        others.each { |p| turn_off(p) }
         # ...the first one (color = 0) should be the topmost...
         return false unless topmost_pixel == 0
         # ...and we disable it to recursively check the others, until none left
         first = enabled.shift
         enabled.empty? ? true : using_priority?(enabled, others << first)
       end
-    end
 
-    def turn_on(object)
-      tia.instance_variable_get("@#{enabled[i]}").stub(:pixel).and_return(rand(256))
-    end
+      def turn_on(object, color)
+        instance_variable_get("@#{object}").stub(:pixel).and_return(color)
+      end
 
-    def turn_off(object)
-      tia.instance_variable_get("@#{p}").stub(:pixel).and_return(nil)
+      def turn_off(object)
+        instance_variable_get("@#{object}").stub(:pixel).and_return(nil)
+      end
     end
   end
 
