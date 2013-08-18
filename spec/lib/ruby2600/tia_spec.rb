@@ -138,6 +138,8 @@ describe Ruby2600::TIA do
   end
 
   describe '#topmost_pixel' do
+    before { tia[COLUBK] = rand(256) }
+
     context 'CTRLPF priority bit clear' do
       before { tia[CTRLPF] = rand(256) & 0b011 }
 
@@ -150,17 +152,21 @@ describe Ruby2600::TIA do
       it { tia.should be_using_priority [:pf, :bl, :p0, :m0, :p1, :m1] }
     end
 
-    # Checks priority by injecting
+    # This code tests that, for an ordered list of graphic objects,
+    # the first one that generates color is the topmost_pixel
     class Ruby2600::TIA
-      def using_priority?(enabled, others = [])
-        # Assuming color = priority for enabled pixels and nil for others...
+      def using_priority?(enabled, disabled = [])
+        # Makes color = order in list for enabled objects (and nil for disabled)
         enabled.count.times { |i| turn_on(enabled[i], i) }
-        others.each { |p| turn_off(p) }
-        # ...the first one (color = 0) should be the topmost...
+        disabled.each { |p| turn_off(p) }
+        # The first object (color = 0) should be the topmost...
         return false unless topmost_pixel == 0
-        # ...and we disable it to recursively check the others, until none left
+        # ...and we disable it to recursively check the second, third, etc.
         first = enabled.shift
-        enabled.empty? ? true : using_priority?(enabled, others << first)
+        using_priority?(enabled, disabled << first) if enabled.any?
+        # Also: if all of them are disabled, the background color should be used
+        turn_off first
+        topmost_pixel == @reg[COLUBK]
       end
 
       def turn_on(object, color)
