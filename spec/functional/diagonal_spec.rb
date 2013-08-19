@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'hello world with CPU, TIA, Cart and Bus' do
+describe 'diagonal drawn with stetched missile and HMOV' do
 
   let(:cart) { Ruby2600::Cart.new(path_for_ROM :diagonal_hmov) }
   let(:tia)  { Ruby2600::TIA.new }
@@ -8,7 +8,7 @@ describe 'hello world with CPU, TIA, Cart and Bus' do
   let(:riot) { Ruby2600::RIOT.new }
   let!(:bus) { Ruby2600::Bus.new(cpu, tia, cart, riot) }
 
-  it 'generates frames with hello world' do
+  it 'draws the diagonal' do
     tia.frame # first frame won't sync, discard it
     2.times { text(tia.frame).should == hello_world_text }
   end

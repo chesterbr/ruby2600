@@ -12,13 +12,17 @@ module Ruby2600
     # Playfield starts counting at 0
     def initialize(*args)
       super(*args)
-      counter.value = 0
+      reset
+    end
+
+    def reset
+      @counter.value = 0
     end
 
     def tick
       unless @tia.scanline_stage == :hblank
         tick_graphic_circuit
-        counter.tick
+        @counter.tick
       end
     end
 
@@ -33,18 +37,18 @@ module Ruby2600
   	private
 
     def tick_graphic_circuit
-      pf_pixel = counter.value % 20
+      pf_pixel = @counter.value % 20
       pf_pixel = 19 - pf_pixel if reflect?
       register, bit = REG_AND_BIT_FOR_PIXEL[pf_pixel]
       @graphic_bit_value = reg(register)[bit]
     end
 
     def on_counter_change
-   	  self.class.color_register = score_mode? ? COLUP0 + counter.value / 20 : COLUPF
+   	  self.class.color_register = score_mode? ? COLUP0 + @counter.value / 20 : COLUPF
     end
 
     def reflect?
-      reg(CTRLPF)[0] == 1 && counter.value > 19
+      reg(CTRLPF)[0] == 1 && @counter.value > 19
     end
 
     def score_mode?

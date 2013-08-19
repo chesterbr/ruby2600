@@ -217,7 +217,7 @@ describe Ruby2600::TIA do
         let(:player)  { tia.instance_variable_get "@p#{n}" }
         let(:missile) { tia.instance_variable_get "@m#{n}" }
         it "should reset m#{n}'s counter to p#{n}'s when strobed" do
-          missile.counter.should_receive(:reset_to).with(player.counter)
+          missile.should_receive(:reset_to).with(player)
 
           tia[RESMP0 + n] = rand(256)
         end

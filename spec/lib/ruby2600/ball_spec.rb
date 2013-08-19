@@ -10,7 +10,7 @@ describe Ruby2600::Ball do
 
     before do
       tia.reg[COLUPF] = color[0]
-      ball.counter.reset
+      ball.reset
     end
 
     it 'should never output if ENABL is disabled' do
@@ -30,7 +30,7 @@ describe Ruby2600::Ball do
         # Enable and strobe from an arbitrary position
         tia.reg[ENABL] = rand(256) | 0b10
         rand(160).times { ball.tick }
-        ball.counter.reset
+        ball.reset
         4.times { ball.tick } # 4-bit delay
       end
 

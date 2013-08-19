@@ -10,13 +10,13 @@ module Ruby2600
     # when their counter wraps around, i.e., on next scanline)
     def initialize(tia)
       super(tia)
-      counter.notify_change_on_reset = true
+      @counter.notify_change_on_reset = true
     end
 
     private
 
     def pixel_bit
-      reg(VDELBL)[0] == 1 ? counter.old_value[1] : reg(ENABL)[1]
+      reg(VDELBL)[0] == 1 ? @counter.old_value[1] : reg(ENABL)[1]
     end
 
     def size

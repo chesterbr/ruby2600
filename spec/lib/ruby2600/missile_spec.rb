@@ -12,7 +12,7 @@ describe Ruby2600::Missile do
       tia.reg[ENAM1] = 0
       tia.reg[COLUP0] = 0x00
       tia.reg[COLUP1] = 0xFF
-      missile.counter.reset
+      missile.reset
       160.times { missile1.tick }
     end
 
@@ -52,7 +52,7 @@ describe Ruby2600::Missile do
         rand(160).times { missile.tick }
 
         # Preemptive strobe (to ensure we don't have retriggering leftovers)
-        missile.counter.reset
+        missile.reset
         80.times { missile.tick }
 
         # Setup
@@ -63,7 +63,7 @@ describe Ruby2600::Missile do
       context 'one copy' do
         before do
           tia.reg[NUSIZ0] = 0
-          missile.counter.reset
+          missile.reset
           4.times { missile.tick } # 4-bit delay
         end
 
@@ -85,7 +85,7 @@ describe Ruby2600::Missile do
       context 'two copies, close' do
         before do
           tia.reg[NUSIZ0] = 1
-          missile.counter.reset
+          missile.reset
           4.times { missile.tick }
         end
 
@@ -102,7 +102,7 @@ describe Ruby2600::Missile do
       context 'two copies, medium' do
         before do
           tia.reg[NUSIZ0] = 2
-          missile.counter.reset
+          missile.reset
           4.times { missile.tick }
         end
 
@@ -119,7 +119,7 @@ describe Ruby2600::Missile do
       context 'three copies, close' do
         before do
           tia.reg[NUSIZ0] = 3
-          missile.counter.reset
+          missile.reset
           4.times { missile.tick }
         end
 
@@ -136,7 +136,7 @@ describe Ruby2600::Missile do
       context 'two copies, wide' do
         before do
           tia.reg[NUSIZ0] = 4
-          missile.counter.reset
+          missile.reset
           4.times { missile.tick }
         end
 
@@ -153,7 +153,7 @@ describe Ruby2600::Missile do
       context 'three copies, medium' do
         before do
           tia.reg[NUSIZ0] = 6
-          missile.counter.reset
+          missile.reset
           4.times { missile.tick }
         end
 
@@ -205,18 +205,18 @@ describe Ruby2600::Missile do
 
     it "should not affect the player's counter" do
       expect {
-        missile.counter.reset_to player.counter
-      }.to_not change { player.counter.value }
+        missile.reset_to player
+      }.to_not change { player.value }
     end
 
     it "should set both objects to the same clock phase (i.e., same value without drifting)" do
-      missile.counter.reset_to player.counter
+      missile.reset_to player
 
       4.times do
         missile.tick
         player.tick
 
-        missile.counter.value.should == player.counter.value
+        missile.value.should == player.value
       end
     end
   end

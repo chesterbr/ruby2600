@@ -1,8 +1,8 @@
 module Ruby2600
   class Graphic
     include Constants
-
-    attr_accessor :counter
+    extend Forwardable
+    def_delegators :@counter, :reset, :value, :old_value, :old_value=
 
     # These parameters are specific to each type of graphic (player, missile, ball or playfield)
     class << self
@@ -20,7 +20,7 @@ module Ruby2600
     def tick
       if @tia.scanline_stage == :visible
         tick_graphic_circuit
-        counter.tick
+        @counter.tick
       else
         apply_hmove
       end
@@ -30,8 +30,12 @@ module Ruby2600
       reg(self.class.color_register) if @graphic_bit_value == 1
     end
 
+    def reset_to(other_graphic)
+      @counter.reset_to other_graphic.instance_variable_get(:@counter)
+    end
+
     def start_hmove
-      counter.start_hmove reg(self.class.hmove_register)
+      @counter.start_hmove reg(self.class.hmove_register)
     end
 
     private
@@ -44,7 +48,7 @@ module Ruby2600
     end
 
     def apply_hmove
-      applied = counter.apply_hmove reg(self.class.hmove_register)
+      applied = @counter.apply_hmove reg(self.class.hmove_register)
       tick_graphic_circuit if applied
     end
 
@@ -74,14 +78,14 @@ module Ruby2600
     end
 
     def should_draw_graphic?
-      counter.value == 39
+      @counter.value == 39
     end
 
     def should_draw_copy?
       nusiz_bits = reg(NUSIZ0) & 0b111
-      (counter.value ==  3 && [0b001, 0b011].include?(nusiz_bits)) ||
-      (counter.value ==  7 && [0b010, 0b011, 0b110].include?(nusiz_bits)) ||
-      (counter.value == 15 && [0b100, 0b110].include?(nusiz_bits))
+      (@counter.value ==  3 && [0b001, 0b011].include?(nusiz_bits)) ||
+      (@counter.value ==  7 && [0b010, 0b011, 0b110].include?(nusiz_bits)) ||
+      (@counter.value == 15 && [0b100, 0b110].include?(nusiz_bits))
     end
   end
 end

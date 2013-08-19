@@ -60,19 +60,19 @@ module Ruby2600
     def []=(position, value)
       case position
       when RESP0
-        @p0.counter.reset
+        @p0.reset
       when RESP1
-        @p1.counter.reset
+        @p1.reset
       when RESM0
-        @m0.counter.reset
+        @m0.reset
       when RESM1
-        @m1.counter.reset
+        @m1.reset
       when RESBL
-        @bl.counter.reset
+        @bl.reset
       when RESMP0
-        @m0.counter.reset_to @p0.counter
+        @m0.reset_to @p0
       when RESMP1
-        @m1.counter.reset_to @p1.counter
+        @m1.reset_to @p1
       when HMOVE
         @late_reset_hblank = true
         @graphics.each &:start_hmove
@@ -85,9 +85,9 @@ module Ruby2600
       when VSYNC..VDELBL
         @reg[position] = value
       end
-      @p0.counter.old_value = @reg[GRP0]  if position == GRP1
-      @bl.counter.old_value = @reg[ENABL] if position == GRP1
-      @p1.counter.old_value = @reg[GRP1]  if position == GRP0
+      @p0.old_value = @reg[GRP0]  if position == GRP1
+      @bl.old_value = @reg[ENABL] if position == GRP1
+      @p1.old_value = @reg[GRP1]  if position == GRP0
       @latch_level.fill(true) if position == VBLANK && value[6] == 1
     end
 
