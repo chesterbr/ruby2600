@@ -36,6 +36,7 @@ module Ruby2600
 
     def start_hmove
       @counter.start_hmove reg(self.class.hmove_register)
+      tick_graphic_circuit
     end
 
     private
