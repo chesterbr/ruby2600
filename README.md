@@ -117,9 +117,7 @@ If you want a full-speed emulator with sound and compatible with every single ga
 
 ## License
 
-If you can see this repository, it means I gave you a sneak preview. Play with it as you wish, but please don't share until it is released - ping me if you have any need otherwise!
-
-Once released (planned for [RubyConf BR 2013](http://cfp.rubyconf.com.br/)), this software will be distributed under the terms of the [MIT License](http://opensource.org/licenses/MIT). If you have access right now, it me
+This software is distributed under the terms of the [MIT License](http://opensource.org/licenses/MIT).
 
 Copyright (c) 2013 Carlos Duarte do Nascimento (Chester) <cd@pobox.com>
 
