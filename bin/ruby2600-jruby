@@ -204,60 +204,6 @@ class GameWindow < javax.swing.JFrame
       when 56 then @bus.p1_difficulty_switch = false
     end
   end
-
-  #def button_down(id)
-  #  case id
-  #  when Gosu::KbUp, Gosu::KbW
-  #    @bus.p0_joystick_up = true
-  #    @bus.p0_joystick_down = false
-  #  when Gosu::KbDown, Gosu::KbS
-  #    @bus.p0_joystick_down = true
-  #    @bus.p0_joystick_up = false
-  #  when Gosu::KbLeft, Gosu::KbA
-  #    @bus.p0_joystick_left = true
-  #    @bus.p0_joystick_right = false
-  #  when Gosu::KbRight, Gosu::KbD
-  #    @bus.p0_joystick_right = true
-  #    @bus.p0_joystick_left = false
-  #  when Gosu::KbSpace || Gosu::Kb0
-  #    @bus.p0_joystick_fire = true
-  #  when Gosu::Kb1
-  #    @bus.select_switch = true
-  #  when Gosu::Kb2
-  #    @bus.reset_switch = true
-  #  end
-  #end
-
-  #def button_up(id)
-  #  case id
-  #  when Gosu::KbDown
-  #    @bus.p0_joystick_up = false
-  #  when Gosu::KbUp
-  #    @bus.p0_joystick_down = false
-  #  when Gosu::KbLeft
-  #    @bus.p0_joystick_left = false
-  #  when Gosu::KbRight
-  #    @bus.p0_joystick_right = false
-  #  when Gosu::KbSpace
-  #    @bus.p0_joystick_fire = false
-  #  when Gosu::Kb1
-  #    @bus.select_switch = false
-  #  when Gosu::Kb2
-  #    @bus.reset_switch = false
-  #  when Gosu::Kb3
-  #    @bus.color_bw_switch = true
-  #  when Gosu::Kb4
-  #    @bus.color_bw_switch = false
-  #  when Gosu::Kb5
-  #    @bus.p0_difficulty_switch = true
-  #  when Gosu::Kb6
-  #    @bus.p0_difficulty_switch = false
-  #  when Gosu::Kb7
-  #    @bus.p1_difficulty_switch = true
-  #  when Gosu::Kb8
-  #    @bus.p1_difficulty_switch = false
-  #  end
-  #end
 end
 
 window = GameWindow.new
