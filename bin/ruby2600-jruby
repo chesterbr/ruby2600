@@ -135,6 +135,8 @@ NTSC_COLOR_LUM_TO_SRGB = [
 
 
 class GameWindow < javax.swing.JFrame
+  SCALE = 3
+
   def initialize
     super("Atari!")
     set_size 800, 600
@@ -171,14 +173,14 @@ class GameWindow < javax.swing.JFrame
       row.each_with_index do |chr, x|
         color = NTSC_COLOR_LUM_TO_SRGB[chr / 2]
         g.color = java.awt.Color.new(color)
-        g.fill_rect(x*2, y*2, 2, 2)
+        g.fill_rect(x*SCALE, y*SCALE, SCALE, SCALE)
       end
     end
     repaint
   end
 
   def paint(g)
-    g.draw_image(@image, 0, 0, nil)
+    g.draw_image(@image, 0, 30, nil)
   end
 
   def handle_press(event)
