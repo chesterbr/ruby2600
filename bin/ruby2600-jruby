@@ -166,7 +166,6 @@ class GameWindow < javax.swing.JFrame
   end
 
   def update
-    @time = Time.now
     frame = @bus.tia.frame
     g = @image.create_graphics
     frame.each_with_index do |row, y|
