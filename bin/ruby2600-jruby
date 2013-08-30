@@ -143,6 +143,7 @@ class GameWindow < javax.swing.JFrame
     @image = java.awt.image.BufferedImage.new(800, 600, java.awt.image.BufferedImage::TYPE_INT_RGB)
 
     add_key_listener { |k| handle_press(k) }
+    self.default_close_operation = javax.swing.WindowConstants::EXIT_ON_CLOSE
   end
 
   def load_cart(filename)
@@ -160,11 +161,9 @@ class GameWindow < javax.swing.JFrame
     @bus.p0_difficulty_switch = true
     @bus.p1_difficulty_switch = true
     @bus.color_bw_switch = false
-    @time = Time.now
   end
 
   def update
-    p Time.now - @time
     @time = Time.now
     frame = @bus.tia.frame
     g = @image.create_graphics
@@ -179,7 +178,6 @@ class GameWindow < javax.swing.JFrame
   end
 
   def paint(g)
-    puts "Update"
     g.draw_image(@image, 0, 0, nil)
   end
 
@@ -196,6 +194,12 @@ class GameWindow < javax.swing.JFrame
       when 37 then @bus.p0_joystick_left = set
       when 39 then @bus.p0_joystick_right = set
       when 32 then @bus.p0_joystick_fire = set
+      when 49 then @bus.select_switch = set
+      when 50 then @bus.reset_switch = set
+      when 53 then @bus.p0_difficulty_switch = true
+      when 54 then @bus.p0_difficulty_switch = false
+      when 55 then @bus.p1_difficulty_switch = true
+      when 56 then @bus.p1_difficulty_switch = false
     end
   end
 
