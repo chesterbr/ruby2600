@@ -6,7 +6,7 @@ An experimental Atari™ 2600 emulator, 100% written in Ruby.
 
 ## Current status
 
-Games **working** with no noticeable screen artifacts or glitches:
+Games **working** with no noticeable glitches include:
 
 - *Pitfall!*
 - *Space Invaders*
@@ -15,7 +15,9 @@ Games **working** with no noticeable screen artifacts or glitches:
 - *Tennis*
 - *Donkey Kong*
 
-Speed is very low: about ~2 FPS (from the expected 60) on a 2.3Ghz computer.
+You can load most 2K and 4K carts and try them out.
+
+Speed is very low: about ~2 FPS (from the expected 60) on a 2.3Ghz computer. An [accelerated video](www.youtube.com/watch?v=S3qAOu41CxE) shows how the emulator would run in full speed.
 
 Also, no sound is emulated, nor any controllers other than the console switches and player 0 joystick.
 
@@ -56,22 +58,30 @@ There are a couple of test files under `spec/fixtures/files` you can try, but I 
 
 ## Technical details
 
-- Full 650x CPU instruction set emulation, [cloc](http://cloc.sourceforge.net/)-ing less than 380 lines of code. (hardware interrupts not emulated, since the 2600 does not have those);
-- RIOT fully implemented;
-- All bus mirrorings implemented; console switches and P0 joystick bindings available for any pluggable front-end.
+- Full 650x CPU instruction set emulation and test, [cloc](http://cloc.sourceforge.net/)-ing less than 380 lines of code. (hardware interrupts not emulated, since the 2600 does not have those);
+- RIOT fully implemented and tested;
+- All bus mirrorings implemented and tested; console switches and P0 joystick bindings available for any pluggable front-end.
 - TIA registers are all emulated, with the exception of audio (AU*) and hardware test (RSYNC);
 - Every single aspect of the emulated code is spec-ed, except for some TIA parts I am still figuring out. CPU/RIOT are pretty final, TIA might still be refactored since it suffered a lot of crazy stabs due to the lack of documentation (see below).
 
 ## Known issues
 
-- Objects rendered close to the left side (counter zeroing during HBLANK, I suppose) sometimes render in wrong positon (see diagonal.bin test, Seaquest and Pitfall no-movement when close to the left edge);
+- Objects rendered close to the left side (counter zeroing during HBLANK, I suppose) sometimes render in wrong positon (see diagonal.bin test);
 - Some games display an artifact at the left side (late hblank area) where there should be nothing (Freeway, Boxing);
-- Most likely HMOV is being "over-applied" - no harm done, but could hamper games trying to do special effects by changing HMxx registers while HMOV is being applied.
+- Donkey Kong is rendered one pixel off its Stella position;
+- Seaquest renders a full scanline with the diver (missile?) at some specific situations. This bug and the three above it might be related (some odd rendering on a specific postion);
+- Enduro and Jawbreaker render their frames a few dozen scanlines after the right position (Enduro leaves some trash behind, Jawbreaker leaves a black space), cutting the lower part;
+- Maybe UI should dynamically adjust to games that (intentionally) generate larger/smaller frames;
+- Emulator only supports NTSC games - not sure if it's worth the hassle of supporting PAL/SECAM anyway, as most(all?) PAL games are NTSC versions, and SECAM, well… sucks.
+- Should display the logo during startup (either by overriding first few calls to frame, or by running a bootstrap ROM that shows it).
+
 
 ### Technical debt:
 
-- UI code needs some love (just quickly slapped a [Gosu](http://www.libgosu.org/) script on /bin to make it playable; would seriously consider a JRuby-friendly version); should dynamically adjust to games that generate larger/smaller frames.
-- TIA tests don't cover a few aspects (see "Pending" specs)
+- UI code needs some love (just quickly slapped a [Gosu](http://www.libgosu.org/) script on /bin to make it playable; would seriously consider a JRuby-friendly version)
+- TIA tests don't cover a few aspects (see "Pending" specs);
+- Bus should auto-initialize the components when receiving a string (either on initialize or on a separate method);
+- Bus should forward the Bus#tia.frame call into Bus.frame (avoid indirect access to Tia)
 
 ## FAQ
 
@@ -84,11 +94,9 @@ I had two (somewhat) unrelated goals for this year:
 
 The emulator is the way I found to tackle both at once.
 
-#### Emulator in Ruby? Is that possible?
+Also, I wanted to test how well such tools coped with emulator development. Performance aside, it was a huge success: an emulator for a very tricky and under-documented system in ~3 months, written by someone that never wrote a full emulator before.
 
-Yes, it is, and ruby2600 shows that.
-
-#### And how good it is?
+#### How good is it?
 
 Not really good if your goal is playing games. Keep in mind that:
 
@@ -100,9 +108,19 @@ It is good, however, if you want to learn more about the 2600, as the lack of co
 
 #### Will you make it faster/add sound?
 
-Once (and if) ruby2600 reaches reasonable compatibility with general games, these aspects can be looked after. For now, I'm focused on fixing the glitches, making the code clear, and improve the specs as much as possible.
+Now that ruby2600 reached reasonable compatibility with general games (remaining glitches are unlikely to change the emulator structure in any aspect related to performance), it can be worked. See the slides mentioned below for some planned strategies.
 
 If you want a full-speed emulator with sound and compatible with every single game under the sun, I wholehartedly recommend [Stella](http://stella.sourceforge.net/) - which has been an invaluable source of inspiration, debug help and implementation reference. It's what I use to play (other than my real Atari).
+
+#### Where can I find more information?
+
+- There are some comments and links on the trickier parts of the code, which refer to interesting pieces of documentation;
+- Slides from the [RubyConfBr 2013](http://www.rubyconf.com.br) presentation [available on SlideShare](http://www.slideshare.net/chesterbr/ruby2600-an-atari-2600-emulator-written-in-ruby). They show the overall architecture and are a good introduction for playing around.
+
+#### Is this logo renderable on an Atari?
+
+Not sure, I did it one day I was too bored to write code or slides. I'd say yes (as a playfield), as long as you are flexible with the background color (or use another object to render the characters). But I liked it, so I might eventually try to make a ROM that displays it.
+
 
 ## Changelog
 
