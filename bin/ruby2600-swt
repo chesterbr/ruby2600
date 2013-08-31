@@ -1,0 +1,282 @@
+#!/usr/bin/env ruby
+require 'swt'
+require 'ruby2600'
+
+# Import missing classes from graphics
+module Swt
+  module Graphics
+    import org.eclipse.swt.graphics.PaletteData
+    import org.eclipse.swt.graphics.ImageData
+  end
+end
+
+# This is alcarvalho's attempt to make ruby2600 work with jruby + swt
+NTSC_COLOR_LUM_TO_SRGB = [
+    Swt::Graphics::RGB.new(0x00,0x00,0x00),
+    Swt::Graphics::RGB.new(0x40,0x40,0x40),
+    Swt::Graphics::RGB.new(0x6C,0x6C,0x6C),
+    Swt::Graphics::RGB.new(0x90,0x90,0x90),
+    Swt::Graphics::RGB.new(0xB0,0xB0,0xB0),
+    Swt::Graphics::RGB.new(0xC8,0xC8,0xC8),
+    Swt::Graphics::RGB.new(0xDC,0xDC,0xDC),
+    Swt::Graphics::RGB.new(0xEC,0xEC,0xEC),
+    Swt::Graphics::RGB.new(0x44,0x44,0x44),
+    Swt::Graphics::RGB.new(0x64,0x64,0x64),
+    Swt::Graphics::RGB.new(0x84,0x84,0x84),
+    Swt::Graphics::RGB.new(0xA0,0xA0,0xA0),
+    Swt::Graphics::RGB.new(0xB8,0xB8,0xB8),
+    Swt::Graphics::RGB.new(0xD0,0xD0,0xD0),
+    Swt::Graphics::RGB.new(0xE8,0xE8,0xE8),
+    Swt::Graphics::RGB.new(0xFC,0xFC,0xFC),
+    Swt::Graphics::RGB.new(0x70,0x28,0x28),
+    Swt::Graphics::RGB.new(0x84,0x44,0x44),
+    Swt::Graphics::RGB.new(0x98,0x5C,0x5C),
+    Swt::Graphics::RGB.new(0xAC,0x78,0x78),
+    Swt::Graphics::RGB.new(0xBC,0x8C,0x8C),
+    Swt::Graphics::RGB.new(0xCC,0xA0,0xA0),
+    Swt::Graphics::RGB.new(0xDC,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0xEC,0xC8,0xC8),
+    Swt::Graphics::RGB.new(0x84,0x18,0x18),
+    Swt::Graphics::RGB.new(0x98,0x34,0x34),
+    Swt::Graphics::RGB.new(0xAC,0x50,0x50),
+    Swt::Graphics::RGB.new(0xC0,0x68,0x68),
+    Swt::Graphics::RGB.new(0xD0,0x80,0x80),
+    Swt::Graphics::RGB.new(0xE0,0x94,0x94),
+    Swt::Graphics::RGB.new(0xEC,0xA8,0xA8),
+    Swt::Graphics::RGB.new(0xFC,0xBC,0xBC),
+    Swt::Graphics::RGB.new(0x88,0x00,0x00),
+    Swt::Graphics::RGB.new(0x9C,0x20,0x20),
+    Swt::Graphics::RGB.new(0xB0,0x3C,0x3C),
+    Swt::Graphics::RGB.new(0xC0,0x58,0x58),
+    Swt::Graphics::RGB.new(0xD0,0x70,0x70),
+    Swt::Graphics::RGB.new(0xE0,0x88,0x88),
+    Swt::Graphics::RGB.new(0xEC,0xA0,0xA0),
+    Swt::Graphics::RGB.new(0xFC,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0x78,0x00,0x00),
+    Swt::Graphics::RGB.new(0x8C,0x20,0x20),
+    Swt::Graphics::RGB.new(0xA0,0x3C,0x3C),
+    Swt::Graphics::RGB.new(0xB0,0x58,0x58),
+    Swt::Graphics::RGB.new(0xC0,0x70,0x70),
+    Swt::Graphics::RGB.new(0xD0,0x84,0x84),
+    Swt::Graphics::RGB.new(0xDC,0x9C,0x9C),
+    Swt::Graphics::RGB.new(0xEC,0xB0,0xB0),
+    Swt::Graphics::RGB.new(0x48,0x00,0x00),
+    Swt::Graphics::RGB.new(0x60,0x20,0x20),
+    Swt::Graphics::RGB.new(0x78,0x3C,0x3C),
+    Swt::Graphics::RGB.new(0x8C,0x58,0x58),
+    Swt::Graphics::RGB.new(0xA0,0x70,0x70),
+    Swt::Graphics::RGB.new(0xB4,0x84,0x84),
+    Swt::Graphics::RGB.new(0xC4,0x9C,0x9C),
+    Swt::Graphics::RGB.new(0xD4,0xB0,0xB0),
+    Swt::Graphics::RGB.new(0x14,0x00,0x00),
+    Swt::Graphics::RGB.new(0x30,0x20,0x20),
+    Swt::Graphics::RGB.new(0x4C,0x3C,0x3C),
+    Swt::Graphics::RGB.new(0x68,0x58,0x58),
+    Swt::Graphics::RGB.new(0x7C,0x70,0x70),
+    Swt::Graphics::RGB.new(0x94,0x88,0x88),
+    Swt::Graphics::RGB.new(0xA8,0xA0,0xA0),
+    Swt::Graphics::RGB.new(0xBC,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0x00,0x00,0x00),
+    Swt::Graphics::RGB.new(0x1C,0x20,0x20),
+    Swt::Graphics::RGB.new(0x38,0x40,0x40),
+    Swt::Graphics::RGB.new(0x50,0x5C,0x5C),
+    Swt::Graphics::RGB.new(0x68,0x74,0x74),
+    Swt::Graphics::RGB.new(0x7C,0x8C,0x8C),
+    Swt::Graphics::RGB.new(0x90,0xA4,0xA4),
+    Swt::Graphics::RGB.new(0xA4,0xB8,0xB8),
+    Swt::Graphics::RGB.new(0x00,0x18,0x18),
+    Swt::Graphics::RGB.new(0x1C,0x38,0x38),
+    Swt::Graphics::RGB.new(0x38,0x54,0x54),
+    Swt::Graphics::RGB.new(0x50,0x70,0x70),
+    Swt::Graphics::RGB.new(0x68,0x88,0x88),
+    Swt::Graphics::RGB.new(0x7C,0x9C,0x9C),
+    Swt::Graphics::RGB.new(0x90,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0xA4,0xC8,0xC8),
+    Swt::Graphics::RGB.new(0x00,0x2C,0x2C),
+    Swt::Graphics::RGB.new(0x1C,0x4C,0x4C),
+    Swt::Graphics::RGB.new(0x38,0x68,0x68),
+    Swt::Graphics::RGB.new(0x50,0x84,0x84),
+    Swt::Graphics::RGB.new(0x68,0x9C,0x9C),
+    Swt::Graphics::RGB.new(0x7C,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0x90,0xCC,0xCC),
+    Swt::Graphics::RGB.new(0xA4,0xE0,0xE0),
+    Swt::Graphics::RGB.new(0x00,0x3C,0x3C),
+    Swt::Graphics::RGB.new(0x1C,0x5C,0x5C),
+    Swt::Graphics::RGB.new(0x38,0x7C,0x7C),
+    Swt::Graphics::RGB.new(0x50,0x9C,0x9C),
+    Swt::Graphics::RGB.new(0x68,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0x7C,0xD0,0xD0),
+    Swt::Graphics::RGB.new(0x90,0xE4,0xE4),
+    Swt::Graphics::RGB.new(0xA4,0xFC,0xFC),
+    Swt::Graphics::RGB.new(0x00,0x3C,0x3C),
+    Swt::Graphics::RGB.new(0x20,0x5C,0x5C),
+    Swt::Graphics::RGB.new(0x40,0x7C,0x7C),
+    Swt::Graphics::RGB.new(0x5C,0x9C,0x9C),
+    Swt::Graphics::RGB.new(0x74,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0x8C,0xD0,0xD0),
+    Swt::Graphics::RGB.new(0xA4,0xE4,0xE4),
+    Swt::Graphics::RGB.new(0xB8,0xFC,0xFC),
+    Swt::Graphics::RGB.new(0x14,0x38,0x38),
+    Swt::Graphics::RGB.new(0x34,0x5C,0x5C),
+    Swt::Graphics::RGB.new(0x50,0x7C,0x7C),
+    Swt::Graphics::RGB.new(0x6C,0x98,0x98),
+    Swt::Graphics::RGB.new(0x84,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0x9C,0xCC,0xCC),
+    Swt::Graphics::RGB.new(0xB4,0xE4,0xE4),
+    Swt::Graphics::RGB.new(0xC8,0xFC,0xFC),
+    Swt::Graphics::RGB.new(0x2C,0x30,0x30),
+    Swt::Graphics::RGB.new(0x4C,0x50,0x50),
+    Swt::Graphics::RGB.new(0x68,0x70,0x70),
+    Swt::Graphics::RGB.new(0x84,0x8C,0x8C),
+    Swt::Graphics::RGB.new(0x9C,0xA8,0xA8),
+    Swt::Graphics::RGB.new(0xB4,0xC0,0xC0),
+    Swt::Graphics::RGB.new(0xCC,0xD4,0xD4),
+    Swt::Graphics::RGB.new(0xE0,0xEC,0xEC),
+    Swt::Graphics::RGB.new(0x44,0x28,0x28),
+    Swt::Graphics::RGB.new(0x64,0x48,0x48),
+    Swt::Graphics::RGB.new(0x84,0x68,0x68),
+    Swt::Graphics::RGB.new(0xA0,0x84,0x84),
+    Swt::Graphics::RGB.new(0xB8,0x9C,0x9C),
+    Swt::Graphics::RGB.new(0xD0,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0xE8,0xCC,0xCC),
+    Swt::Graphics::RGB.new(0xFC,0xE0,0xE0)
+].to_java(Swt::Graphics::RGB)
+
+class MyKeyListener
+  include Swt::Events::KeyListener
+
+  KEY_UP = 0x1000001
+  KEY_DOWN = 0x1000002
+  KEY_LEFT = 0x1000003
+  KEY_RIGHT = 0x1000004
+  KEY_FIRE = 0x20
+  KEY_SELECT = '1'
+  KEY_RESET = '2'
+  KEY_BW_SWITCH_ON = '3'
+  KEY_BW_SWITCH_OFF = '4'
+  KEY_DIFFICULTY_SWITCH_P0_ON = '5'
+  KEY_DIFFICULTY_SWITCH_P0_OFF = '6'
+  KEY_DIFFICULTY_SWITCH_P1_ON = '7'
+  KEY_DIFFICULTY_SWITCH_P1_OFF = '8'
+
+  def initialize(bus)
+    @bus = bus
+  end
+
+
+  def keyPressed(event)
+    case event.keyCode
+      when KEY_UP
+        @bus.p0_joystick_up = true
+        @bus.p0_joystick_down = false
+      when KEY_DOWN
+        @bus.p0_joystick_down = true
+        @bus.p0_joystick_up = false
+      when KEY_LEFT
+        @bus.p0_joystick_left = true
+        @bus.p0_joystick_right = false
+      when KEY_RIGHT
+        @bus.p0_joystick_right = true
+        @bus.p0_joystick_left = false
+      when KEY_FIRE
+        @bus.p0_joystick_fire = true
+      when KEY_SELECT
+        @bus.select_switch = true
+      when KEY_RESET
+        @bus.reset_switch = true
+    end
+  end
+
+
+  def keyReleased(event)
+    case event.keyCode
+      when KEY_UP
+        @bus.p0_joystick_up = false
+      when KEY_DOWN
+        @bus.p0_joystick_down = false
+      when KEY_LEFT
+        @bus.p0_joystick_left = false
+      when KEY_RIGHT
+        @bus.p0_joystick_right = false
+      when KEY_FIRE
+        @bus.p0_joystick_fire = false
+      when KEY_SELECT
+        @bus.select_switch = false
+      when KEY_RESET
+        @bus.reset_switch = false
+      when KEY_BW_SWITCH_ON
+        @bus.color_bw_switch = true
+      when KEY_BW_SWITCH_OFF
+        @bus.color_bw_switch = false
+      when KEY_DIFFICULTY_SWITCH_P0_ON
+        @bus.p0_difficulty_switch = true
+      when KEY_DIFFICULTY_SWITCH_P0_OFF
+        @bus.p0_difficulty_switch = false
+      when KEY_DIFFICULTY_SWITCH_P1_ON
+        @bus.p1_difficulty_switch = true
+      when KEY_DIFFICULTY_SWITCH_P1_OFF
+        @bus.p1_difficulty_switch = false
+    end
+  end
+end
+
+class GameWindow
+  def initialize
+    @display = Swt::Widgets::Display.new
+    @shell = Swt::Widgets::Shell.new(display)
+    @shell.setLayout(Swt::Layout::FillLayout.new)
+
+    # I don't know why the shell (window) must be 20 pixel larger than the scaled up canvas
+    @shell.setBounds(0,0,640,420)
+    @label = Swt::Widgets::Label.new(@shell, Swt::SWT::NONE)
+    paletteData = Swt::Graphics::PaletteData.new(NTSC_COLOR_LUM_TO_SRGB)
+    @canvas = Swt::Graphics::ImageData.new(160, 192, 8, paletteData)
+    @label.image = Swt::Graphics::Image.new(@display, @canvas.scaledTo(640,400))
+
+  end
+
+  def start
+    @shell.open
+
+    while !@shell.isDisposed
+      update
+      @display.sleep unless @display.read_and_dispatch
+    end
+
+  end
+
+  def load_cart(filename)
+    @bus = Ruby2600::Bus.new(Ruby2600::CPU.new,
+                             Ruby2600::TIA.new,
+                             Ruby2600::Cart.new(filename),
+                             Ruby2600::RIOT.new)
+    @bus.p0_joystick_up = false
+    @bus.p0_joystick_down = false
+    @bus.p0_joystick_left = false
+    @bus.p0_joystick_right = false
+    @bus.p0_joystick_fire = false
+    @bus.select_switch = false
+    @bus.reset_switch = false
+    @bus.p0_difficulty_switch = true
+    @bus.p1_difficulty_switch = true
+    @bus.color_bw_switch = false
+
+    @shell.add_key_listener(MyKeyListener.new(@bus))
+  end
+
+  def update
+    frame = @bus.tia.frame
+    frame.each_index do |y|
+      frame[y].each_index do |x|
+        # this if is needed because the first frame on pitfall has some really weird and high y
+        @canvas.setPixel(x, y, frame[y][x] / 2) if y < 192
+      end
+    end
+    @label.image = Swt::Graphics::Image.new(@display, @canvas.scaledTo(640,400))
+  end
+
+end
+
+window = GameWindow.new
+window.load_cart ARGV[0]
+window.start
