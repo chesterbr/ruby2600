@@ -39,7 +39,10 @@ For now, do this:
 
 ## Usage
 
-	bundle exec ruby -Ilib bin/ruby2600 /path/of/your/romfile.bin
+	bundle exec jruby -Ilib bin/ruby2600 /path/of/your/romfile.bin
+
+Or on Mac OS X
+  bundle exec jruby -J-XstartOnFirstThread -Ilib bin/ruby2600 /path/of/your/romfile.bin
 
 (it will be `ruby2600 /path/of/your/romfile.bin` once the gem is published)
 
