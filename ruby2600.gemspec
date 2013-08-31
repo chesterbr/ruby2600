@@ -20,8 +20,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_dependency 'gosu'
-  spec.add_dependency 'texplay'
+  spec.add_dependency 'swt'
 
   spec.add_development_dependency 'bundler', '~> 1.3'
   spec.add_development_dependency 'rake'
@@ -30,7 +29,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'guard-bundler'
   spec.add_development_dependency 'growl'
   spec.add_development_dependency 'listen', '0.4.7' # http://stackoverflow.com/a/12259130
-  spec.add_development_dependency 'debugger'
   spec.add_development_dependency 'humanize'
   spec.add_development_dependency 'simplecov'
   spec.add_development_dependency 'simplecov-gem-adapter'

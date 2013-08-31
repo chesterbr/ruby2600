@@ -1,176 +1,248 @@
 #!/usr/bin/env ruby
-require 'gosu'
-require 'texplay'
+require 'swt'
 require 'ruby2600'
 
-# This is a first hack just to see the emulator runing.
-# Will probably make some system of "pluggable" outputs to TIA,
-# which would enable different outputs (including fun stuff like
-# outputing to a text screen, a la Text Mode Quake II)
-
-
-NTSC_COLOR_LUM_TO_SRGB = [
-  0xFF000000,
-  0xFF404040,
-  0xFF6C6C6C,
-  0xFF909090,
-  0xFFB0B0B0,
-  0xFFC8C8C8,
-  0xFFDCDCDC,
-  0xFFECECEC,
-  0xFF444400,
-  0xFF646410,
-  0xFF848424,
-  0xFFA0A034,
-  0xFFB8B840,
-  0xFFD0D050,
-  0xFFE8E85C,
-  0xFFFCFC68,
-  0xFF702800,
-  0xFF844414,
-  0xFF985C28,
-  0xFFAC783C,
-  0xFFBC8C4C,
-  0xFFCCA05C,
-  0xFFDCB468,
-  0xFFECC878,
-  0xFF841800,
-  0xFF983418,
-  0xFFAC5030,
-  0xFFC06848,
-  0xFFD0805C,
-  0xFFE09470,
-  0xFFECA880,
-  0xFFFCBC94,
-  0xFF880000,
-  0xFF9C2020,
-  0xFFB03C3C,
-  0xFFC05858,
-  0xFFD07070,
-  0xFFE08888,
-  0xFFECA0A0,
-  0xFFFCB4B4,
-  0xFF78005C,
-  0xFF8C2074,
-  0xFFA03C88,
-  0xFFB0589C,
-  0xFFC070B0,
-  0xFFD084C0,
-  0xFFDC9CD0,
-  0xFFECB0E0,
-  0xFF480078,
-  0xFF602090,
-  0xFF783CA4,
-  0xFF8C58B8,
-  0xFFA070CC,
-  0xFFB484DC,
-  0xFFC49CEC,
-  0xFFD4B0FC,
-  0xFF140084,
-  0xFF302098,
-  0xFF4C3CAC,
-  0xFF6858C0,
-  0xFF7C70D0,
-  0xFF9488E0,
-  0xFFA8A0EC,
-  0xFFBCB4FC,
-  0xFF000088,
-  0xFF1C209C,
-  0xFF3840B0,
-  0xFF505CC0,
-  0xFF6874D0,
-  0xFF7C8CE0,
-  0xFF90A4EC,
-  0xFFA4B8FC,
-  0xFF00187C,
-  0xFF1C3890,
-  0xFF3854A8,
-  0xFF5070BC,
-  0xFF6888CC,
-  0xFF7C9CDC,
-  0xFF90B4EC,
-  0xFFA4C8FC,
-  0xFF002C5C,
-  0xFF1C4C78,
-  0xFF386890,
-  0xFF5084AC,
-  0xFF689CC0,
-  0xFF7CB4D4,
-  0xFF90CCE8,
-  0xFFA4E0FC,
-  0xFF003C2C,
-  0xFF1C5C48,
-  0xFF387C64,
-  0xFF509C80,
-  0xFF68B494,
-  0xFF7CD0AC,
-  0xFF90E4C0,
-  0xFFA4FCD4,
-  0xFF003C00,
-  0xFF205C20,
-  0xFF407C40,
-  0xFF5C9C5C,
-  0xFF74B474,
-  0xFF8CD08C,
-  0xFFA4E4A4,
-  0xFFB8FCB8,
-  0xFF143800,
-  0xFF345C1C,
-  0xFF507C38,
-  0xFF6C9850,
-  0xFF84B468,
-  0xFF9CCC7C,
-  0xFFB4E490,
-  0xFFC8FCA4,
-  0xFF2C3000,
-  0xFF4C501C,
-  0xFF687034,
-  0xFF848C4C,
-  0xFF9CA864,
-  0xFFB4C078,
-  0xFFCCD488,
-  0xFFE0EC9C,
-  0xFF442800,
-  0xFF644818,
-  0xFF846830,
-  0xFFA08444,
-  0xFFB89C58,
-  0xFFD0B46C,
-  0xFFE8CC7C,
-  0xFFFCE08C
-]
-
-# http://www.libgosu.org/cgi-bin/mwf/topic_show.pl?tid=196
-# EmptyImageStub is based on an idea Julian Raschke suggested in #gosu
-# on IRC. It provides empty RMagic::Image-like objects which, when
-# passed to Gosu::Image's constructor, have their to_blob method called,
-# to provide RGBA data. This allows the easy creation of new Gosu::Image
-# objects without accessing the filesystem, which can then be drawn into
-# with TexPlay.
-class EmptyImageStub
-  def initialize(w,h)
-    @w, @h = w, h;
-  end
-
-  def to_blob
-    "\0" * @w * @h * 4
-  end
-
-  def rows
-    @h
-  end
-
-  def columns
-    @w
+# Import missing classes from graphics
+module Swt
+  module Graphics
+    import org.eclipse.swt.graphics.PaletteData
+    import org.eclipse.swt.graphics.ImageData
   end
 end
 
-class GameWindow < Gosu::Window
+# This is alcarvalho's attempt to make ruby2600 work with jruby + swt
+NTSC_COLOR_LUM_TO_SRGB = [
+    Swt::Graphics::RGB.new(0x00,0x00,0x00),
+    Swt::Graphics::RGB.new(0x40,0x40,0x40),
+    Swt::Graphics::RGB.new(0x6C,0x6C,0x6C),
+    Swt::Graphics::RGB.new(0x90,0x90,0x90),
+    Swt::Graphics::RGB.new(0xB0,0xB0,0xB0),
+    Swt::Graphics::RGB.new(0xC8,0xC8,0xC8),
+    Swt::Graphics::RGB.new(0xDC,0xDC,0xDC),
+    Swt::Graphics::RGB.new(0xEC,0xEC,0xEC),
+    Swt::Graphics::RGB.new(0x44,0x44,0x44),
+    Swt::Graphics::RGB.new(0x64,0x64,0x64),
+    Swt::Graphics::RGB.new(0x84,0x84,0x84),
+    Swt::Graphics::RGB.new(0xA0,0xA0,0xA0),
+    Swt::Graphics::RGB.new(0xB8,0xB8,0xB8),
+    Swt::Graphics::RGB.new(0xD0,0xD0,0xD0),
+    Swt::Graphics::RGB.new(0xE8,0xE8,0xE8),
+    Swt::Graphics::RGB.new(0xFC,0xFC,0xFC),
+    Swt::Graphics::RGB.new(0x70,0x28,0x28),
+    Swt::Graphics::RGB.new(0x84,0x44,0x44),
+    Swt::Graphics::RGB.new(0x98,0x5C,0x5C),
+    Swt::Graphics::RGB.new(0xAC,0x78,0x78),
+    Swt::Graphics::RGB.new(0xBC,0x8C,0x8C),
+    Swt::Graphics::RGB.new(0xCC,0xA0,0xA0),
+    Swt::Graphics::RGB.new(0xDC,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0xEC,0xC8,0xC8),
+    Swt::Graphics::RGB.new(0x84,0x18,0x18),
+    Swt::Graphics::RGB.new(0x98,0x34,0x34),
+    Swt::Graphics::RGB.new(0xAC,0x50,0x50),
+    Swt::Graphics::RGB.new(0xC0,0x68,0x68),
+    Swt::Graphics::RGB.new(0xD0,0x80,0x80),
+    Swt::Graphics::RGB.new(0xE0,0x94,0x94),
+    Swt::Graphics::RGB.new(0xEC,0xA8,0xA8),
+    Swt::Graphics::RGB.new(0xFC,0xBC,0xBC),
+    Swt::Graphics::RGB.new(0x88,0x00,0x00),
+    Swt::Graphics::RGB.new(0x9C,0x20,0x20),
+    Swt::Graphics::RGB.new(0xB0,0x3C,0x3C),
+    Swt::Graphics::RGB.new(0xC0,0x58,0x58),
+    Swt::Graphics::RGB.new(0xD0,0x70,0x70),
+    Swt::Graphics::RGB.new(0xE0,0x88,0x88),
+    Swt::Graphics::RGB.new(0xEC,0xA0,0xA0),
+    Swt::Graphics::RGB.new(0xFC,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0x78,0x00,0x00),
+    Swt::Graphics::RGB.new(0x8C,0x20,0x20),
+    Swt::Graphics::RGB.new(0xA0,0x3C,0x3C),
+    Swt::Graphics::RGB.new(0xB0,0x58,0x58),
+    Swt::Graphics::RGB.new(0xC0,0x70,0x70),
+    Swt::Graphics::RGB.new(0xD0,0x84,0x84),
+    Swt::Graphics::RGB.new(0xDC,0x9C,0x9C),
+    Swt::Graphics::RGB.new(0xEC,0xB0,0xB0),
+    Swt::Graphics::RGB.new(0x48,0x00,0x00),
+    Swt::Graphics::RGB.new(0x60,0x20,0x20),
+    Swt::Graphics::RGB.new(0x78,0x3C,0x3C),
+    Swt::Graphics::RGB.new(0x8C,0x58,0x58),
+    Swt::Graphics::RGB.new(0xA0,0x70,0x70),
+    Swt::Graphics::RGB.new(0xB4,0x84,0x84),
+    Swt::Graphics::RGB.new(0xC4,0x9C,0x9C),
+    Swt::Graphics::RGB.new(0xD4,0xB0,0xB0),
+    Swt::Graphics::RGB.new(0x14,0x00,0x00),
+    Swt::Graphics::RGB.new(0x30,0x20,0x20),
+    Swt::Graphics::RGB.new(0x4C,0x3C,0x3C),
+    Swt::Graphics::RGB.new(0x68,0x58,0x58),
+    Swt::Graphics::RGB.new(0x7C,0x70,0x70),
+    Swt::Graphics::RGB.new(0x94,0x88,0x88),
+    Swt::Graphics::RGB.new(0xA8,0xA0,0xA0),
+    Swt::Graphics::RGB.new(0xBC,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0x00,0x00,0x00),
+    Swt::Graphics::RGB.new(0x1C,0x20,0x20),
+    Swt::Graphics::RGB.new(0x38,0x40,0x40),
+    Swt::Graphics::RGB.new(0x50,0x5C,0x5C),
+    Swt::Graphics::RGB.new(0x68,0x74,0x74),
+    Swt::Graphics::RGB.new(0x7C,0x8C,0x8C),
+    Swt::Graphics::RGB.new(0x90,0xA4,0xA4),
+    Swt::Graphics::RGB.new(0xA4,0xB8,0xB8),
+    Swt::Graphics::RGB.new(0x00,0x18,0x18),
+    Swt::Graphics::RGB.new(0x1C,0x38,0x38),
+    Swt::Graphics::RGB.new(0x38,0x54,0x54),
+    Swt::Graphics::RGB.new(0x50,0x70,0x70),
+    Swt::Graphics::RGB.new(0x68,0x88,0x88),
+    Swt::Graphics::RGB.new(0x7C,0x9C,0x9C),
+    Swt::Graphics::RGB.new(0x90,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0xA4,0xC8,0xC8),
+    Swt::Graphics::RGB.new(0x00,0x2C,0x2C),
+    Swt::Graphics::RGB.new(0x1C,0x4C,0x4C),
+    Swt::Graphics::RGB.new(0x38,0x68,0x68),
+    Swt::Graphics::RGB.new(0x50,0x84,0x84),
+    Swt::Graphics::RGB.new(0x68,0x9C,0x9C),
+    Swt::Graphics::RGB.new(0x7C,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0x90,0xCC,0xCC),
+    Swt::Graphics::RGB.new(0xA4,0xE0,0xE0),
+    Swt::Graphics::RGB.new(0x00,0x3C,0x3C),
+    Swt::Graphics::RGB.new(0x1C,0x5C,0x5C),
+    Swt::Graphics::RGB.new(0x38,0x7C,0x7C),
+    Swt::Graphics::RGB.new(0x50,0x9C,0x9C),
+    Swt::Graphics::RGB.new(0x68,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0x7C,0xD0,0xD0),
+    Swt::Graphics::RGB.new(0x90,0xE4,0xE4),
+    Swt::Graphics::RGB.new(0xA4,0xFC,0xFC),
+    Swt::Graphics::RGB.new(0x00,0x3C,0x3C),
+    Swt::Graphics::RGB.new(0x20,0x5C,0x5C),
+    Swt::Graphics::RGB.new(0x40,0x7C,0x7C),
+    Swt::Graphics::RGB.new(0x5C,0x9C,0x9C),
+    Swt::Graphics::RGB.new(0x74,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0x8C,0xD0,0xD0),
+    Swt::Graphics::RGB.new(0xA4,0xE4,0xE4),
+    Swt::Graphics::RGB.new(0xB8,0xFC,0xFC),
+    Swt::Graphics::RGB.new(0x14,0x38,0x38),
+    Swt::Graphics::RGB.new(0x34,0x5C,0x5C),
+    Swt::Graphics::RGB.new(0x50,0x7C,0x7C),
+    Swt::Graphics::RGB.new(0x6C,0x98,0x98),
+    Swt::Graphics::RGB.new(0x84,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0x9C,0xCC,0xCC),
+    Swt::Graphics::RGB.new(0xB4,0xE4,0xE4),
+    Swt::Graphics::RGB.new(0xC8,0xFC,0xFC),
+    Swt::Graphics::RGB.new(0x2C,0x30,0x30),
+    Swt::Graphics::RGB.new(0x4C,0x50,0x50),
+    Swt::Graphics::RGB.new(0x68,0x70,0x70),
+    Swt::Graphics::RGB.new(0x84,0x8C,0x8C),
+    Swt::Graphics::RGB.new(0x9C,0xA8,0xA8),
+    Swt::Graphics::RGB.new(0xB4,0xC0,0xC0),
+    Swt::Graphics::RGB.new(0xCC,0xD4,0xD4),
+    Swt::Graphics::RGB.new(0xE0,0xEC,0xEC),
+    Swt::Graphics::RGB.new(0x44,0x28,0x28),
+    Swt::Graphics::RGB.new(0x64,0x48,0x48),
+    Swt::Graphics::RGB.new(0x84,0x68,0x68),
+    Swt::Graphics::RGB.new(0xA0,0x84,0x84),
+    Swt::Graphics::RGB.new(0xB8,0x9C,0x9C),
+    Swt::Graphics::RGB.new(0xD0,0xB4,0xB4),
+    Swt::Graphics::RGB.new(0xE8,0xCC,0xCC),
+    Swt::Graphics::RGB.new(0xFC,0xE0,0xE0)
+].to_java(Swt::Graphics::RGB)
+
+class MyKeyListener
+  include Swt::Events::KeyListener
+
+  KEY_UP = 0x1000001
+  KEY_DOWN = 0x1000002
+  KEY_LEFT = 0x1000003
+  KEY_RIGHT = 0x1000004
+  KEY_FIRE = 0x20
+  KEY_SELECT = '1'
+  KEY_RESET = '2'
+  KEY_BW_SWITCH_ON = '3'
+  KEY_BW_SWITCH_OFF = '4'
+  KEY_DIFFICULTY_SWITCH_P0_ON = '5'
+  KEY_DIFFICULTY_SWITCH_P0_OFF = '6'
+  KEY_DIFFICULTY_SWITCH_P1_ON = '7'
+  KEY_DIFFICULTY_SWITCH_P1_OFF = '8'
+
+  def initialize(bus)
+    @bus = bus
+  end
+
+
+  def keyPressed(event)
+    case event.keyCode
+      when KEY_UP
+        @bus.p0_joystick_up = true
+        @bus.p0_joystick_down = false
+      when KEY_DOWN
+        @bus.p0_joystick_down = true
+        @bus.p0_joystick_up = false
+      when KEY_LEFT
+        @bus.p0_joystick_left = true
+        @bus.p0_joystick_right = false
+      when KEY_RIGHT
+        @bus.p0_joystick_right = true
+        @bus.p0_joystick_left = false
+      when KEY_FIRE
+        @bus.p0_joystick_fire = true
+      when KEY_SELECT
+        @bus.select_switch = true
+      when KEY_RESET
+        @bus.reset_switch = true
+    end
+  end
+
+
+  def keyReleased(event)
+    case event.keyCode
+      when KEY_UP
+        @bus.p0_joystick_up = false
+      when KEY_DOWN
+        @bus.p0_joystick_down = false
+      when KEY_LEFT
+        @bus.p0_joystick_left = false
+      when KEY_RIGHT
+        @bus.p0_joystick_right = false
+      when KEY_FIRE
+        @bus.p0_joystick_fire = false
+      when KEY_SELECT
+        @bus.select_switch = false
+      when KEY_RESET
+        @bus.reset_switch = false
+      when KEY_BW_SWITCH_ON
+        @bus.color_bw_switch = true
+      when KEY_BW_SWITCH_OFF
+        @bus.color_bw_switch = false
+      when KEY_DIFFICULTY_SWITCH_P0_ON
+        @bus.p0_difficulty_switch = true
+      when KEY_DIFFICULTY_SWITCH_P0_OFF
+        @bus.p0_difficulty_switch = false
+      when KEY_DIFFICULTY_SWITCH_P1_ON
+        @bus.p1_difficulty_switch = true
+      when KEY_DIFFICULTY_SWITCH_P1_OFF
+        @bus.p1_difficulty_switch = false
+    end
+  end
+end
+
+class GameWindow
   def initialize
-    super 640, 400, false, 1
-    stub = EmptyImageStub.new(160,200)
-    @canvas = Gosu::Image.new(self, stub, true)
-    self.caption = "ruby2600"
+    @display = Swt::Widgets::Display.new
+    @shell = Swt::Widgets::Shell.new(display)
+    @shell.setLayout(Swt::Layout::FillLayout.new)
+
+    # I don't know why the shell (window) must be 20 pixel larger than the scaled up canvas
+    @shell.setBounds(0,0,640,420)
+    @label = Swt::Widgets::Label.new(@shell, Swt::SWT::NONE)
+    paletteData = Swt::Graphics::PaletteData.new(NTSC_COLOR_LUM_TO_SRGB)
+    @canvas = Swt::Graphics::ImageData.new(160, 192, 8, paletteData)
+    @label.image = Swt::Graphics::Image.new(@display, @canvas.scaledTo(640,400))
+
+  end
+
+  def start
+    @shell.open
+
+    while !@shell.isDisposed
+      update
+      @display.sleep unless @display.read_and_dispatch
+    end
+
   end
 
   def load_cart(filename)
@@ -188,78 +260,23 @@ class GameWindow < Gosu::Window
     @bus.p0_difficulty_switch = true
     @bus.p1_difficulty_switch = true
     @bus.color_bw_switch = false
+
+    @shell.add_key_listener(MyKeyListener.new(@bus))
   end
 
   def update
     frame = @bus.tia.frame
-    @canvas.paint do
-      frame.each_index do |y|
-        frame[y].each_index do |x|
-          pixel x, y, :color => NTSC_COLOR_LUM_TO_SRGB[frame[y][x] / 2]
-        end
+    frame.each_index do |y|
+      frame[y].each_index do |x|
+        # this if is needed because the first frame on pitfall has some really weird and high y
+        @canvas.setPixel(x, y, frame[y][x] / 2) if y < 192
       end
     end
+    @label.image = Swt::Graphics::Image.new(@display, @canvas.scaledTo(640,400))
   end
 
-  def draw
-    @canvas.draw(0, 0, 0, 4, 2)
-  end
-
-  def button_down(id)
-    case id
-    when Gosu::KbUp, Gosu::KbW
-      @bus.p0_joystick_up = true
-      @bus.p0_joystick_down = false
-    when Gosu::KbDown, Gosu::KbS
-      @bus.p0_joystick_down = true
-      @bus.p0_joystick_up = false
-    when Gosu::KbLeft, Gosu::KbA
-      @bus.p0_joystick_left = true
-      @bus.p0_joystick_right = false
-    when Gosu::KbRight, Gosu::KbD
-      @bus.p0_joystick_right = true
-      @bus.p0_joystick_left = false
-    when Gosu::KbSpace || Gosu::Kb0
-      @bus.p0_joystick_fire = true
-    when Gosu::Kb1
-      @bus.select_switch = true
-    when Gosu::Kb2
-      @bus.reset_switch = true
-    end
-  end
-
-  def button_up(id)
-    case id
-    when Gosu::KbDown
-      @bus.p0_joystick_up = false
-    when Gosu::KbUp
-      @bus.p0_joystick_down = false
-    when Gosu::KbLeft
-      @bus.p0_joystick_left = false
-    when Gosu::KbRight
-      @bus.p0_joystick_right = false
-    when Gosu::KbSpace
-      @bus.p0_joystick_fire = false
-    when Gosu::Kb1
-      @bus.select_switch = false
-    when Gosu::Kb2
-      @bus.reset_switch = false
-    when Gosu::Kb3
-      @bus.color_bw_switch = true
-    when Gosu::Kb4
-      @bus.color_bw_switch = false
-    when Gosu::Kb5
-      @bus.p0_difficulty_switch = true
-    when Gosu::Kb6
-      @bus.p0_difficulty_switch = false
-    when Gosu::Kb7
-      @bus.p1_difficulty_switch = true
-    when Gosu::Kb8
-      @bus.p1_difficulty_switch = false
-    end
-  end
 end
 
 window = GameWindow.new
 window.load_cart ARGV[0]
-window.show
+window.start
