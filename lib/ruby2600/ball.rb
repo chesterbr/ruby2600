@@ -20,7 +20,7 @@ module Ruby2600
     end
 
     def size
-    	2 ** (reg(CTRLPF)[5] * 2 + reg(CTRLPF)[4])
+    	1 << (reg(CTRLPF) >> 4)
     end
 
     def should_draw_copy?
