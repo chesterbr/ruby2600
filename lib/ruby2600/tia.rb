@@ -134,26 +134,29 @@ module Ruby2600
       end
     end
 
-    BIT_6 = 0b01000000
-    BIT_7 = 0b10000000
-
     def update_collision_flags
-      @reg[CXM0P]  |= BIT_6 if @m0.pixel && @p0.pixel
-      @reg[CXM0P]  |= BIT_7 if @m0.pixel && @p1.pixel
-      @reg[CXM1P]  |= BIT_6 if @m1.pixel && @p1.pixel
-      @reg[CXM1P]  |= BIT_7 if @m1.pixel && @p0.pixel
-      @reg[CXP0FB] |= BIT_6 if @p0.pixel && @bl.pixel
-      @reg[CXP0FB] |= BIT_7 if @p0.pixel && @pf.pixel
-      @reg[CXP1FB] |= BIT_6 if @p1.pixel && @bl.pixel
-      @reg[CXP1FB] |= BIT_7 if @p1.pixel && @pf.pixel
-      @reg[CXM0FB] |= BIT_6 if @m0.pixel && @bl.pixel
-      @reg[CXM0FB] |= BIT_7 if @m0.pixel && @pf.pixel
-      @reg[CXM1FB] |= BIT_6 if @m1.pixel && @bl.pixel
-      @reg[CXM1FB] |= BIT_7 if @m1.pixel && @pf.pixel
-      # c-c-c-combo breaker: bit 6 of CXLBPF is unused
-      @reg[CXBLPF] |= BIT_7 if @bl.pixel && @pf.pixel
-      @reg[CXPPMM] |= BIT_6 if @m0.pixel && @m1.pixel
-      @reg[CXPPMM] |= BIT_7 if @p0.pixel && @p1.pixel
+      p0 = 0b1001001111111101
+      p1 = 0b0110110011111101
+      m0 = 0b0011111100111110
+      m1 = 0b1100111111001110
+      bl = 0b1111101010100111
+      pf = 0b1111010101010111
+
+      p0 = 0xffffff if @p0.pixel
+      p1 = 0xffffff if @p1.pixel
+      m0 = 0xffffff if @m0.pixel
+      m1 = 0xffffff if @m1.pixel
+      bl = 0xffffff if @bl.pixel
+      pf = 0xffffff if @pf.pixel
+      flags = p0 & p1 & m0 & m1 & bl & pf
+      @reg[CXM0P]  |= flags >> 8
+      @reg[CXM1P]  |= flags >> 6
+      @reg[CXP0FB] |= flags >> 4
+      @reg[CXP1FB] |= flags >> 2
+      @reg[CXM0FB] |= flags
+      @reg[CXM1FB] |= flags << 2
+      @reg[CXBLPF] |= flags << 4
+      @reg[CXPPMM] |= flags << 6
     end
 
     # All Atari chips use the same crystal for their clocks (with RIOT and
