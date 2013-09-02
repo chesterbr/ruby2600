@@ -3,8 +3,8 @@ require 'spec_helper'
 describe 'vertical delay' do
   subject(:tia) do
     tia = Ruby2600::TIA.new
-    tia.cpu = mock('cpu', :tick => nil, :halted= => nil)
-    tia.riot = mock('riot', :tick => nil)
+    tia.cpu = double('cpu', :tick => nil, :halted= => nil)
+    tia.riot = double('riot', :tick => nil)
     tia.scanline
     0x3F.downto(0) { |reg| tia[reg] = 0 }
     tia.scanline

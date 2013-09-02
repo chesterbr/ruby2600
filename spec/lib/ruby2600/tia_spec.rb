@@ -4,8 +4,8 @@ describe Ruby2600::TIA do
 
   subject(:tia) do
     tia = Ruby2600::TIA.new
-    tia.cpu = mock('cpu', :tick => nil, :halted= => nil)
-    tia.riot = mock('riot', :tick => nil)
+    tia.cpu = double('cpu', :tick => nil, :halted= => nil)
+    tia.riot = double('riot', :tick => nil)
 
     # Make registers accessible (for easier testing)
     def tia.reg
