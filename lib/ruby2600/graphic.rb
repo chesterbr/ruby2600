@@ -1,3 +1,5 @@
+require 'forwardable'
+
 module Ruby2600
   class Graphic
     include Constants
