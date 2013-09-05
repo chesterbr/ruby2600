@@ -11,3 +11,5 @@ require 'ruby2600/player'
 require 'ruby2600/missile'
 require 'ruby2600/ball'
 require 'ruby2600/playfield'
+
+require 'ruby2600/tia_frame_counter'

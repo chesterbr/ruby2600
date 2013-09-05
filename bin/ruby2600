@@ -262,6 +262,9 @@ class GameWindow
     @bus.color_bw_switch = false
 
     @shell.add_key_listener(MyKeyListener.new(@bus))
+
+    # Remove/comment if you don't want FPS display
+    Ruby2600::TIAFrameCounter.hook(@bus.tia)
   end
 
   def update
