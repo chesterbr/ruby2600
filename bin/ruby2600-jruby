@@ -163,6 +163,9 @@ class GameWindow < javax.swing.JFrame
     @bus.p0_difficulty_switch = true
     @bus.p1_difficulty_switch = true
     @bus.color_bw_switch = false
+
+    # Remove/comment if you don't want FPS display
+    Ruby2600::TIAFrameCounter.hook(@bus.tia)
   end
 
   def update
