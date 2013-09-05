@@ -34,6 +34,7 @@ module Ruby2600
       scanline while vertical_blank?                # VBlank
       buffer << scanline until vertical_blank?      # Picture
       scanline until vertical_sync?                 # Overscan
+      @frame_counter.track_fps if @frame_counter
       buffer
     end
 
