@@ -100,9 +100,9 @@ module Ruby2600
       # To press/enable something, we reset the bit, and vice-versa.
       # Why? Because TIA, that's why.
       if state
-        @riot_bit_states[port] &= 0xFF - (2 ** n)
+        @riot_bit_states[port] &= 0xFF - (1 << n)
       else
-        @riot_bit_states[port] |= 2 ** n
+        @riot_bit_states[port] |= 1 << n
       end
       refresh_riot port
     end

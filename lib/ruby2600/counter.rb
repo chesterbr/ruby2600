@@ -9,10 +9,12 @@ module Ruby2600
                   :notify_change_on_reset   # Allows ball to trigger immediately
 
     PERIOD = 40       # "Visible" counter value ranges from 0-39...
-    DIVIDER = 4       # ...incrementing every 4 "ticks" from TIA (1/4 of TIA clock)
+    SHIFTER = 2       # ...incrementing every 4 "ticks" from TIA (1/4 of TIA clock)
+                      # (shift left (<<) are equivalent to multiply by 2^<shift>
+                      # and shift right (>>) are equivalent to divide by 2^<shift>)
     RESET_VALUE = 39  # Value set when the TIA RESxx position is strobed
 
-    INTERNAL_PERIOD = PERIOD * DIVIDER
+    INTERNAL_PERIOD = PERIOD << SHIFTER
 
     def initialize
       @old_value = @internal_value = rand(INTERNAL_PERIOD)
@@ -20,30 +22,30 @@ module Ruby2600
     end
 
     def value
-      @internal_value / DIVIDER
+      @internal_value >> SHIFTER
     end
 
     def value=(x)
-      @internal_value = x * DIVIDER
+      @internal_value = x << SHIFTER
     end
 
     # TIA graphic circuits are triggered when the visible counter value changes, so
     # graphics should provide this listener. The ball will also trigger it on strobe
     # (and that is why it draws immediately and not on the next scanline)
 
-    def on_change(&block)
-      @change_listener = block
+    def on_change(object)
+      @change_listener = object
     end
 
     def tick
       previous_value = value
       @internal_value = (@internal_value + 1) % INTERNAL_PERIOD
-      @change_listener.call if @change_listener && value != previous_value
+      @change_listener.on_counter_change if @change_listener && value != previous_value
     end
 
     def reset
-      @internal_value = RESET_VALUE * DIVIDER
-      @change_listener.call if @notify_change_on_reset
+      @internal_value = RESET_VALUE << SHIFTER
+      @change_listener.on_counter_change if @notify_change_on_reset
     end
 
     def reset_to(other_counter)

@@ -14,7 +14,7 @@ module Ruby2600
       @graphic_number = graphic_number
 
       @counter = Counter.new
-      @counter.on_change { on_counter_change }
+      @counter.on_change(self)
     end
 
     def tick
@@ -37,6 +37,14 @@ module Ruby2600
     def start_hmove
       @counter.start_hmove reg(self.class.hmove_register)
       tick_graphic_circuit
+    end
+
+
+    def on_counter_change
+      if should_draw_graphic? || should_draw_copy?
+        @graphic_bit = -self.class.graphic_delay
+        @bit_copies_written = 0
+      end
     end
 
     private
@@ -68,13 +76,6 @@ module Ruby2600
         @graphic_bit = nil if @graphic_bit == self.class.graphic_size
       else
         @graphic_bit_value = nil
-      end
-    end
-
-    def on_counter_change
-      if should_draw_graphic? || should_draw_copy?
-        @graphic_bit = -self.class.graphic_delay
-        @bit_copies_written = 0
       end
     end
 
