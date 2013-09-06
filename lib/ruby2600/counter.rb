@@ -31,8 +31,8 @@ module Ruby2600
     # graphics should provide this listener. The ball will also trigger it on strobe
     # (and that is why it draws immediately and not on the next scanline)
 
-    def on_change(&block)
-      @change_listener = block
+    def on_change(object)
+      @change_listener = object
     end
 
     def tick
