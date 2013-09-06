@@ -17,7 +17,7 @@ Games **working** with no noticeable glitches include:
 
 You can load most 2K and 4K carts and try them out.
 
-Speed is very low: about ~2 FPS (from the expected 60) on a 2.3Ghz computer. An [accelerated video](www.youtube.com/watch?v=S3qAOu41CxE) shows how the emulator would run in full speed.
+Speed is very low: about ~2 FPS (from the expected 60) on a 2.3Ghz computer. An [accelerated video](http://www.youtube.com/watch?v=S3qAOu41CxE) shows how the emulator would run in full speed.
 
 Also, no sound is emulated, nor any controllers other than the console switches and player 0 joystick.
 
