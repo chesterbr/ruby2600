@@ -133,11 +133,30 @@ Not sure, I did it one day I was too bored to write code or slides. I'd say yes 
 ##### 0.1.0
 - First release with full (sans sound) TIA emulation
 
-## License
+## Credits and Acknowlegdements
 
-This software is distributed under the terms of the [MIT License](http://opensource.org/licenses/MIT).
+Original code was written and is currently mantained by [Carlos "Chester" Duarte do Nascimento](https://github.com/chesterbr), with acknowledgment and special thanks for contributions from the developers alphabetically listed below:
 
-Copyright (c) 2013 Carlos Duarte do Nascimento (Chester) <cd@pobox.com>
+- [André Luiz Carvalho](https://github.com/alcarvalho)
+- [Maurício Szabo](https://github.com/mauricioszabo)
+
+Development would not be possible without all the great sources of 2600 information on the web, such as:
+
+- [Stella Programming Guide](http://atarihq.com/danb/files/stella.pdf), a 1979 manual from [Steve Wright](https://atariage.com/programmer_page.html?ProgrammerID=145&orderBy=Name&orderByValue=Descending), reconstructed by Charles Sinnett in the 90s;
+- AtariAge's [2600 Programming forum](http://atariage.com/forums/forum/50-atari-2600-programming/)) and [useful links](https://atariage.com/2600/programming/index.html);
+- [Stella emulator](http://stella.sourceforge.net/) source code and disassembler/debugger;
+- Andrew Towers' [TIA hardware notes](http://www.atarihq.com/danb/files/TIA_HW_Notes.txt) (enlightening low-level analysis of the [TIA Schematics](http://www.atariage.com/2600/archives/schematics_tia/index.html));
+- Neil Parker's [low-level decoding of 6502 instructions](http://www.llx.com/~nparker/a2/opcodes.html);
+- [no$2k6](http://nocash.emubase.de/2k6.htm) emulator author Martin Korth's concise yet complete [Atari 2600 Specifications](http://nocash.emubase.de/2k6specs.htm).
+
+
+## License and Copyright Information
+
+This software is distributed under the terms of the [MIT License](http://opensource.org/licenses/MIT). All contributors agree to have their contributions redistributed under the same terms.
+
+Copyright © 2013 Carlos Duarte do Nascimento (Chester) <cd@pobox.com>.
+
+Contributed code © 2013 to their respective contributors (see github history and names above)
 
 Atari™ word trademarks owned by Atari Interactive, Inc., which this software and its authors do not claim to hold or represent in any way. Any other software mentioned is also property of its respective owners, being mentioned solely for reference purposes.
 
