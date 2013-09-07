@@ -34,17 +34,17 @@ module Ruby2600
       # Playfield doesn't move
     end
 
-  	private
+    def on_counter_change
+      self.class.color_register = score_mode? ? COLUP0 + @counter.value / 20 : COLUPF
+    end
+
+    private
 
     def tick_graphic_circuit
       pf_pixel = @counter.value % 20
       pf_pixel = 19 - pf_pixel if reflect?
       register, bit = REG_AND_BIT_FOR_PIXEL[pf_pixel]
       @graphic_bit_value = reg(register)[bit]
-    end
-
-    def on_counter_change
-   	  self.class.color_register = score_mode? ? COLUP0 + @counter.value / 20 : COLUPF
     end
 
     def reflect?

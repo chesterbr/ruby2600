@@ -22,19 +22,19 @@ describe Ruby2600::Counter do
 
   describe 'on_change' do
     let(:callback_double) { double 'callback' }
-    before { subject.on_change { callback_double.triggered } }
+    before { subject.on_change(callback_double) }
 
     it 'should be triggered every 4th call' do
       subject.value = rand(40)
       3.times { subject.tick }
-      callback_double.should_receive(:triggered)
+      callback_double.should_receive(:on_counter_change)
 
       subject.tick
     end
 
     it 'should be triggered on wrap' do
       subject.value = 38
-      callback_double.should_receive(:triggered).twice
+      callback_double.should_receive(:on_counter_change).twice
 
       8.times { subject.tick }
     end
