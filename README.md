@@ -43,7 +43,7 @@ For now, do this:
 
 If using jruby on Mac OS X:
 
-  bundle exec jruby -J-XstartOnFirstThread -Ilib bin/ruby2600 /path/of/your/romfile.bin
+    bundle exec jruby -J-XstartOnFirstThread -Ilib bin/ruby2600-swt /path/of/your/romfile.bin
 
 (it will be `ruby2600 /path/of/your/romfile.bin` once the gem is published)
 
