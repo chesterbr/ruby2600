@@ -125,6 +125,14 @@ If you want a full-speed emulator with sound and compatible with every single ga
 
 Not sure, I did it one day I was too bored to write code or slides. I'd say yes (as a playfield), as long as you are flexible with the background color (or use another object to render the characters). But I liked it, so I might eventually try to make a ROM that displays it.
 
+## Optimization Ideas
+
+Here is a backlog of things that may help towards increasing performance:
+
+- [ricbit](http://github.com/ricbit) suggested we try to cache the scanlines. Essentially, given a specific TIA (+CPU/RIOT?) state, the scanline generated will be pretty much the same, so we could skip everything if no TIA registers are changed throughout drawing. He mentioned hefty gains on [BrMSX](http://www.msxpro.com/mirror/ricardo/brmsx.htm) by doing so. We just need to ensure consistent state on internal counters (although we could add them as part of the mentioned state hash key and the final value on the cached scanline) and other detail like that.
+- [Georges](https://github.com/gbenatti) made some experiments with unrolling loops, finding a 2x increase by simply doing [this](https://gist.github.com/gbenatti/6498776). It seems cache-related (increasing from 16 to 32 unrolled cycles killed the improvement), but there may be some gains around here (oddly, both MRI and JRuby had improvements working that way)
+- We could easily do the color translation (currently done by the ui scripts) whenever a color register is written to, greatly reducing the number of lookups. We could also keep the more frequently used colors on a quick-access location (would not help with "rainbow" bound games, but quite a few stick to a reduced color set)
+-  [Lucas Fontes](https://github.com/lxfontes) tried reusing the scanline array with no noticeable improvement, but we might try having a fixed "framebuffer" array and rewriting it constantly, to kill the instantiation payload (maybe consider an alternative structure to store the bytes?)
 
 ## Changelog
 
