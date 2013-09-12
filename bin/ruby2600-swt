@@ -161,6 +161,9 @@ class MyKeyListener
 
   def initialize(bus)
     @bus = bus
+
+    # Remove/comment if you don't want FPS display
+    Ruby2600::TIAFrameCounter.hook(@bus.tia)
   end
 
 
