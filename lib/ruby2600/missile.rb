@@ -13,7 +13,7 @@ module Ruby2600
     end
 
     def size
-    	2 ** (reg(NUSIZ0)[5] * 2 + reg(NUSIZ0)[4])
+    	1 << (reg(NUSIZ0) >> 4)
     end
   end
 end
