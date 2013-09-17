@@ -83,6 +83,8 @@ module Ruby2600
         @reg[CXM0P] = @reg[CXM1P] = @reg[CXP0FB] = @reg[CXP1FB] = @reg[CXM0FB] = @reg[CXM1FB] = @reg[CXBLPF] = @reg[CXPPMM] = 0
       when WSYNC
         @cpu.halted = true
+      when NUSIZ0, NUSIZ1, CTRLPF
+        @reg[position] = six_bit_value(value)
       when VSYNC..VDELBL
         @reg[position] = value
       end
@@ -186,6 +188,10 @@ module Ruby2600
 
     def latched_port?(number)
       @reg[VBLANK][6] == 1 && number >= 4
+    end
+    
+    def six_bit_value(number)
+      number & 0b111111
     end
   end
 end

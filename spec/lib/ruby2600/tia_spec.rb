@@ -181,8 +181,8 @@ describe Ruby2600::TIA do
 
   describe '#[]=' do
     [
-      VSYNC, VBLANK, RSYNC, NUSIZ0, NUSIZ1, COLUP0, COLUP1, COLUPF,
-      COLUBK, CTRLPF, REFP0, REFP1, PF0, PF1, PF2, AUDC0, AUDC1, AUDF0,
+      VSYNC, VBLANK, RSYNC, COLUP0, COLUP1, COLUPF,
+      COLUBK, REFP0, REFP1, PF0, PF1, PF2, AUDC0, AUDC1, AUDF0,
       AUDF1, AUDV0, AUDV1, GRP0, GRP1, ENAM0, ENAM1, ENABL, HMP0, HMP1,
       HMM0, HMM1, HMBL, VDELP0, VDELP1, VDELBL
     ].each do |r|
@@ -193,6 +193,19 @@ describe Ruby2600::TIA do
         tia.reg[r].should == value
       end
     end
+
+    # This registers have the bits 6, 7 protected from writing
+    [
+        NUSIZ0, NUSIZ1, CTRLPF
+    ].each do |r|
+      it "should store the value for #{r}" do
+        value = rand(63)
+        tia[r] = value
+
+        tia.reg[r].should == value
+      end
+    end
+
 
     [
       WSYNC, RESP0, RESP1, RESM0, RESM1, RESBL, HMOVE, HMCLR, CXCLR,
