@@ -197,7 +197,7 @@ class GameWindow < Gosu::Window
     frame = @bus.frame
     @canvas.paint do
       frame.each_index do |y|
-        frame[y].each_index do |x|
+        0.upto 159 do |x|
           pixel x, y, :color => NTSC_COLOR_LUM_TO_SRGB[frame[y][x] / 2]
         end
       end

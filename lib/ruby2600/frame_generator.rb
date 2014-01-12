@@ -1,3 +1,5 @@
+require 'narray'
+
 module Ruby2600
   class FrameGenerator
     # A scanline "lasts" 228 "color clocks" (CLKs), of which 68
@@ -13,7 +15,7 @@ module Ruby2600
     end
 
     def frame
-      @buffer ||= Array.new(200) { Array.new(160, 0) }
+      @buffer ||= Array.new(200) { NArray.byte(160) }
       scanline           while @tia.vertical_sync?   # VSync
       scanline           while @tia.vertical_blank?  # VBlank
       @scanline_counter = 0
