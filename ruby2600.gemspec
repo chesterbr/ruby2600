@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
     spec.add_dependency 'gosu'
     spec.add_dependency 'texplay'
 
-    spec.add_development_dependency 'debugger'
+    spec.add_development_dependency 'byebug'
   end
 
   spec.add_development_dependency 'bundler', '~> 1.3'
