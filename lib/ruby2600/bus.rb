@@ -2,13 +2,12 @@ module Ruby2600
   class Bus
     include Constants
 
-    attr_accessor :tia
-
     def initialize(cpu, tia, cart, riot)
       @cpu = cpu
       @tia  = tia
       @cart = cart
       @riot = riot
+      @frame_generator = Ruby2600::FrameGenerator.new(cpu, tia, riot)
 
       @cpu.memory = self
       @tia.cpu = cpu
@@ -22,6 +21,10 @@ module Ruby2600
       refresh_riot :portB
 
       cpu.reset
+    end
+
+    def frame
+      @frame_generator.frame
     end
 
     # FIXME dry

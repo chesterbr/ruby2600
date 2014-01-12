@@ -2,8 +2,9 @@ module Ruby2600
   class TIAFrameCounter
   	FPS_DISPLAY_INTERVAL_SECONDS = 2
 
-    def self.hook(tia)
-      tia.instance_variable_set(:@frame_counter, TIAFrameCounter.new)
+    def self.hook(bus)
+      bus.instance_variable_get(:@frame_generator).
+          instance_variable_set(:@frame_counter, TIAFrameCounter.new)
     end
 
     def reset_fps

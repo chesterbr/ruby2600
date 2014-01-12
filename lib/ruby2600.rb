@@ -1,5 +1,8 @@
 require 'ruby2600/constants'
+
 require 'ruby2600/bus'
+require 'ruby2600/frame_generator'
+
 require 'ruby2600/cpu'
 require 'ruby2600/cart'
 require 'ruby2600/riot'
