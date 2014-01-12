@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Ruby2600::Graphic do
 
   let(:subject) { Ruby2600::Graphic.new(tia) }
-  let(:tia) { mock 'tia', :reg => Array.new(64, 0) }
+  let(:tia) { double 'tia', :reg => Array.new(64, 0) }
 
   describe '#reg' do
     context 'p0 / m0 / bl' do

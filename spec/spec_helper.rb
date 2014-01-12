@@ -3,6 +3,7 @@ require 'simplecov-gem-adapter'
 SimpleCov.start 'gem'
 
 require 'rubygems'
+require 'json'
 require 'humanize'
 require 'timeout'
 
