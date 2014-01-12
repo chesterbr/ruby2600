@@ -16,7 +16,6 @@ module Ruby2600
       @m1 = Missile.new(self, 1)
       @bl = Ball.new(self)
       @pf = Playfield.new(self)
-      @graphics = [@p0, @p1, @m0, @m1, @bl, @pf]
 
       @port_level = Array.new(6, false)
       @latch_level = Array.new(6, true)
@@ -54,7 +53,11 @@ module Ruby2600
         @m1.reset_to @p1
       when HMOVE
         @late_reset_hblank = true
-        @graphics.each &:start_hmove
+        @p0.start_hmove
+        @p1.start_hmove
+        @m0.start_hmove
+        @m1.start_hmove
+        @bl.start_hmove
       when HMCLR
         @reg[HMP0] = @reg[HMP1] = @reg[HMM0] = @reg[HMM1] = @reg[HMBL] = 0
       when CXCLR
@@ -73,7 +76,12 @@ module Ruby2600
     end
 
     def tick
-      @graphics.each &:tick
+      @p0.tick
+      @p1.tick
+      @m0.tick
+      @m1.tick
+      @bl.tick
+      @pf.tick
     end
 
     def vertical_blank?
