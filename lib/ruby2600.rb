@@ -16,3 +16,5 @@ require 'ruby2600/ball'
 require 'ruby2600/playfield'
 
 require 'ruby2600/fps_calculator'
+
+

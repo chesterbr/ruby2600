@@ -42,11 +42,13 @@ For now, do this:
 
   bundle exec bin/ruby2600 /path/of/your/romfile.bin
 
-If using jruby on Mac OS X:
+There are a couple of test files under `spec/fixtures/files` you can try, but I suggest that you obtain a 2K or 4K .BIN file (for which you have the legal right to play, say, by owning the original cart).
+
+If you're using JRuby:
 
     bundle exec jruby -J-XstartOnFirstThread -Ilib bin/ruby2600-swt /path/of/your/romfile.bin
 
-There are a couple of test files under `spec/fixtures/files` you can try, but I suggest that you obtain a 2K or 4K .BIN file (for which you have the legal right to play, say, by owning the original cart).
+(you can run outside bundler by omitting `bundle exec` and ensuring you have the `swt` gem installed, e.g.: `jruby -S gem install swt`)
 
 For some profiling, you'll likely prefer headless mode:
 

@@ -163,7 +163,7 @@ class MyKeyListener
     @bus = bus
 
     # Remove/comment if you don't want FPS display
-    Ruby2600::FPSCalculator.hook(@bus.tia)
+    @calc = Ruby2600::FPSCalculator.new(@bus)
   end
 
 
@@ -268,7 +268,7 @@ class GameWindow
   end
 
   def update
-    frame = @bus.tia.frame
+    frame = @bus.frame
     frame.each_index do |y|
       frame[y].each_index do |x|
         # this if is needed because the first frame on pitfall has some really weird and high y

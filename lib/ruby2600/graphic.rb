@@ -1,3 +1,5 @@
+require 'forwardable' # JRuby needs this
+
 module Ruby2600
   class Graphic
     include Constants
