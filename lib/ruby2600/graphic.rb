@@ -84,10 +84,12 @@ module Ruby2600
     end
 
     def should_draw_copy?
-      nusiz_bits = reg(NUSIZ0) & 0b111
-      (@counter.value ==  3 && [0b001, 0b011].include?(nusiz_bits)) ||
-      (@counter.value ==  7 && [0b010, 0b011, 0b110].include?(nusiz_bits)) ||
-      (@counter.value == 15 && [0b100, 0b110].include?(nusiz_bits))
+      count = @counter.value
+      nusiz_bits = reg(NUSIZ0) % 8
+
+      (count ==  3 && (nusiz_bits == 0b001 || nusiz_bits == 0b011)) ||
+      (count ==  7 && (nusiz_bits == 0b010 || nusiz_bits == 0b011 || nusiz_bits == 0b110)) ||
+      (count == 15 && (nusiz_bits == 0b100 || nusiz_bits == 0b110))
     end
   end
 end
