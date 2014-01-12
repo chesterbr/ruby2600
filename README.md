@@ -48,11 +48,11 @@ If you're using JRuby:
 
     bundle exec jruby -J-XstartOnFirstThread -Ilib bin/ruby2600-swt /path/of/your/romfile.bin
 
-For some profiling, you'll likely prefer headless mode:
+For profiling/performance testing, you'll likely prefer headless mode, e.g.:
 
-    bundle exec bin/ruby2600-headless /path/of/your/romfile.bin
+    bundle exec ruby-prof bin/ruby2600-headless /path/of/your/romfile.bin 1
 
-(you can append the # of frames to run - an extra one will be added since first frame of several games is kind of bogus)
+(the number in the end is the number of frames to run - an extra one will be added, since first frame of several games is kind of bogus)
 
 
 ### Keys
@@ -137,9 +137,12 @@ Here is a backlog of things that may help towards increasing performance:
 - [ricbit](http://github.com/ricbit) suggested we try to cache the scanlines. Essentially, given a specific TIA (+CPU/RIOT?) state, the scanline generated will be pretty much the same, so we could skip everything if no TIA registers are changed throughout drawing. He mentioned hefty gains on [BrMSX](http://www.msxpro.com/mirror/ricardo/brmsx.htm) by doing so. We just need to ensure consistent state on internal counters (although we could add them as part of the mentioned state hash key and the final value on the cached scanline) and other detail like that.
 - [Georges](https://github.com/gbenatti) made some experiments with unrolling loops, finding a 2x increase by simply doing [this](https://gist.github.com/gbenatti/6498776). It seems cache-related (increasing from 16 to 32 unrolled cycles killed the improvement), but there may be some gains around here (oddly, both MRI and JRuby had improvements working that way)
 - We could easily do the color translation (currently done by the ui scripts) whenever a color register is written to, greatly reducing the number of lookups. We could also keep the more frequently used colors on a quick-access location (would not help with "rainbow" bound games, but quite a few stick to a reduced color set)
--  [Lucas Fontes](https://github.com/lxfontes) tried reusing the scanline array with no noticeable improvement, but we might try having a fixed "framebuffer" array and rewriting it constantly, to kill the instantiation payload (maybe consider an alternative structure to store the bytes?)
+-  [Lucas Fontes](https://github.com/lxfontes) tried reusing the scanline array with no noticeable improvement, but we might try having a fixed "framebuffer" array and rewriting it constantly, to kill the instantiation payload, or even consider an alternative structure to store the bytes. UPDATE: The `FrameGenerator` class makes it easy to test those things; I did an initial attempt of reusing buffer / using [NArray](http://narray.rubyforge.org/) for each scanline, but no noticeable improvement was found (maybe MRI *is* being smart enough to use integer types where appropriate).
 
 ## Changelog
+
+##### 0.1.3
+- Separated frame generation from TIA emulation; added headless mode and improved FPS counting; reworked most-used methods based on [ruby-prof](https://github.com/ruby-prof/ruby-prof) information.
 
 ##### 0.1.2
 - Separated MovableObject: now Player, Missile, Ball and Playfield are subclasses of Graphic (which only deals with drawing), which is composed from Counter (focused on position and movement) with no delegation. This design clarifies intentions on TIA ("reset this object's counter" = object.counter.reset) which is fundamental now.
