@@ -13,13 +13,15 @@ module Ruby2600
     end
 
     def frame
-      buffer = []
+      @buffer ||= Array.new(200) { Array.new(160, 0) }
       scanline           while @tia.vertical_sync?   # VSync
       scanline           while @tia.vertical_blank?  # VBlank
-      buffer << scanline until @tia.vertical_blank?  # Picture
+      @scanline_counter = 0
+      scanline           until @tia.vertical_blank?  # Picture
+      @scanline_counter = nil
       scanline           until @tia.vertical_sync?   # Overscan
       @frame_counter.track_fps if @frame_counter
-      buffer
+      @buffer
     end
 
     def scanline
@@ -39,16 +41,15 @@ module Ruby2600
     end
 
     def draw_scanline
-      scanline = Array.new(160, 0)
       VISIBLE_CLK_COUNT.times do |pixel|
         @tia.scanline_stage = @tia.late_reset_hblank && pixel < 8 ? :late_hblank : :visible
 
         @tia.update_collision_flags
         sync_2600_with pixel + HORIZONTAL_BLANK_CLK_COUNT
 
-        scanline[pixel] = @tia.topmost_pixel if @tia.scanline_stage == :visible && !@tia.vertical_blank?
+        @buffer[@scanline_counter][pixel] = @tia.topmost_pixel if @tia.scanline_stage == :visible && @scanline_counter
       end
-      scanline
+      @scanline_counter += 1 if @scanline_counter && @scanline_counter < 199
     end
 
     # All Atari chips use the same crystal for their clocks (with RIOT and
