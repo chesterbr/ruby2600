@@ -34,111 +34,14 @@ describe Ruby2600::TIA do
     end
   end
 
-  describe '#scanline' do
-    before { clear_tia_registers }
-
-    context 'TIA-CPU integration' do
-      it 'should spend 76 CPU cycles generating a scanline' do
-        tia.cpu.should_receive(:tick).exactly(76).times
-
-        tia.scanline
-      end
-    end
-
-    context 'TIA-RIOT integtation' do
-      it 'should tick RIOT 76 times while generating a scanline, regardless of CPU timing' do
-        tia.riot.should_receive(:tick).exactly(76).times
-
-        tia.scanline
-      end
-
-      it 'should tick RIOT even if CPU is frozen by a write to WSYNC' do
-        tia.cpu.stub(:tick) { tia[WSYNC] = rand(256) }
-        tia.riot.should_receive(:tick).exactly(76).times
-
-        tia.scanline
-      end
-    end
-
-    context 'PF0, PF1, PF2' do
-      before do
-        tia[COLUBK] = 0xBB
-        tia[COLUPF] = 0xFF
-      end
-
-      context 'all-zeros playfield' do
-        it 'should generate a fullscanline with background color' do
-          tia.scanline.should == Array.new(160, 0xBB)
-        end
-      end
-
-      context 'all-ones playfield' do
-        before { tia[PF0] = tia[PF1] = tia[PF2] = 0xFF }
-
-        it 'should generate a fullscanline with foreground color' do
-          tia.scanline.should == Array.new(160, 0xFF)
-        end
-      end
-
-      context 'pattern playfield' do
-        before do
-          tia[PF0] = 0b01000101
-          tia[PF1] = 0b01001011
-          tia[PF2] = 0b01001011
-        end
-
-        it 'should generate matching pattern' do
-          tia.scanline.should == [0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xFF, 0xFF, 0xFF, 0xFF, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xFF, 0xFF, 0xFF, 0xFF, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xFF, 0xFF, 0xFF, 0xFF, 0xBB, 0xBB, 0xBB, 0xBB, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xBB, 0xBB, 0xBB, 0xBB, 0xFF, 0xFF, 0xFF, 0xFF, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xFF, 0xFF, 0xFF, 0xFF, 0xBB, 0xBB, 0xBB, 0xBB,
-                                  0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xFF, 0xFF, 0xFF, 0xFF, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xFF, 0xFF, 0xFF, 0xFF, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xFF, 0xFF, 0xFF, 0xFF, 0xBB, 0xBB, 0xBB, 0xBB, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xBB, 0xBB, 0xBB, 0xBB, 0xFF, 0xFF, 0xFF, 0xFF, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xBB, 0xFF, 0xFF, 0xFF, 0xFF, 0xBB, 0xBB, 0xBB, 0xBB]
-        end
-      end
-    end
-
-    context 'WSYNC' do
-      it 'should halt the CPU if WSYNC is written to' do
-        tia.cpu.should_receive(:halted=).with(true)
-
-        tia[WSYNC] = rand(256)
-      end
-
-      it 'should "un-halt" the CPU before starting a new scanline (i.e., before its horizontal blank)' do
-        tia.cpu.should_receive(:halted=).with(false) do
-          tia.should_receive(:wait_horizontal_blank)
-        end
-
-        tia.scanline
-      end
-    end
-
-    context 'VBLANK' do
-      before do
-        tia[COLUBK] = 0xBB
-        tia[COLUPF] = 0xFF
-        tia[PF0]    = 0xF0
-        tia[PF1]    = 0xFF
-        tia[PF2]    = 0xFF
-      end
-
-      it 'should generate a black scanline when "blanking" bit is set' do
-        tia[VBLANK] = rand_with_bit(1, :set)
-
-        tia.scanline.should == Array.new(160, 0x00)
-      end
-
-      it 'should generate a normal scanline when "blanking" bit is clear' do
-        tia[VBLANK] = rand_with_bit(1, :clear)
-
-        tia.scanline.should == Array.new(160, 0xFF)
-      end
-
-      pending "Latches: INPT4-INPT5 bit (6) and INPT6-INPT7 bit(7)"
-    end
-
-    it 'late hblank shifts everything'
-  end
-
   describe '#topmost_pixel' do
-    before { tia[COLUBK] = rand(256) }
+    before do
+      tia[COLUBK] = 0xBB
+      tia[COLUPF] = 0xFF
+      tia[PF0]    = 0xF0
+      tia[PF1]    = 0xFF
+      tia[PF2]    = 0xFF
+    end
 
     context 'CTRLPF priority bit clear' do
       before { tia[CTRLPF] = rand(256) & 0b011 }
@@ -179,6 +82,20 @@ describe Ruby2600::TIA do
     end
   end
 
+  describe '#vertical_blank?' do
+    context 'VBLANK bit set' do
+      before { tia[VBLANK] = rand_with_bit(1, :set) }
+
+      its(:vertical_blank?) { should be_true }
+    end
+
+    context 'VBLANK bit clear' do
+      before { tia[VBLANK] = rand_with_bit(1, :clear) }
+
+      its(:vertical_blank?) { should be_false }
+    end
+  end
+
   describe '#[]=' do
     [
       VSYNC, VBLANK, RSYNC, COLUP0, COLUP1, COLUPF,
@@ -206,7 +123,6 @@ describe Ruby2600::TIA do
       end
     end
 
-
     [
       WSYNC, RESP0, RESP1, RESM0, RESM1, RESBL, HMOVE, HMCLR, CXCLR,
       CXM0P, CXM1P, CXP0FB, CXP1FB, CXM0FB, CXM1FB, CXBLPF, CXPPMM,
@@ -219,9 +135,6 @@ describe Ruby2600::TIA do
         tia[r] = value
       end
     end
-
-
-    it 'should not store the value'
   end
 
   context 'positioning' do
@@ -341,4 +254,6 @@ describe Ruby2600::TIA do
       end
     end
   end
+
+  pending "Latches: INPT4-INPT5 bit (6) and INPT6-INPT7 bit(7)"
 end

@@ -1,15 +1,9 @@
 module Ruby2600
   class TIA
-    attr_accessor :cpu, :riot
-    attr_reader :reg, :scanline_stage
+    attr_accessor :cpu, :riot, :scanline_stage, :late_reset_hblank
+    attr_reader :reg
 
     include Constants
-
-    # A scanline "lasts" 228 "color clocks" (CLKs), of which 68
-    # are the horizontal blank period, and 160 are visible pixels
-
-    HORIZONTAL_BLANK_CLK_COUNT = 68
-    VISIBLE_CLK_COUNT = 160
 
     def initialize
       # Real 2600 starts with random values (and Stella comments warn
@@ -22,26 +16,9 @@ module Ruby2600
       @m1 = Missile.new(self, 1)
       @bl = Ball.new(self)
       @pf = Playfield.new(self)
-      @graphics = [@p0, @p1, @m0, @m1, @bl, @pf]
 
       @port_level = Array.new(6, false)
       @latch_level = Array.new(6, true)
-    end
-
-    def frame
-      buffer = []
-      scanline while vertical_sync?                 # VSync
-      scanline while vertical_blank?                # VBlank
-      buffer << scanline until vertical_blank?      # Picture
-      scanline until vertical_sync?                 # Overscan
-      @frame_counter.track_fps if @frame_counter
-      buffer
-    end
-
-    def scanline
-      intialize_scanline
-      wait_horizontal_blank
-      draw_scanline
     end
 
     def set_port_level(number, level)
@@ -76,7 +53,11 @@ module Ruby2600
         @m1.reset_to @p1
       when HMOVE
         @late_reset_hblank = true
-        @graphics.each &:start_hmove
+        @p0.start_hmove
+        @p1.start_hmove
+        @m0.start_hmove
+        @m1.start_hmove
+        @bl.start_hmove
       when HMCLR
         @reg[HMP0] = @reg[HMP1] = @reg[HMM0] = @reg[HMM1] = @reg[HMBL] = 0
       when CXCLR
@@ -94,7 +75,14 @@ module Ruby2600
       @latch_level.fill(true) if position == VBLANK && value[6] == 1
     end
 
-    private
+    def tick
+      @p0.tick
+      @p1.tick
+      @m0.tick
+      @m1.tick
+      @bl.tick
+      @pf.tick
+    end
 
     def vertical_blank?
       @reg[VBLANK][1] != 0
@@ -102,30 +90,6 @@ module Ruby2600
 
     def vertical_sync?
       @reg[VSYNC][1] != 0
-    end
-
-    def intialize_scanline
-      @cpu.halted = false
-      @late_reset_hblank = false
-    end
-
-    def wait_horizontal_blank
-      @scanline_stage = :hblank
-      HORIZONTAL_BLANK_CLK_COUNT.times { |color_clock| sync_2600_with color_clock }
-    end
-
-    def draw_scanline
-      scanline = Array.new(160, 0)
-      VISIBLE_CLK_COUNT.times do |pixel|
-        @scanline_stage = @late_reset_hblank && pixel < 8 ? :late_hblank : :visible
-
-        update_collision_flags
-        sync_2600_with pixel + HORIZONTAL_BLANK_CLK_COUNT
-
-        scanline[pixel] = topmost_pixel if @scanline_stage == :visible && !vertical_blank?
-
-      end
-      scanline
     end
 
     def topmost_pixel
@@ -136,42 +100,29 @@ module Ruby2600
       end
     end
 
+    BIT_6 = 0b01000000
+    BIT_7 = 0b10000000
+
     def update_collision_flags
-      p0 = 0b1001001111111101
-      p1 = 0b0110110011111101
-      m0 = 0b0011111100111110
-      m1 = 0b1100111111001110
-      bl = 0b1111101010100111
-      pf = 0b1111010101010111
-
-      p0 = 0xffffff if @p0.pixel
-      p1 = 0xffffff if @p1.pixel
-      m0 = 0xffffff if @m0.pixel
-      m1 = 0xffffff if @m1.pixel
-      bl = 0xffffff if @bl.pixel
-      pf = 0xffffff if @pf.pixel
-      flags = p0 & p1 & m0 & m1 & bl & pf
-      @reg[CXM0P]  |= flags >> 8
-      @reg[CXM1P]  |= flags >> 6
-      @reg[CXP0FB] |= flags >> 4
-      @reg[CXP1FB] |= flags >> 2
-      @reg[CXM0FB] |= flags
-      @reg[CXM1FB] |= flags << 2
-      @reg[CXBLPF] |= flags << 4
-      @reg[CXPPMM] |= flags << 6
+      @reg[CXM0P] |= BIT_6 if @m0.pixel && @p0.pixel
+      @reg[CXM0P] |= BIT_7 if @m0.pixel && @p1.pixel
+      @reg[CXM1P] |= BIT_6 if @m1.pixel && @p1.pixel
+      @reg[CXM1P] |= BIT_7 if @m1.pixel && @p0.pixel
+      @reg[CXP0FB] |= BIT_6 if @p0.pixel && @bl.pixel
+      @reg[CXP0FB] |= BIT_7 if @p0.pixel && @pf.pixel
+      @reg[CXP1FB] |= BIT_6 if @p1.pixel && @bl.pixel
+      @reg[CXP1FB] |= BIT_7 if @p1.pixel && @pf.pixel
+      @reg[CXM0FB] |= BIT_6 if @m0.pixel && @bl.pixel
+      @reg[CXM0FB] |= BIT_7 if @m0.pixel && @pf.pixel
+      @reg[CXM1FB] |= BIT_6 if @m1.pixel && @bl.pixel
+      @reg[CXM1FB] |= BIT_7 if @m1.pixel && @pf.pixel
+      # c-c-c-combo breaker: bit 6 of CXLBPF is unused
+      @reg[CXBLPF] |= BIT_7 if @bl.pixel && @pf.pixel
+      @reg[CXPPMM] |= BIT_6 if @m0.pixel && @m1.pixel
+      @reg[CXPPMM] |= BIT_7 if @p0.pixel && @p1.pixel
     end
 
-    # All Atari chips use the same crystal for their clocks (with RIOT and
-    # CPU running at 1/3 of TIA speed).
-    #
-    # Since the emulator's "main loop" is based on TIA#scanline, we'll "tick"
-    # the other chips here
-
-    def sync_2600_with(color_clock)
-      riot.tick if color_clock % 3 == 0
-      @graphics.each &:tick
-      cpu.tick if color_clock % 3 == 2
-    end
+    private
 
     # INPTx (I/O ports) helpers
 
@@ -189,7 +140,7 @@ module Ruby2600
     def latched_port?(number)
       @reg[VBLANK][6] == 1 && number >= 4
     end
-    
+
     def six_bit_value(number)
       number & 0b111111
     end
