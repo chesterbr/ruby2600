@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Ruby2600::Playfield do
 
-  let(:tia) { mock 'tia', :reg => Array.new(64, 0), :scanline_stage => :visible }
+  let(:tia) { double 'tia', :reg => Array.new(64, 0), :scanline_stage => :visible }
   subject(:playfield) { Ruby2600::Playfield.new(tia, 0) }
 
   def scanline
