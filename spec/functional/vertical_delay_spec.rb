@@ -1,29 +1,36 @@
 require 'spec_helper'
 
 describe 'vertical delay' do
-  subject(:tia) do
+  subject(:frame_generator) { Ruby2600::FrameGenerator.new(cpu, tia, riot) }
+
+  let(:cpu)  { double 'cpu', :tick => nil, :halted= => nil }
+  let(:riot) { double 'riot', :tick => nil }
+  let(:tia) do
     tia = Ruby2600::TIA.new
-    tia.cpu = double('cpu', :tick => nil, :halted= => nil)
-    tia.riot = double('riot', :tick => nil)
-    tia.scanline
-    0x3F.downto(0) { |reg| tia[reg] = 0 }
-    tia.scanline
+    tia.cpu = cpu
+    tia.riot = riot
     tia
   end
 
+  before do
+    frame_generator.scanline
+    0x3F.downto(0) { |reg| tia[reg] = 0 }
+    frame_generator.scanline
+  end
+
   def grp_on_scanline
-    tia.scanline[5..12].join.to_i(2)
+    frame_generator.scanline[5..12].join.to_i(2)
   end
 
   def ball_on_scanline
-    tia.scanline[4]
+    frame_generator.scanline[4]
   end
 
   context 'VDELP0' do
     before do
       tia[COLUP0] = 0x01
       tia[RESP0] = rand(256)
-      tia.scanline
+      frame_generator.scanline
 
       # Old register = AA, new register = BB
       tia[GRP0] = 0xAA
@@ -45,7 +52,7 @@ describe 'vertical delay' do
     before do
       tia[COLUP1] = 0x01
       tia[RESP1] = rand(256)
-      tia.scanline
+      frame_generator.scanline
 
       # Old register = AA, new register = BB
       tia[GRP1] = 0xAA
