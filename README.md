@@ -36,18 +36,24 @@ For now, do this:
     git clone git@github.com:chesterbr/ruby2600.git
     cd ruby2600
     bundle install
+    chmod +x bin/*
 
 ## Usage
 
-	bundle exec ruby -Ilib bin/ruby2600 /path/of/your/romfile.bin
+  bundle exec bin/ruby2600 /path/of/your/romfile.bin
 
 If using jruby on Mac OS X:
 
     bundle exec jruby -J-XstartOnFirstThread -Ilib bin/ruby2600-swt /path/of/your/romfile.bin
 
-(it will be `ruby2600 /path/of/your/romfile.bin` once the gem is published)
-
 There are a couple of test files under `spec/fixtures/files` you can try, but I suggest that you obtain a 2K or 4K .BIN file (for which you have the legal right to play, say, by owning the original cart).
+
+For some profiling, you'll likely prefer headless mode:
+
+    bundle exec bin/ruby2600-headless /path/of/your/romfile.bin
+
+(you can append the # of frames to run - an extra one will be added since first frame of several games is kind of bogus)
+
 
 ### Keys
 
@@ -78,7 +84,6 @@ There are a couple of test files under `spec/fixtures/files` you can try, but I 
 - Maybe UI should dynamically adjust to games that (intentionally) generate larger/smaller frames;
 - Emulator only supports NTSC games - not sure if it's worth the hassle of supporting PAL/SECAM anyway, as most(all?) PAL games are NTSC versions, and SECAM, well… sucks.
 - Should display the logo during startup (either by overriding first few calls to frame, or by running a bootstrap ROM that shows it).
-
 
 ### Technical debt:
 

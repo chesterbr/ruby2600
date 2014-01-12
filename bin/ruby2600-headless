@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+require 'ruby2600'
+
+# Yet-another-run rack. This one will run the emulator "headless", meaning
+# frames are just generated and perf-measured, but never used. This allows
+# easier testing on different VMs (by using mostly only the core Ruby lib)
+# and graphics engine-independent optimizations
+
+if !ARGV[0]
+  puts "Usage: #{$PROGRAM_NAME} some_rom.bin [frames to measure, default 10]"
+  exit
+end
+
+filename = ARGV[0]
+frames = (ARGV[1] || 10).to_i
+
+puts "Initializing..."
+@bus = Ruby2600::Bus.new(Ruby2600::CPU.new,
+                         Ruby2600::TIA.new,
+                         Ruby2600::Cart.new(filename),
+                         Ruby2600::RIOT.new)
+
+puts "Running..."
+counter = Ruby2600::FPSCalculator.new(@bus, frames)
+0.upto(frames) { @bus.frame }
+

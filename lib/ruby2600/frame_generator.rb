@@ -18,7 +18,7 @@ module Ruby2600
       scanline           while @tia.vertical_blank?  # VBlank
       buffer << scanline until @tia.vertical_blank?  # Picture
       scanline           until @tia.vertical_sync?   # Overscan
-      @frame_counter.track_fps if @frame_counter
+      @frame_counter.add if @frame_counter
       buffer
     end
 

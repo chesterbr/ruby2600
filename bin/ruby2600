@@ -190,7 +190,7 @@ class GameWindow < Gosu::Window
     @bus.color_bw_switch = false
 
     # Remove/comment if you don't want FPS display
-    Ruby2600::TIAFrameCounter.hook(@bus)
+    @calc = Ruby2600::FPSCalculator.new(@bus)
   end
 
   def update

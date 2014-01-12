@@ -15,4 +15,4 @@ require 'ruby2600/missile'
 require 'ruby2600/ball'
 require 'ruby2600/playfield'
 
-require 'ruby2600/tia_frame_counter'
+require 'ruby2600/fps_calculator'
