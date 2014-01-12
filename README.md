@@ -48,8 +48,6 @@ If you're using JRuby:
 
     bundle exec jruby -J-XstartOnFirstThread -Ilib bin/ruby2600-swt /path/of/your/romfile.bin
 
-(you can run outside bundler by omitting `bundle exec` and ensuring you have the `swt` gem installed, e.g.: `jruby -S gem install swt`)
-
 For some profiling, you'll likely prefer headless mode:
 
     bundle exec bin/ruby2600-headless /path/of/your/romfile.bin
