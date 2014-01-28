@@ -87,10 +87,10 @@ For profiling/performance testing, you'll likely prefer headless mode, e.g.:
 
 ### Technical debt:
 
-- UI code needs some love (just quickly slapped a [Gosu](http://www.libgosu.org/) script on /bin to make it playable; would seriously consider a JRuby-friendly version)
+- UI code needs some love (just quickly slapped a [Gosu](http://www.libgosu.org/) script on /bin to make it playable; would seriously consider a JRuby-friendly option);
 - TIA tests don't cover a few aspects (see "Pending" specs);
-- Bus should auto-initialize the components when receiving a string (either on initialize or on a separate method);
-- Bus should forward the Bus#tia.frame call into Bus.frame (avoid indirect access to Tia)
+- `Bus` should auto-initialize the components when receiving a string (either on initialize or on a separate method);
+- *Maybe* `Player`/`Ball`/`Missile`/`Playfield` should not be separate classes, since most of their code is "configuration" for the generic `Graphic` (and its `Counter`).
 
 ## FAQ
 
