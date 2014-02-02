@@ -10,6 +10,10 @@ module Ruby2600
       @cpu  = cpu
       @tia  = tia
       @riot = riot
+
+      @cpu_thread  = ChipThreadRunner.new(@cpu)
+      @tia_thread  = ChipThreadRunner.new(@tia)
+      @riot_thread = ChipThreadRunner.new(@riot)
     end
 
     def frame
@@ -55,9 +59,9 @@ module Ruby2600
     # CPU running at 1/3 of TIA speed).
 
     def sync_2600_with(color_clock)
-      @riot.tick if color_clock % 3 == 0
-      @tia.tick
-      @cpu.tick if color_clock % 3 == 2
+      @riot_thread.tick if color_clock % 3 == 0
+      @tia_thread.tick
+      @cpu_thread.tick if color_clock % 3 == 2
     end
 
   end
