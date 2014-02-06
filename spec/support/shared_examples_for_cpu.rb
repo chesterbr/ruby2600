@@ -68,14 +68,16 @@ shared_examples_for 'set memory with value' do |position, expected|
   end
 end
 
+humanized = %w{zero one two three four five six seven}
+
 1.upto 3 do |number|
-  shared_examples_for "advance PC by #{number.humanize}" do
+  shared_examples_for "advance PC by #{humanized[number]}" do
     it { expect { cpu.step }.to change { cpu.pc }.by number }
   end
 end
 
 2.upto 7 do |number|
-  shared_examples_for "take #{number.humanize} cycles" do
+  shared_examples_for "take #{humanized[number]} cycles" do
     it { cpu.step.should == number }
   end
 end
