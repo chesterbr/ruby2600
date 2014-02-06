@@ -1,3 +1,6 @@
+require 'bundler'
+Bundler.require
+
 require 'opal'
 require 'opal/rspec/rake_task'
 require 'rspec/core/rake_task'
@@ -15,6 +18,8 @@ namespace :opal do
       out << env["ruby2600-opal"].to_s
     end
   end
+
+  Opal.append_path File.expand_path('../lib', __FILE__)
 
   Opal::RSpec::RakeTask.new(:spec)
 end
