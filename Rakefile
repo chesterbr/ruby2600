@@ -1,5 +1,4 @@
 require 'opal'
-require 'opal-sprockets'
 require 'opal/rspec/rake_task'
 require 'rspec/core/rake_task'
 

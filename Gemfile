@@ -1,9 +1,8 @@
 source 'https://rubygems.org'
 
 gem 'rake'
-gem 'opal', :git => 'git://github.com/chesterbr/opal', :branch => 'ruby2600'
-gem 'opal-rspec'
-gem 'opal-sprockets'
+gem 'opal', :github => 'opal/opal'
+gem 'opal-rspec', '0.3.0.beta3'
 
 # gemspec
 # if RUBY_PLATFORM == 'java'
