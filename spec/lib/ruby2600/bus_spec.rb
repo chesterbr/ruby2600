@@ -7,7 +7,7 @@ describe Ruby2600::Bus do
   let(:cart) { double('cart') }
   let(:riot) { double('riot', :portA= => nil, :portB= => nil) }
 
-  subject(:bus) { Ruby2600::Bus.new(cpu, tia, cart, riot) }
+  let(:bus) { Ruby2600::Bus.new(cpu, tia, cart, riot) }
 
   # 6507 address lines (bits) A7 & A12 select which chip (TIA/RIOT/cart ROM)
   # will be read/written (and line A9 selects betwen RIOT's RAM and I/O+Timer).

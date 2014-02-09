@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe 'vertical delay' do
-  subject(:frame_generator) { Ruby2600::FrameGenerator.new(cpu, tia, riot) }
+  let(:frame_generator) { Ruby2600::FrameGenerator.new(cpu, tia, riot) }
 
   let(:cpu)  { double 'cpu', :tick => nil, :halted= => nil }
   let(:riot) { double 'riot', :tick => nil }

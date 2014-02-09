@@ -3,10 +3,10 @@ require 'spec_helper'
 describe Ruby2600::Player do
 
   let(:tia) { double 'tia', :reg => Array.new(64, 0), :scanline_stage => :visible }
-  subject(:player) { Ruby2600::Player.new(tia, 0) }
+  let(:player) { Ruby2600::Player.new(tia, 0) }
 
   context 'player 1' do
-    subject(:player1) { Ruby2600::Player.new(tia, 1) }
+    let(:player1) { Ruby2600::Player.new(tia, 1) }
 
     before do
       tia.reg[GRP0] = 0x00

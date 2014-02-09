@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Ruby2600::RIOT do
 
-  subject(:riot) { Ruby2600::RIOT.new }
+  let(:riot) { Ruby2600::RIOT.new }
 
   it 'should initialize on a working state' do
     expect { riot.tick        }.to_not raise_error

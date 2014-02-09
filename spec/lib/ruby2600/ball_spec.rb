@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Ruby2600::Ball do
 
   let(:tia) { double 'tia', :reg => Array.new(64, 0), :scanline_stage => :visible }
-  subject(:ball) { Ruby2600::Ball.new(tia) }
+  let(:ball) { Ruby2600::Ball.new(tia) }
 
   describe 'pixel' do
     let(:color) { [rand(255) + 1] }

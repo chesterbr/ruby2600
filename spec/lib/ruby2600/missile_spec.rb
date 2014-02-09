@@ -3,10 +3,10 @@ require 'spec_helper'
 describe Ruby2600::Missile do
 
   let(:tia) { double 'tia', :reg => Array.new(64, 0), :scanline_stage => :visible }
-  subject(:missile) { Ruby2600::Missile.new(tia, 0) }
+  let(:missile) { Ruby2600::Missile.new(tia, 0) }
 
   context 'missile 1' do
-    subject(:missile1) { Ruby2600::Missile.new(tia, 1) }
+    let(:missile1) { Ruby2600::Missile.new(tia, 1) }
 
     before do
       tia.reg[ENAM1] = 0

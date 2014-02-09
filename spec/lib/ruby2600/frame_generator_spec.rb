@@ -5,7 +5,7 @@ describe Ruby2600::FrameGenerator do
   let(:tia)  { double('tia').as_null_object }
   let(:riot) { double('riot', :tick => nil) }
 
-  subject(:frame_generator) { Ruby2600::FrameGenerator.new(cpu, tia, riot) }
+  let(:frame_generator) { Ruby2600::FrameGenerator.new(cpu, tia, riot) }
 
   describe '#scanline' do
     context 'CPU timing' do

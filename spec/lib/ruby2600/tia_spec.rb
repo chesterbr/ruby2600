@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Ruby2600::TIA do
 
-  subject(:tia) do
+  let(:tia) do
     tia = Ruby2600::TIA.new
     tia.cpu = double('cpu', :tick => nil, :halted= => nil)
     tia.riot = double('riot', :tick => nil)
