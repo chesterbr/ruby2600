@@ -83,16 +83,16 @@ describe Ruby2600::TIA do
   end
 
   describe '#vertical_blank?' do
-    context 'VBLANK bit set' do
-      before { tia[VBLANK] = rand_with_bit(1, :set) }
+    it 'is truthy if VBLANK bit is set' do
+      tia[VBLANK] = rand_with_bit(1, :set)
 
-      its(:vertical_blank?) { should be_true }
+      tia.vertical_blank?.should be_truthy
     end
 
-    context 'VBLANK bit clear' do
-      before { tia[VBLANK] = rand_with_bit(1, :clear) }
+    it 'is falsey if VBLANK bit is clear' do
+      tia[VBLANK] = rand_with_bit(1, :clear)
 
-      its(:vertical_blank?) { should be_false }
+      tia.vertical_blank?.should be_falsey
     end
   end
 
