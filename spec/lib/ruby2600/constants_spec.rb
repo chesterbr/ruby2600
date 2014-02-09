@@ -14,15 +14,15 @@ describe Ruby2600::Constants do
       VDELP0, VDELP1, VDELBL, RESMP0, RESMP1, HMOVE, HMCLR, CXCLR,
       CXM0P, CXM1P, CXP0FB, CXP1FB, CXM0FB, CXM1FB, CXBLPF, CXPPMM,
       INPT0, INPT1, INPT2, INPT3, INPT4, INPT5
-    ].each { |reg| reg.should be <= 0x3F }
+    ].each { |reg| expect(reg).to be <= 0x3F }
   end
 
   it 'should use $0280-$029x mirror in al RIOT constants' do
     [
       SWCHA, SWACNT, SWCHB, SWBCNT, INTIM, INSTAT, TIM1T, TIM8T, TIM64T, T1024T
     ].each do |reg|
-      reg.should be >= 0x280
-      reg.should be <= 0x29F
+      expect(reg).to be >= 0x280
+      expect(reg).to be <= 0x29F
     end
   end
 end
