@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/opal/opal.git
-  revision: 85220f32136c74ac93f1cb721462324a3423cf44
+  revision: 5e73e545e9e6185ec25b8912dfa774cd6b62e87f
   specs:
     opal (0.6.0)
       source_map
@@ -23,9 +23,8 @@ GEM
     guard-bundler (1.0.0)
       bundler (~> 1.0)
       guard (~> 1.1)
-    guard-rspec (2.5.4)
+    guard-rspec (1.2.1)
       guard (>= 1.1)
-      rspec (~> 2.11)
     hike (1.2.3)
     humanize (1.1.0)
     json (1.7.7)
@@ -49,14 +48,18 @@ GEM
     rb-fsevent (0.9.4)
     rb-inotify (0.8.8)
       ffi (>= 0.5.0)
-    rspec (2.14.1)
-      rspec-core (~> 2.14.0)
-      rspec-expectations (~> 2.14.0)
-      rspec-mocks (~> 2.14.0)
-    rspec-core (2.14.7)
-    rspec-expectations (2.14.5)
+    rspec (3.0.0.beta1)
+      rspec-core (= 3.0.0.beta1)
+      rspec-expectations (= 3.0.0.beta1)
+      rspec-mocks (= 3.0.0.beta1)
+    rspec-core (3.0.0.beta1)
+      rspec-support (= 3.0.0.beta1)
+    rspec-expectations (3.0.0.beta1)
       diff-lcs (>= 1.1.3, < 2.0)
-    rspec-mocks (2.14.5)
+      rspec-support (= 3.0.0.beta1)
+    rspec-mocks (3.0.0.beta1)
+      rspec-support (= 3.0.0.beta1)
+    rspec-support (3.0.0.beta1)
     rubygems-bundler (1.4.2)
       bundler-unload (>= 1.0.2)
       executable-hooks (>= 1.2.5)
@@ -91,6 +94,7 @@ DEPENDENCIES
   opal!
   opal-rspec (= 0.3.0.beta3)
   rake
+  rspec (~> 3.0.0.beta1)
   rubygems-bundler
   simplecov
   simplecov-gem-adapter
