@@ -64,7 +64,7 @@ shared_examples_for 'set memory with value' do |position, expected|
     cpu.step
 
     value = cpu.memory[position]
-    expect(value).to be(expected), "Expected: #{hex_byte(expected)} at address #{hex_word(position)}, found: #{hex_byte(value)}"
+    expect(value).to be(expected), "Expected: #{hex_byte(expected)} at address #{hex_word(position)}, found: #{hex_byte(value)} (#{value.inspect})"
   end
 end
 
