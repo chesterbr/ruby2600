@@ -7,7 +7,7 @@ pitfall = [120, 216, 162, 0, 169, 0, 149, 0, 154, 232, 208, 250, 32, 117, 250, 1
 
 bus = Ruby2600::Bus.new(Ruby2600::CPU.new,
                         Ruby2600::TIA.new,
-                        pitfall,
+                        Ruby2600::Cart.new(pitfall),
                         Ruby2600::RIOT.new)
 bus.p0_joystick_up = false
 bus.p0_joystick_down = false
@@ -20,6 +20,7 @@ bus.p0_difficulty_switch = true
 bus.p1_difficulty_switch = true
 bus.color_bw_switch = false
 
+bus.frame # Discard first frame
 frame = bus.frame
 
-`console.log(frame[0])`
+`console.log(frame)`
