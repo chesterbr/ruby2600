@@ -1,8 +1,52 @@
 require 'spec_helper'
+require 'fixtures/cart_arrays'
 
 describe Ruby2600::Cart do
   let(:cart_4K) { Ruby2600::Cart.new(path_for_ROM :hello)   }
   let(:cart_2K) { Ruby2600::Cart.new(path_for_ROM :hello2k) }
+
+  describe '#initialize' do
+    it 'opens a file if given a filename (string)' do
+      expect(File).to receive(:open).with('foo.bin', anything).
+                      and_yield double('file').as_null_object
+
+      Ruby2600::Cart.new('foo.bin')
+    end
+
+    it 'reads an array if one is given' do
+      cart = Ruby2600::Cart.new([00, 11, 22, 33, 44, 55])
+
+      expect(cart[5]).to eq(55)
+    end
+
+    # Opal can't run this spec (after all, we only support arrays because of it)
+    if File.respond_to? :open
+      def bytes(cart)
+        result = Array.new(4096)
+        0.upto(4095) do |i|
+          result[i] = cart[i]
+        end
+        result
+      end
+
+      context '4K cart' do
+        let(:cart_from_file)  { Ruby2600::Cart.new(path_for_ROM 'hello') }
+        let(:cart_from_array) { Ruby2600::Cart.new(HELLO_CART_ARRAY) }
+
+        it 'works the same with either array or filename' do
+          expect(bytes(cart_from_file)).to eq(bytes(cart_from_array))
+        end
+      end
+      context '2K cart' do
+        let(:cart_from_file)  { Ruby2600::Cart.new(path_for_ROM 'hello2k') }
+        let(:cart_from_array) { Ruby2600::Cart.new(HELLO2K_CART_ARRAY) }
+
+        it 'works the same with either array or filename' do
+          expect(bytes(cart_from_file)).to eq(bytes(cart_from_array))
+        end
+      end
+    end
+  end
 
   it 'should silently ignore writes' do
     old_value = cart_4K[0x0000]
