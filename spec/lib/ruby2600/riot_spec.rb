@@ -13,7 +13,7 @@ describe Ruby2600::RIOT do
   describe 'ram (#ram)' do
     it 'should have lower 128 bytes available for reading/writing' do
       0.upto(127).each do |position|
-        value = Random.rand(256)
+        value = rand(256)
         riot[position] = value
         expect(riot[position]).to be(value), "Failed for value $#{value.to_s(16)} at $#{position.to_s(16)}"
       end
