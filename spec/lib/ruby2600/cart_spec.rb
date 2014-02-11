@@ -2,8 +2,8 @@ require 'spec_helper'
 require 'fixtures/cart_arrays'
 
 describe Ruby2600::Cart do
-  let(:cart_4K) { Ruby2600::Cart.new(path_for_ROM :hello)   }
-  let(:cart_2K) { Ruby2600::Cart.new(path_for_ROM :hello2k) }
+  let(:cart_4K) { Ruby2600::Cart.new(HELLO_CART_ARRAY)   }
+  let(:cart_2K) { Ruby2600::Cart.new(HELLO2K_CART_ARRAY) }
 
   describe '#initialize' do
     it 'opens a file if given a filename (string)' do

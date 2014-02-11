@@ -1,8 +1,9 @@
 require 'spec_helper'
+require 'fixtures/cart_arrays'
 
 describe 'diagonal drawn with stetched missile and HMOV' do
 
-  let(:cart) { Ruby2600::Cart.new(path_for_ROM :diagonal_hmov) }
+  let(:cart) { Ruby2600::Cart.new(DIAGONAL_HMOV_CART_ARRAY) }
   let(:tia)  { Ruby2600::TIA.new }
   let(:cpu)  { Ruby2600::CPU.new }
   let(:riot) { Ruby2600::RIOT.new }
