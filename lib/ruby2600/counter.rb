@@ -22,7 +22,7 @@ module Ruby2600
     end
 
     def value
-      @internal_value / DIVIDER
+      (@internal_value / DIVIDER).to_i
     end
 
     def value=(x)
