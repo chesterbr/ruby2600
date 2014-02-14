@@ -4,19 +4,17 @@ gem 'rake'
 gem 'opal', :github => 'opal/opal'
 gem 'opal-rspec', '0.3.0.beta3'
 
-# gemspec
-# if RUBY_PLATFORM == 'java'
-#   spec.add_dependency 'swt'
-# else
-#   spec.add_dependency 'gosu'
-#   spec.add_dependency 'texplay'
+if RUBY_ENGINE == 'jruby'
+  gem 'swt'
+elsif RUBY_ENGINE == 'ruby'
+  gem 'gosu'
+  gem 'texplay'
 
-#   spec.add_development_dependency 'byebug'
-#   spec.add_development_dependency 'ruby-prof'
-# end
+  gem 'byebug'
+  gem 'ruby-prof'
+end
 
 gem 'bundler', '~> 1.3'
-gem 'rake'
 gem 'rubygems-bundler'
 gem 'rspec', '~> 3.0.0.beta1'
 gem 'guard-rspec'
