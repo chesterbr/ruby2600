@@ -40,7 +40,7 @@ For now, do this:
 
 ## Usage
 
-  bundle exec bin/ruby2600 /path/of/your/romfile.bin
+    bundle exec -Ilib bin/ruby2600 /path/of/your/romfile.bin
 
 There are a couple of test files under `spec/fixtures/files` you can try, but I suggest that you obtain a 2K or 4K .BIN file (for which you have the legal right to play, say, by owning the original cart).
 
