@@ -18,3 +18,4 @@ tmp
 spec/fixtures/files/vcs.h
 spec/fictures/files/dasm
 ruby2600.js
+Gemfile.lock
