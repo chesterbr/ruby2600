@@ -27,6 +27,11 @@ module Ruby2600
       @frame_generator.frame
     end
 
+    # FIXME test?
+    def scanline
+      @frame_generator.scanline
+    end
+
     # FIXME dry
 
     def [](address)
