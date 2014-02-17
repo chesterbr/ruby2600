@@ -3,7 +3,6 @@
 .bundle
 .config
 .yardoc
-Gemfile.lock
 InstalledFiles
 _yardoc
 coverage
@@ -18,3 +17,5 @@ tmp
 .DS_Store
 spec/fixtures/files/vcs.h
 spec/fictures/files/dasm
+ruby2600.js
+Gemfile.lock

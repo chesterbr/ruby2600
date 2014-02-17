@@ -1,8 +1,9 @@
 require 'spec_helper'
+require 'fixtures/cart_arrays'
 
 describe 'diagonal drawn with stetched missile and HMOV' do
 
-  let(:cart) { Ruby2600::Cart.new(path_for_ROM :diagonal_hmov) }
+  let(:cart) { Ruby2600::Cart.new(DIAGONAL_HMOV_CART_ARRAY) }
   let(:tia)  { Ruby2600::TIA.new }
   let(:cpu)  { Ruby2600::CPU.new }
   let(:riot) { Ruby2600::RIOT.new }
@@ -11,7 +12,7 @@ describe 'diagonal drawn with stetched missile and HMOV' do
   it 'draws the diagonal' do
     pending 'adjust the off-by-one drawing'
     tia.frame # first frame won't sync, discard it
-    2.times { text(tia.frame).should == hello_world_text }
+    2.times { expect(text(tia.frame)).to eq(hello_world_text) }
   end
 
   def text(frame)

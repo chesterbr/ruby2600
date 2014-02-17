@@ -10,7 +10,7 @@ describe Ruby2600::Graphic do
       let(:subject) { Ruby2600::Graphic.new(tia, 0) }
 
       it 'should always read the requested register' do
-        tia.reg.should_receive(:[]).with(HMP0)
+        expect(tia.reg).to receive(:[]).with(HMP0)
 
         subject.send(:reg, HMP0)
       end
@@ -20,7 +20,7 @@ describe Ruby2600::Graphic do
       let(:subject) { Ruby2600::Graphic.new(tia, 1) }
 
       it 'should read the matching register for the other object' do
-        tia.reg.should_receive(:[]).with(HMP1)
+        expect(tia.reg).to receive(:[]).with(HMP1)
 
         subject.send(:reg, HMP0)
       end
@@ -32,19 +32,19 @@ describe Ruby2600::Graphic do
       it 'by being nil if the graphic bit is clear' do
         subject.instance_variable_set(:@graphic_bit_value, 0)
 
-        subject.pixel.should == nil
+        expect(subject.pixel).to eq(nil)
       end
 
       it "by being the graphic color register's value if the graphic bit is set" do
         subject.instance_variable_set(:@graphic_bit_value, 1)
 
-        subject.pixel.should == 0xAB
+        expect(subject.pixel).to eq(0xAB)
       end
     end
 
     before do
-      subject.stub :tick
-      subject.stub :tick_graphic_circuit
+      allow(subject).to receive :tick
+      allow(subject).to receive :tick_graphic_circuit
       subject.class.color_register = [COLUPF, COLUP0, COLUP1].sample
       tia.reg[subject.class.color_register] = 0xAB
     end

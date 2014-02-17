@@ -22,15 +22,31 @@ module Ruby2600
       buffer
     end
 
+    # This scanline method will not store/return invisible scanlines
+    # meaning you can call it and reset horizontal drawing counter if nil
+    # FIXME review tests; Enduro errors out with it (maybe a clue to why it over-renders)
     def scanline
       intialize_scanline
       wait_horizontal_blank
-      draw_scanline
+      @beam_on ? visible_scanline : invisible_scanline
     end
+
+    # Slightly more performatic frame (maybe more compatible? less?)
+    # def frame
+    #   buffer = []
+    #   unless @beam_on
+    #     s = scanline until @beam_on
+    #   end
+    #   buffer << scanline while @beam_on
+    #   buffer.reject!(&:nil?)
+    #   @frame_counter.add if @frame_counter
+    #   buffer
+    # end
 
     def intialize_scanline
       @cpu.halted = false
       @tia.late_reset_hblank = false
+      @beam_on = !(@tia.vertical_blank? || @tia.vertical_sync?)
     end
 
     def wait_horizontal_blank
@@ -38,7 +54,7 @@ module Ruby2600
       HORIZONTAL_BLANK_CLK_COUNT.times { |color_clock| sync_2600_with color_clock }
     end
 
-    def draw_scanline
+    def visible_scanline
       scanline = Array.new(160, 0)
       VISIBLE_CLK_COUNT.times do |pixel|
         @tia.scanline_stage = @tia.late_reset_hblank && pixel < 8 ? :late_hblank : :visible
@@ -49,6 +65,16 @@ module Ruby2600
         scanline[pixel] = @tia.topmost_pixel if @tia.scanline_stage == :visible && !@tia.vertical_blank?
       end
       scanline
+    end
+
+    def invisible_scanline
+      VISIBLE_CLK_COUNT.times do |pixel|
+        @tia.scanline_stage = @tia.late_reset_hblank && pixel < 8 ? :late_hblank : :visible
+
+        @tia.update_collision_flags
+        sync_2600_with pixel + HORIZONTAL_BLANK_CLK_COUNT
+      end
+      nil
     end
 
     # All Atari chips use the same crystal for their clocks (with RIOT and

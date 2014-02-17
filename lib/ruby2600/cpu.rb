@@ -383,7 +383,7 @@ module Ruby2600
     end
 
     def push_word(value)
-      push value / 0x0100
+      push (value / 0x0100).to_i
       push byte(value)
     end
 
@@ -447,14 +447,14 @@ module Ruby2600
 
     def bcd_to_value(value)
       return value unless @d
-      ([value / 16, 9].min) * 10 + ([value % 16, 9].min)
+      ([(value / 16).to_i, 9].min) * 10 + ([value % 16, 9].min)
     end
 
     def value_to_bcd(value)
       return value unless @d
       value = 100 + value if value < 0
       value -= 100        if value > 99
-      (value / 10) * 16 + (value % 10)
+      (value / 10).to_i * 16 + (value % 10)
     end
 
     # Convenience conversions (most due to the lack of byte/word & signed/unsigned types)

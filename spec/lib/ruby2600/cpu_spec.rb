@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Ruby2600::CPU do
-  subject(:cpu) { Ruby2600::CPU.new }
+  let(:cpu) { Ruby2600::CPU.new }
 
   CPU_FLAGS.each do |flag|
     it 'should initialize with a readable #{flag} flag' do
@@ -11,7 +11,7 @@ describe Ruby2600::CPU do
 
   %w'x y a s'.each do |register|
     it "should initialize with a byte-size #{register} register" do
-      (0..255).should cover(cpu.send(register))
+      expect(0..255).to cover(cpu.send(register))
     end
   end
 
@@ -21,7 +21,7 @@ describe Ruby2600::CPU do
     it 'should boot at the address on the RESET vector ($FFFC)' do
       cpu.reset
 
-      cpu.pc.should == 0x1234
+      expect(cpu.pc).to eq(0x1234)
     end
   end
 

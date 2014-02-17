@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe 'vertical delay' do
-  subject(:frame_generator) { Ruby2600::FrameGenerator.new(cpu, tia, riot) }
+  let(:frame_generator) { Ruby2600::FrameGenerator.new(cpu, tia, riot) }
 
   let(:cpu)  { double 'cpu', :tick => nil, :halted= => nil }
   let(:riot) { double 'riot', :tick => nil }
@@ -39,12 +39,12 @@ describe 'vertical delay' do
     end
 
     it "should use new player by default" do
-      grp_on_scanline.should == 0xBB
+      expect(grp_on_scanline).to eq(0xBB)
     end
 
     it "should use old player if VDELP0 bit 0 is set" do
       tia[VDELP0] = rand(256) | 1
-      grp_on_scanline.should == 0xAA
+      expect(grp_on_scanline).to eq(0xAA)
     end
   end
 
@@ -61,12 +61,12 @@ describe 'vertical delay' do
     end
 
     it "should use new player by default" do
-      grp_on_scanline.should == 0xBB
+      expect(grp_on_scanline).to eq(0xBB)
     end
 
     it "should use old player if VDELP0 bit 0 is set" do
       tia[VDELP1] = rand(256) | 1
-      grp_on_scanline.should == 0xAA
+      expect(grp_on_scanline).to eq(0xAA)
     end
   end
 
@@ -82,13 +82,13 @@ describe 'vertical delay' do
     end
 
     it "should use new register (disabled) by default" do
-      ball_on_scanline.should_not == 0x22
+      expect(ball_on_scanline).not_to eq(0x22)
     end
 
     it "should use old register (enabled) if VDELP0 bit 0 is set" do
       pending "intermitent failures on this test, fix it"
       tia[VDELBL] = rand(256) & 1
-      ball_on_scanline.should == 0x22
+      expect(ball_on_scanline).to eq(0x22)
     end
   end
 end

@@ -1,11 +1,11 @@
-require 'simplecov'
-require 'simplecov-gem-adapter'
-SimpleCov.start 'gem'
+# require 'simplecov'
+# require 'simplecov-gem-adapter'
+# SimpleCov.start 'gem'
 
-require 'rubygems'
-require 'json'
-require 'humanize'
-require 'timeout'
+# require 'rubygems'
+# require 'json'
+# require 'humanize'
+# require 'timeout'
 
 require 'ruby2600'
 require 'support/shared_examples_for_bus.rb'
