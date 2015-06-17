@@ -38,6 +38,10 @@ For now, do this:
     bundle install
     chmod +x bin/*
 
+You may also need some dependencies for `gosu`. On OS X this does the trick:
+
+    brew install sdl2 libogg libvorbis
+
 ## Usage
 
     bundle exec -Ilib bin/ruby2600 /path/of/your/romfile.bin

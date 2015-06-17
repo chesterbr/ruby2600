@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
     spec.add_dependency 'swt'
   else
     spec.add_dependency 'gosu'
-    spec.add_dependency 'texplay'
+    spec.add_dependency 'texplay', '~> 0.4.4.pre'
 
     spec.add_development_dependency 'byebug'
     spec.add_development_dependency 'ruby-prof'
@@ -39,5 +39,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'humanize'
   spec.add_development_dependency 'simplecov'
   spec.add_development_dependency 'simplecov-gem-adapter'
-  spec.add_development_dependency 'json', '~> 1.7.7' # Simplecov(-gem-adapter?) requirement
 end
