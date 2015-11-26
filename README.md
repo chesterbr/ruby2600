@@ -97,6 +97,8 @@ Notice you can add support to other VMs by creating a run script under [`/bin`][
 - TIA tests don't cover a few aspects (see "Pending" specs);
 - `Bus` should auto-initialize the components when receiving a string (either on initialize or on a separate method);
 - *Maybe* `Player`/`Ball`/`Missile`/`Playfield` should not be separate classes, since most of their code is "configuration" for the generic `Graphic` (and its `Counter`).
+- There is some overuse of "magic" in CPU tests (mostly syntatic sugar to keep them descritive). Maybe it should be more properly encapsulated (outside of the test class itself).
+- RSpec 3 would improve the semantics (and even make some of the aforementioned magic unnecessary)
 - Convert this list to Github issues.
 
 ## FAQ
