@@ -2,7 +2,9 @@
 
 An experimental Atari™ 2600 emulator, 100% written in Ruby.
 
-![ruby2600](http://i.imgur.com/Zjgibpr.png "ruby2600")
+[![ruby2600](http://i.imgur.com/Zjgibpr.png "ruby2600")](http://www.slideshare.net/chesterbr/ruby2600-an-atari-2600-emulator-written-in-ruby)
+
+These [RubyConfBr 2013 slides](http://www.slideshare.net/chesterbr/ruby2600-an-atari-2600-emulator-written-in-ruby) showcase the general architecture and rationale.
 
 ## Current status
 
@@ -35,7 +37,9 @@ Standard Ruby (MRI) will use [Gosu](http://www.libgosu.org/) to display the fram
 
     git clone git@github.com:chesterbr/ruby2600.git
     cd ruby2600
-    rvm install # (or whatever you choose in order to install the .ruby-version ruby / JRuby / etc.)
+    # If you want to use JRuby:
+    # cp .ruby-version-for-jruby .ruby-version
+    rvm install # (or whatever you use to install the Ruby in .ruby-version)
     bundle install
 
 ## Usage
@@ -120,18 +124,17 @@ It is good, however, if you want to learn more about the 2600, as the lack of co
 
 #### Will you make it faster/add sound?
 
-Now that ruby2600 reached reasonable compatibility with general games (remaining glitches are unlikely to change the emulator structure in any aspect related to performance), it can be worked. See the slides mentioned below for some planned strategies.
+Now that ruby2600 reached reasonable compatibility with general games (remaining glitches are unlikely to change the emulator structure in any aspect related to performance), it can be worked. See the slides mentioned above for some planned strategies.
 
 If you want a full-speed emulator with sound and compatible with every single game under the sun, I wholehartedly recommend [Stella](http://stella.sourceforge.net/) - which has been an invaluable source of inspiration, debug help and implementation reference. It's what I use to play (other than my real Atari).
-
-#### Where can I find more information?
-
-- There are some comments and links on the trickier parts of the code, which refer to interesting pieces of documentation;
-- Slides from the [RubyConfBr 2013](http://www.rubyconf.com.br) presentation [available on SlideShare](http://www.slideshare.net/chesterbr/ruby2600-an-atari-2600-emulator-written-in-ruby). They show the overall architecture and are a good introduction for playing around.
 
 #### Is this logo renderable on an Atari?
 
 Not sure, I did it one day I was too bored to write code or slides. I'd say yes (as a playfield), as long as you are flexible with the background color (or use another object to render the characters). But I liked it, so I might eventually try to make a ROM that displays it.
+
+#### How to browse the source code?
+
+The slides mentioned above will give you an overview of the core classes. If you understand Atari architecture well, you may start with [`Bus`](https://github.com/chesterbr/ruby2600/blob/master/lib/ruby2600/bus.rb) (which, unsurprisingly, connects all the pieces together). [`CPU`](https://github.com/chesterbr/ruby2600/blob/master/lib/ruby2600/cpu.rb) is completely independent and may also be a good starting point.
 
 ## Optimization Ideas
 
