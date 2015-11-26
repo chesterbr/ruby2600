@@ -27,26 +27,22 @@ Check the [Known Issues](#known-issues) and [FAQ](#faq) below for more informati
 
 ## Installation
 
-Once this gem is published, you'll be able to install it with:
-
-    gem install ruby2600
-
-For now, do this:
-
-    git clone git@github.com:chesterbr/ruby2600.git
-    cd ruby2600
-    bundle install
-    chmod +x bin/*
-
-You may also need some dependencies for `gosu`. On OS X this does the trick:
+Standard Ruby (MRI) will use [Gosu](http://www.libgosu.org/) to display the frames and capture user input, so you need to ensure its dependencies are installed. On OS X, this does the trick:
 
     brew install sdl2 libogg libvorbis
 
+(you don't need that if you run on JRuby - which uses the built-in SWT - or if you will run headless)
+
+    git clone git@github.com:chesterbr/ruby2600.git
+    cd ruby2600
+    rvm install # (or whatever you choose in order to install the .ruby-version ruby / JRuby / etc.)
+    bundle install
+
 ## Usage
 
-    bundle exec -Ilib bin/ruby2600 /path/of/your/romfile.bin
+To run on MRI:
 
-There are a couple of test files under `spec/fixtures/files` you can try, but I suggest that you obtain a 2K or 4K .BIN file (for which you have the legal right to play, say, by owning the original cart).
+    bundle exec ruby -Ilib bin/ruby2600 /path/of/your/romfile.bin
 
 If you're using JRuby:
 
@@ -56,8 +52,9 @@ For profiling/performance testing, you'll likely prefer headless mode, e.g.:
 
     bundle exec ruby-prof bin/ruby2600-headless /path/of/your/romfile.bin 1
 
-(the number in the end is the number of frames to run - an extra one will be added, since first frame of several games is kind of bogus)
+(the number in the end is the number of frames to run; an extra one will be added, since first frame of most games is kind of bogus)
 
+Notice you can add support to other VMs by creating a run script under [`/bin`][https://github.com/chesterbr/ruby2600/tree/master/bin].
 
 ### Keys
 
@@ -68,7 +65,7 @@ For profiling/performance testing, you'll likely prefer headless mode, e.g.:
 - *3/4* - Color switch (3 = Color; 4 = black and white)
 - *5/6* - Player 0 difficulty switch (5 = Beginner, 6 = Advanced)
 - *7/8* - Player 1 difficulty switch (7 = Beginner, 8 = Advanced)
-- *W/A/S/D* - "Sticky" Player 0 joystick (to stop moving, press the non-sticky arrow)
+- *W/A/S/D* - "Sticky" Player 0 joystick (to stop moving, press the non-sticky matching arrow)
 
 ## Technical details
 
