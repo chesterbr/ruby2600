@@ -93,7 +93,7 @@ Notice you can add support to other VMs by creating a run script under [`/bin`][
 ### Technical debt:
 
 - MRI startup script could be improved (just quickly slapped a [Gosu](http://www.libgosu.org/) script on /bin to make it playable;
-- Add an Opal generation/running script (see [this post][http://chester.me/archives/2014/02/running-ruby2600-in-a-browser-with-opal/] on running ruby2600 on Opal)
+- Add an Opal generation/running script (see [this post](http://chester.me/archives/2014/02/running-ruby2600-in-a-browser-with-opal/) on running ruby2600 on Opal)
 - TIA tests don't cover a few aspects (see "Pending" specs);
 - `Bus` should auto-initialize the components when receiving a string (either on initialize or on a separate method);
 - *Maybe* `Player`/`Ball`/`Missile`/`Playfield` should not be separate classes, since most of their code is "configuration" for the generic `Graphic` (and its `Counter`).
