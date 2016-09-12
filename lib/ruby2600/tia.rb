@@ -104,22 +104,28 @@ module Ruby2600
     BIT_7 = 0b10000000
 
     def update_collision_flags
-      @reg[CXM0P] |= BIT_6 if @m0.pixel && @p0.pixel
-      @reg[CXM0P] |= BIT_7 if @m0.pixel && @p1.pixel
-      @reg[CXM1P] |= BIT_6 if @m1.pixel && @p1.pixel
-      @reg[CXM1P] |= BIT_7 if @m1.pixel && @p0.pixel
-      @reg[CXP0FB] |= BIT_6 if @p0.pixel && @bl.pixel
-      @reg[CXP0FB] |= BIT_7 if @p0.pixel && @pf.pixel
-      @reg[CXP1FB] |= BIT_6 if @p1.pixel && @bl.pixel
-      @reg[CXP1FB] |= BIT_7 if @p1.pixel && @pf.pixel
-      @reg[CXM0FB] |= BIT_6 if @m0.pixel && @bl.pixel
-      @reg[CXM0FB] |= BIT_7 if @m0.pixel && @pf.pixel
-      @reg[CXM1FB] |= BIT_6 if @m1.pixel && @bl.pixel
-      @reg[CXM1FB] |= BIT_7 if @m1.pixel && @pf.pixel
-      # c-c-c-combo breaker: bit 6 of CXLBPF is unused
-      @reg[CXBLPF] |= BIT_7 if @bl.pixel && @pf.pixel
-      @reg[CXPPMM] |= BIT_6 if @m0.pixel && @m1.pixel
-      @reg[CXPPMM] |= BIT_7 if @p0.pixel && @p1.pixel
+      # m0_pixel = @m0.pixel
+      # m1_pixel = @m1.pixel
+      # p0_pixel = @p0.pixel
+      # p1_pixel = @p1.pixel
+      # bl_pixel = @bl.pixel
+      # pf_pixel = @pf.pixel
+      # @reg[CXM0P] |= BIT_6 if m0_pixel && p0_pixel
+      # @reg[CXM0P] |= BIT_7 if m0_pixel && p1_pixel
+      # @reg[CXM1P] |= BIT_6 if m1_pixel && p1_pixel
+      # @reg[CXM1P] |= BIT_7 if m1_pixel && p0_pixel
+      # @reg[CXP0FB] |= BIT_6 if p0_pixel && bl_pixel
+      # @reg[CXP0FB] |= BIT_7 if p0_pixel && pf_pixel
+      # @reg[CXP1FB] |= BIT_6 if p1_pixel && bl_pixel
+      # @reg[CXP1FB] |= BIT_7 if p1_pixel && pf_pixel
+      # @reg[CXM0FB] |= BIT_6 if m0_pixel && bl_pixel
+      # @reg[CXM0FB] |= BIT_7 if m0_pixel && pf_pixel
+      # @reg[CXM1FB] |= BIT_6 if m1_pixel && bl_pixel
+      # @reg[CXM1FB] |= BIT_7 if m1_pixel && pf_pixel
+      # # c-c-c-combo breaker: bit 6 of CXLBPF is unused
+      # @reg[CXBLPF] |= BIT_7 if bl_pixel && pf_pixel
+      # @reg[CXPPMM] |= BIT_6 if m0_pixel && m1_pixel
+      # @reg[CXPPMM] |= BIT_7 if p0_pixel && p1_pixel
     end
 
     private

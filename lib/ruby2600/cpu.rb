@@ -1,3 +1,5 @@
+require 'inline'
+
 module Ruby2600
   class CPU
     attr_accessor :memory
@@ -459,13 +461,21 @@ module Ruby2600
 
     # Convenience conversions (most due to the lack of byte/word & signed/unsigned types)
 
-    def byte(value)
-      (value || 0) & 0xFF
+    inline do |builder|
+      builder.c '
+        char byte(char num) {
+          return num;
+        }'
+      builder.c '
+        int word(int num) {
+          return num;
+        }'
+
     end
 
-    def word(value)
-      (value || 0) & 0xFFFF
-    end
+    # def word(value)
+    #   (value || 0) & 0xFFFF
+    # end
 
     def bit(flag)
       flag ? 1 : 0
