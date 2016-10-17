@@ -1,9 +1,9 @@
 module Ruby2600
   class CPU
-    attr_accessor :memory
-    attr_accessor :pc, :a, :x, :y, :s
-    attr_accessor :n, :v, :d, :i, :z, :c  # Flags (P register): nv--dizc
-    attr_accessor :halted                 # Simulates RDY (if true, clock is ignored)
+    property :memory
+    property :pc, :a, :x, :y, :s
+    property :n, :v, :d, :i, :z, :c  # Flags (P register): nv--dizc
+    property :halted                 # Simulates RDY (if true, clock is ignored)
 
     RESET_VECTOR = 0xFFFC
     BRK_VECTOR   = 0xFFFE
@@ -67,16 +67,21 @@ module Ruby2600
     ]
 
     INSTRUCTION_GROUPS = [
-      %w'xxx BIT JMP JMPabs STY LDY CPY CPX',
-      %w'ORA AND EOR ADC    STA LDA CMP SBC',
-      %w'ASL ROL LSR ROR    STX LDX DEC INC'
+      ["xxx", "BIT", "JMP", "JMPabs", "STY", "LDY", "CPY", "CPX"],
+      ["ORA", "AND", "EOR", "ADC",    "STA", "LDA", "CMP", "SBC"],
+      ["ASL", "ROL", "LSR", "ROR",    "STX", "LDX", "DEC", "INC"]
     ]
+
+    macro const_set(name, value)
+      {{name}} = {{value}}
+    end
 
     INSTRUCTION_GROUPS.each_with_index do |names, cc|
       names.each_with_index do |name, aaa|
-        const_set name, (aaa << 5) + cc unless name == 'xxx'
+        const_set name, (aaa << 5) + cc unless name == "xxx"
       end
     end
+
 
     # Conditional branches (BPL, BMI, BVC, BVS, BCC, BCS, BNE, BEQ) and the symmetric
     # set/clear flag instructions (SEC, SEI, SED, CLD, CLI, CLD) also follow bit
@@ -85,8 +90,8 @@ module Ruby2600
 
     BXX = 0b00010000
     SCX = 0b00011000
-    BXX_FLAGS = [:@n, :@v, :@c, :@z]
-    SCX_FLAGS = [:@c, :@i, :@v, :@d] # @v not (officially) used
+    BXX_FLAGS = ["@n", "@v", "@c", "@z"]
+    SCX_FLAGS = ["@c", "@i", "@v", "@d"] # @v not (officially) used
 
     # Instructions that index (non-zero-page) memory have a 1-cycle penality if
     # the resulting address crosses page boundaries (trivia: it is, in fact, an
@@ -97,6 +102,7 @@ module Ruby2600
     def initialize
       @pc = @x = @y = @a = @s = 0
     end
+
 
     def reset
       @pc = memory_word(RESET_VECTOR)
@@ -122,7 +128,7 @@ module Ruby2600
       end
     end
 
-    private
+    # private
 
     # 6507 has an internal "T-state" that gets incremented as each clock cycle
     # advances within an instruction (cf. http://www.pagetable.com/?p=39).
@@ -486,3 +492,12 @@ module Ruby2600
     end
   end
 end
+
+cpu = Ruby2600::CPU.new
+cpu.memory = Array(Int32).new(65535)
+cpu.memory[0] = 0xEA
+cpu.pc = 0
+puts cpu.pc
+cpu.step
+puts cpu.pc
+
