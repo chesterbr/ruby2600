@@ -147,6 +147,8 @@ Here is a backlog of things that may help towards increasing performance:
 - We could easily do the color translation (currently done by the ui scripts) whenever a color register is written to, greatly reducing the number of lookups. We could also keep the more frequently used colors on a quick-access location (would not help with "rainbow" bound games, but quite a few stick to a reduced color set)
 -  [Lucas Fontes](https://github.com/lxfontes) tried reusing the scanline array with no noticeable improvement, but we might try having a fixed "framebuffer" array and rewriting it constantly, to kill the instantiation payload, or even consider an alternative structure to store the bytes. UPDATE: The `FrameGenerator` class makes it easy to test those things; I did an initial attempt of reusing buffer / using [NArray](http://narray.rubyforge.org/) for each scanline, but no noticeable improvement was found (maybe MRI *is* being smart enough to use integer types where appropriate).
 - Even though advanced pipelining is hard to implement on old architectures like 650x, it would be theoretically possible to parallelize the fetch/decode/execute phases (like most ARM processors do). Proper profiling is needed to assert the actual benefit of such an strategy before actually implementing it.
+- [Optcarrot](https://github.com/mame/optcarrot) did awesome strides regarding performance that we could benefit from. In particular, the CPU-GPU parallelism and other optimizations from [the RubyKaigi presentation](http://www.slideshare.net/mametter/optcarrot-a-pureruby-nes-emulator).
+- [JRuby+Truffle](https://eregon.me/blog/2016/11/28/optcarrot.html) is capable of running OptCarrot at 150fps, worth taking a look.
 
 ## Changelog
 
