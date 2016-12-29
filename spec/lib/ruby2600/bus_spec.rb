@@ -231,6 +231,6 @@ describe Ruby2600::Bus do
     end
   end
 
-  pending '2K carts / SARA / RIOT details from http://atariage.com/forums/topic/192418-mirrored-memory/'
+  skip '2K carts / SARA / RIOT details from http://atariage.com/forums/topic/192418-mirrored-memory/'
 
 end

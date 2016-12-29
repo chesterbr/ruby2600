@@ -86,13 +86,13 @@ describe Ruby2600::TIA do
     context 'VBLANK bit set' do
       before { tia[VBLANK] = rand_with_bit(1, :set) }
 
-      its(:vertical_blank?) { should be_true }
+      it { expect(tia.vertical_blank?).to be_truthy }
     end
 
     context 'VBLANK bit clear' do
       before { tia[VBLANK] = rand_with_bit(1, :clear) }
 
-      its(:vertical_blank?) { should be_false }
+      it { expect(tia.vertical_blank?).to be_falsey }
     end
   end
 
@@ -255,5 +255,5 @@ describe Ruby2600::TIA do
     end
   end
 
-  pending "Latches: INPT4-INPT5 bit (6) and INPT6-INPT7 bit(7)"
+  skip "Latches: INPT4-INPT5 bit (6) and INPT6-INPT7 bit(7)"
 end

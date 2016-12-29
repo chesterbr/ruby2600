@@ -787,7 +787,7 @@ describe Ruby2600::CPU do
 
         it_should 'set C flag'
 
-        pending 'Z FLAG TEST'
+        skip 'Z FLAG TEST'
       end
 
       context 'zero page' do
@@ -1510,7 +1510,7 @@ describe Ruby2600::CPU do
       end
 
       context 'indirect mode bug' do
-        pending 'not sure if will support'
+        skip 'not sure if will support'
       end
     end
 
@@ -3041,8 +3041,8 @@ describe Ruby2600::CPU do
     #     http://atariage.com/forums/topic/163876-flags-on-decimal-mode-on-the-nmos-6502/
     # Stella/M6502 has this verison of the V code (M6502.ins, L271-305):
     #        @v = (~(@a ^ load) & (@a ^ t) & 0x80) != 0
-    pending "undocumented flags on BCD mode"
+    skip "undocumented flags on BCD mode"
 
-    pending "nice CMP test: http://forum.6502.org/viewtopic.php?t=474#p2984"
+    skip "nice CMP test: http://forum.6502.org/viewtopic.php?t=474#p2984"
   end
 end

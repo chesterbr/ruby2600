@@ -227,9 +227,9 @@ describe Ruby2600::Player do
         end
       end
 
-      pending 'VDELPn test'
+      skip 'VDELPn test'
 
-      pending 'dynamic change of GRPn/REFPn test'
+      skip 'dynamic change of GRPn/REFPn test'
     end
   end
 end

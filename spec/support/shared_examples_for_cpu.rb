@@ -17,7 +17,7 @@ CPU_FLAGS.each do |flag|
     it do
       cpu.step
 
-      cpu.send(flag).should be_true
+      cpu.send(flag).should be_truthy
     end
   end
 
@@ -25,7 +25,7 @@ CPU_FLAGS.each do |flag|
     it do
       cpu.step
 
-      cpu.send(flag).should be_false
+      cpu.send(flag).should be_falsey
     end
   end
 end
@@ -37,7 +37,7 @@ shared_examples_for "preserve flags" do
 
       cpu.step
 
-      cpu.send(flag).should be_false
+      cpu.send(flag).should be_falsey
     end
 
     it "keeps #{flag} set" do
@@ -45,7 +45,7 @@ shared_examples_for "preserve flags" do
 
       cpu.step
 
-      cpu.send(flag).should be_true
+      cpu.send(flag).should be_truthy
     end
   end
 end
