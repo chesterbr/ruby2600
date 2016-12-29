@@ -16,7 +16,7 @@ describe Ruby2600::Player do
       160.times { player1.tick }
     end
 
-    it 'nots draw anything without GRP1' do
+    it 'does not draw anything without GRP1' do
       expect(pixels(player1, 1, 160)).not_to include(0xFF)
     end
 
@@ -27,7 +27,7 @@ describe Ruby2600::Player do
   end
 
   describe 'pixel' do
-    it 'nevers output if GRP0 is all zeros' do
+    it 'never outputs if GRP0 is all zeros' do
       tia.reg[GRP0] = 0
       300.times do
         player.tick
@@ -62,7 +62,7 @@ describe Ruby2600::Player do
           5.times { player.tick }
         end
 
-        it 'nots draw anything on current scanline' do
+        it 'does not draw anything on current scanline' do
           expect(pixels(player, 1, 160)).to eq(Array.new(160))
         end
 
@@ -152,7 +152,7 @@ describe Ruby2600::Player do
           5.times { player.tick }
         end
 
-        it 'nots draw anything on current scanline' do
+        it 'does not draw anything on current scanline' do
           expect(pixels(player, 1, 160)).to eq(Array.new(160))
         end
 
@@ -195,7 +195,7 @@ describe Ruby2600::Player do
           5.times { player.tick }
         end
 
-        it 'nots draw anything on current scanline' do
+        it 'does not draw anything on current scanline' do
           expect(pixels(player, 1, 160)).to eq(Array.new(160))
         end
 
@@ -221,7 +221,7 @@ describe Ruby2600::Player do
           5.times { player.tick }
         end
 
-        it 'nots be affected (should draw on subsequent scanlines)' do
+        it 'does not be affected (should draw on subsequent scanlines)' do
           160.times { player.tick }
           expect(pixels(player, 1, 160)).to eq(PIXELS_2X + Array.new(144))
         end

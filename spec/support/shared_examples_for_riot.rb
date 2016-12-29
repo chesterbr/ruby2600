@@ -36,7 +36,7 @@ shared_examples_for 'a timer with clock interval' do |interval|
   end
 
   context 'instat (timer status)' do
-    it 'haves bits 6 & 7 clear if no underflow happened' do
+    it 'has bits 6 & 7 clear if no underflow happened' do
       10.times do
         expect(riot[INSTAT][6]).to eq(0)
         expect(riot[INSTAT][7]).to eq(0)
@@ -44,7 +44,7 @@ shared_examples_for 'a timer with clock interval' do |interval|
       end
     end
 
-    it 'haves bits 6 and 7 set after any underflow (and reset by an init)' do
+    it 'has bits 6 and 7 set after any underflow (and reset by an init)' do
       3.times do
         riot[timer_register] = 0x01
         expect(riot[INSTAT][6]).to eq(0)
@@ -60,14 +60,14 @@ shared_examples_for 'a timer with clock interval' do |interval|
       end
     end
 
-    it 'haves bit 6 clear after it is read' do
+    it 'has bit 6 clear after it is read' do
       riot[timer_register] = 0x01
       interval.times { riot.tick }
       expect(riot[INSTAT][6]).to eq(1)
       expect(riot[INSTAT][6]).to eq(0)
     end
 
-    it 'nots have bit 7 affected by a read' do
+    it 'does not have bit 7 affected by a read' do
       riot[timer_register] = 0x01
       interval.times { riot.tick }
       expect(riot[INSTAT][7]).to eq(1)

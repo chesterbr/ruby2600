@@ -129,7 +129,7 @@ describe Ruby2600::TIA do
       CXM0P, CXM1P, CXP0FB, CXP1FB, CXM0FB, CXM1FB, CXBLPF, CXPPMM,
       INPT0, INPT1, INPT2, INPT3, INPT4, INPT5
     ].each do |r|
-      it "nots store the value for #{r}" do
+      it "does not store the value for #{r}" do
         value = rand(256)
         expect(tia.reg).not_to receive(:[]=).with(r, value)
 

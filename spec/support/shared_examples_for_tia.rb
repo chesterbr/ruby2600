@@ -66,7 +66,7 @@ shared_examples_for 'update collision register bit for objects' do |register, bi
 end
 
 shared_examples_for 'reflect port input' do |port|
-  it "set/clears bit 7 on high/low level" do
+  it "sets/clears bit 7 on high/low level" do
     tia.set_port_level port, :low
     expect(tia[INPT0 + port][7]).to eq(0)
 

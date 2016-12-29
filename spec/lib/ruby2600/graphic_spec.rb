@@ -67,13 +67,13 @@ describe Ruby2600::Graphic do
     # end
 
     # context 'in extended hblank (aka "comb effect", caused by HMOVE during hblank)' do
-    #   it 'nots tick the counter' do
+    #   it 'does not tick the counter' do
     #     subject.counter.should_not_receive(:tick)
 
     #     subject.pixel :extended_hblank => true
     #   end
 
-    #   it 'nots advance the graphic' do
+    #   it 'does not advance the graphic' do
     #     subject.should_not_receive(:tick_graphic_circuit)
 
     #     subject.pixel :extended_hblank => true

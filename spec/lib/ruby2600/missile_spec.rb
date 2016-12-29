@@ -16,7 +16,7 @@ describe Ruby2600::Missile do
       160.times { missile1.tick }
     end
 
-    it 'nevers output if ENAM1 is disabled' do
+    it 'never outputs if ENAM1 is disabled' do
       expect(pixels(missile1, 1, 160)).not_to include(0xFF)
     end
 
@@ -31,7 +31,7 @@ describe Ruby2600::Missile do
       tia.reg[COLUP0] = rand(255) + 1
     end
 
-    it 'nevers output if ENAM0 is disabled' do
+    it 'never outputs if ENAM0 is disabled' do
       tia.reg[ENAM0] = 0
 
       expect(pixels(missile, 1, 300)).to eq(Array.new(300))
@@ -67,7 +67,7 @@ describe Ruby2600::Missile do
           4.times { missile.tick } # 4-bit delay
         end
 
-        it 'nots draw anything on current scanline' do
+        it 'does not draw anything on current scanline' do
           expect(pixels(missile, 1, 160)).to eq(Array.new(160))
         end
 
@@ -203,7 +203,7 @@ describe Ruby2600::Missile do
       rand(160).times { player.tick }
     end
 
-    it "nots affect the player's counter" do
+    it "does not affect the player's counter" do
       expect {
         missile.reset_to player
       }.to_not change { player.value }

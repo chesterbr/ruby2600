@@ -13,7 +13,7 @@ describe Ruby2600::Ball do
       ball.reset
     end
 
-    it 'nevers output if ENABL is disabled' do
+    it 'never outputs if ENABL is disabled' do
       tia.reg[ENABL] = 0
 
       pixels(ball, 1, 300).  == Array.new(300)
@@ -41,7 +41,7 @@ describe Ruby2600::Ball do
           expect(pixels(ball, 1, 160)).to eq(scanline_with_object(1, color[0]))
         end
 
-        it 'NOTs be affected by NUSZ0 (it is not player/missile)' do
+        it 'is NOT affected by NUSZ0 (it is not player/missile)' do
           tia.reg[NUSIZ0] = 1
 
           expect(pixels(ball, 1, 160)).to eq(scanline_with_object(1, color[0]))

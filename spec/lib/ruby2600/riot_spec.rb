@@ -11,7 +11,7 @@ describe Ruby2600::RIOT do
   end
 
   describe 'ram (#ram)' do
-    it 'haves lower 128 bytes available for reading/writing' do
+    it 'has lower 128 bytes available for reading/writing' do
       0.upto(127).each do |position|
         value = Random.rand(256)
         riot[position] = value

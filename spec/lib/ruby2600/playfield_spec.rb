@@ -11,7 +11,7 @@ describe Ruby2600::Playfield do
   end
 
   describe 'pixel' do
-    it 'nevers output if COLUP0 is all zeros' do
+    it 'never outputs if COLUP0 is all zeros' do
       tia.reg[COLUP0] = 0
       300.times { expect(playfield.pixel).to be_nil }
     end

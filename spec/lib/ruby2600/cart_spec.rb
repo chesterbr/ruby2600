@@ -4,7 +4,7 @@ describe Ruby2600::Cart do
   let(:cart_4K) { Ruby2600::Cart.new(path_for_ROM :hello)   }
   let(:cart_2K) { Ruby2600::Cart.new(path_for_ROM :hello2k) }
 
-  it 'silentlys ignore writes' do
+  it 'silently ignore writes' do
     old_value = cart_4K[0x0000]
 
     cart_4K[0x0000] = rand(256)
