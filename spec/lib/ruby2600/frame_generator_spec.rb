@@ -9,7 +9,7 @@ describe Ruby2600::FrameGenerator do
 
   describe '#scanline' do
     context 'CPU timing' do
-      it 'should spend 76 CPU cycles generating a scanline' do
+      it 'spends 76 CPU cycles generating a scanline' do
         expect(cpu).to receive(:tick).exactly(76).times
 
         frame_generator.scanline
@@ -17,13 +17,13 @@ describe Ruby2600::FrameGenerator do
     end
 
     context 'RIOT timing' do
-      it 'should tick RIOT 76 times while generating a scanline, regardless of CPU timing' do
+      it 'ticks RIOT 76 times while generating a scanline, regardless of CPU timing' do
         expect(riot).to receive(:tick).exactly(76).times
 
         frame_generator.scanline
       end
 
-      it 'should tick RIOT even if CPU is halted' do
+      it 'ticks RIOT even if CPU is halted' do
         allow(cpu).to receive(:tick) { allow(cpu).to receive(:halted).and_return(:true) }
         expect(riot).to receive(:tick).exactly(76).times
 
@@ -31,7 +31,7 @@ describe Ruby2600::FrameGenerator do
       end
     end
 
-    it 'should "un-halt" the CPU before starting a new scanline (i.e., before its horizontal blank)' do
+    it '"un-halt"s the CPU before starting a new scanline (i.e., before its horizontal blank)' do
       expect(cpu).to receive(:halted=).with(false) do
         expect(frame_generator).to receive(:wait_horizontal_blank)
       end

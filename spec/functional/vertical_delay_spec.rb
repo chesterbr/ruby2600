@@ -38,11 +38,11 @@ describe 'vertical delay' do
       tia[GRP0] = 0xBB
     end
 
-    it "should use new player by default" do
+    it "uses new player by default" do
       expect(grp_on_scanline).to eq(0xBB)
     end
 
-    it "should use old player if VDELP0 bit 0 is set" do
+    it "uses old player if VDELP0 bit 0 is set" do
       tia[VDELP0] = rand(256) | 1
       expect(grp_on_scanline).to eq(0xAA)
     end
@@ -60,11 +60,11 @@ describe 'vertical delay' do
       tia[GRP1] = 0xBB
     end
 
-    it "should use new player by default" do
+    it "uses new player by default" do
       expect(grp_on_scanline).to eq(0xBB)
     end
 
-    it "should use old player if VDELP0 bit 0 is set" do
+    it "uses old player if VDELP0 bit 0 is set" do
       tia[VDELP1] = rand(256) | 1
       expect(grp_on_scanline).to eq(0xAA)
     end
@@ -81,11 +81,11 @@ describe 'vertical delay' do
       tia[ENABL] = 0b00
     end
 
-    it "should use new register (disabled) by default" do
+    it "uses new register (disabled) by default" do
       expect(ball_on_scanline).not_to eq(0x22)
     end
 
-    it "should use old register (enabled) if VDELP0 bit 0 is set" do
+    it "uses old register (enabled) if VDELP0 bit 0 is set" do
       skip "intermitent failures on this test, fix it"
       tia[VDELBL] = rand(256) & 1
       expect(ball_on_scanline).to eq(0x22)

@@ -9,7 +9,7 @@ describe Ruby2600::Graphic do
     context 'p0 / m0 / bl' do
       let(:subject) { Ruby2600::Graphic.new(tia, 0) }
 
-      it 'should always read the requested register' do
+      it 'alwayss read the requested register' do
         expect(tia.reg).to receive(:[]).with(HMP0)
 
         subject.send(:reg, HMP0)
@@ -19,7 +19,7 @@ describe Ruby2600::Graphic do
     context 'p1 / m1' do
       let(:subject) { Ruby2600::Graphic.new(tia, 1) }
 
-      it 'should read the matching register for the other object' do
+      it 'reads the matching register for the other object' do
         expect(tia.reg).to receive(:[]).with(HMP1)
 
         subject.send(:reg, HMP0)
@@ -51,35 +51,35 @@ describe Ruby2600::Graphic do
 
     # REVIEW these
     # context 'in visible scanline' do
-    #   it 'should tick the counter' do
+    #   it 'ticks the counter' do
     #     subject.counter.should_receive(:tick)
 
     #     subject.pixel
     #   end
 
-    #   it 'should advance the graphic bit' do
+    #   it 'advances the graphic bit' do
     #     subject.should_receive(:tick_graphic_circuit)
 
     #     subject.pixel
     #   end
 
-    #   it_should 'reflect graphic bit'
+    #   it_does 'reflect graphic bit'
     # end
 
     # context 'in extended hblank (aka "comb effect", caused by HMOVE during hblank)' do
-    #   it 'should not tick the counter' do
+    #   it 'nots tick the counter' do
     #     subject.counter.should_not_receive(:tick)
 
     #     subject.pixel :extended_hblank => true
     #   end
 
-    #   it 'should not advance the graphic' do
+    #   it 'nots advance the graphic' do
     #     subject.should_not_receive(:tick_graphic_circuit)
 
     #     subject.pixel :extended_hblank => true
     #   end
 
-    #   it_should 'reflect graphic bit' # (won't be displayed, but needed for collision checking)
+    #   it_does 'reflect graphic bit' # (won't be displayed, but needed for collision checking)
     # end
   end
 end

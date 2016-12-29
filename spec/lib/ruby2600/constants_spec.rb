@@ -5,7 +5,7 @@ require 'spec_helper'
 # guaranteeing that chips will work regardless of the mirror used by games
 
 describe Ruby2600::Constants do
-  it 'should use $00-$3F mirror in all TIA constants' do
+  it 'uses $00-$3F mirror in all TIA constants' do
     [
       VSYNC, VBLANK, WSYNC, RSYNC, NUSIZ0, NUSIZ1, COLUP0, COLUP1, COLUPF,
       COLUBK, CTRLPF, REFP0, REFP1, PF0, PF1, PF2, RESP0, RESP1,
@@ -17,7 +17,7 @@ describe Ruby2600::Constants do
     ].each { |reg| expect(reg).to be <= 0x3F }
   end
 
-  it 'should use $0280-$029x mirror in al RIOT constants' do
+  it 'uses $0280-$029x mirror in al RIOT constants' do
     [
       SWCHA, SWACNT, SWCHB, SWBCNT, INTIM, INSTAT, TIM1T, TIM8T, TIM64T, T1024T
     ].each do |reg|

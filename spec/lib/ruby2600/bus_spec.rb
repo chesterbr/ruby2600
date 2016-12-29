@@ -21,31 +21,31 @@ describe Ruby2600::Bus do
   RIOT_RAM_ADDRESSES = ALL_ADDRESSES.select { |a| a[12] == 0 && a[9] == 0 && a[7] == 1 }
 
   context 'initialization' do
-    it 'should wire itself as a memory proxy for CPU' do
+    it 'wires itself as a memory proxy for CPU' do
       expect(cpu).to receive(:memory=).with(instance_of(Ruby2600::Bus))
 
       bus
     end
 
-    it 'should wire TIA to CPU (so it can drive the CPU timing)' do
+    it 'wires TIA to CPU (so it can drive the CPU timing)' do
       expect(tia).to receive(:cpu=).with(cpu)
 
       bus
     end
 
-    it 'should wire TIA to RIOT (so it can drive the timers)' do
+    it 'wires TIA to RIOT (so it can drive the timers)' do
       expect(tia).to receive(:riot=).with(riot)
 
       bus
     end
 
-    it 'should reset CPU' do
+    it 'resets CPU' do
       expect(cpu).to receive(:reset)
 
       bus
     end
 
-    it 'should put all switches and inputs in default (reset/released) position' do
+    it 'puts all switches and inputs in default (reset/released) position' do
       # FIXME button 0 (on TIA)
       expect(riot).to receive(:portA=).with(0b11111111)
       expect(riot).to receive(:portB=).with(0b11111111)
@@ -63,42 +63,42 @@ describe Ruby2600::Bus do
     end
 
     context 'normal directions' do
-      it_should 'set bits on RIOT port after switch is set/pressed',    :portA, 0b11101111, :p0_joystick_up
-      it_should 'set bits on RIOT port after switch is set/pressed',    :portA, 0b11011111, :p0_joystick_down
-      it_should 'set bits on RIOT port after switch is set/pressed',    :portA, 0b10111111, :p0_joystick_left
-      it_should 'set bits on RIOT port after switch is set/pressed',    :portA, 0b01111111, :p0_joystick_right
-      it_should 'set bits on RIOT port after switch is reset/released', :portA, 0b11111111, :p0_joystick_up
-      it_should 'set bits on RIOT port after switch is reset/released', :portA, 0b11111111, :p0_joystick_down
-      it_should 'set bits on RIOT port after switch is reset/released', :portA, 0b11111111, :p0_joystick_left
-      it_should 'set bits on RIOT port after switch is reset/released', :portA, 0b11111111, :p0_joystick_right
+      it_does 'set bits on RIOT port after switch is set/pressed',    :portA, 0b11101111, :p0_joystick_up
+      it_does 'set bits on RIOT port after switch is set/pressed',    :portA, 0b11011111, :p0_joystick_down
+      it_does 'set bits on RIOT port after switch is set/pressed',    :portA, 0b10111111, :p0_joystick_left
+      it_does 'set bits on RIOT port after switch is set/pressed',    :portA, 0b01111111, :p0_joystick_right
+      it_does 'set bits on RIOT port after switch is reset/released', :portA, 0b11111111, :p0_joystick_up
+      it_does 'set bits on RIOT port after switch is reset/released', :portA, 0b11111111, :p0_joystick_down
+      it_does 'set bits on RIOT port after switch is reset/released', :portA, 0b11111111, :p0_joystick_left
+      it_does 'set bits on RIOT port after switch is reset/released', :portA, 0b11111111, :p0_joystick_right
     end
 
     context 'diagonal left + (up|down)' do
       before { bus.p0_joystick_left = true }
 
-      it_should 'set bits on RIOT port after switch is set/pressed',    :portA, 0b10101111, :p0_joystick_up
-      it_should 'set bits on RIOT port after switch is reset/released', :portA, 0b10111111, :p0_joystick_up
-      it_should 'set bits on RIOT port after switch is set/pressed',    :portA, 0b10011111, :p0_joystick_down
-      it_should 'set bits on RIOT port after switch is reset/released', :portA, 0b10111111, :p0_joystick_down
+      it_does 'set bits on RIOT port after switch is set/pressed',    :portA, 0b10101111, :p0_joystick_up
+      it_does 'set bits on RIOT port after switch is reset/released', :portA, 0b10111111, :p0_joystick_up
+      it_does 'set bits on RIOT port after switch is set/pressed',    :portA, 0b10011111, :p0_joystick_down
+      it_does 'set bits on RIOT port after switch is reset/released', :portA, 0b10111111, :p0_joystick_down
     end
 
     context 'diagonal right + (up|down)' do
       before { bus.p0_joystick_right = true }
 
-      it_should 'set bits on RIOT port after switch is set/pressed',    :portA, 0b01101111, :p0_joystick_up
-      it_should 'set bits on RIOT port after switch is reset/released', :portA, 0b01111111, :p0_joystick_up
-      it_should 'set bits on RIOT port after switch is set/pressed',    :portA, 0b01011111, :p0_joystick_down
-      it_should 'set bits on RIOT port after switch is reset/released', :portA, 0b01111111, :p0_joystick_down
+      it_does 'set bits on RIOT port after switch is set/pressed',    :portA, 0b01101111, :p0_joystick_up
+      it_does 'set bits on RIOT port after switch is reset/released', :portA, 0b01111111, :p0_joystick_up
+      it_does 'set bits on RIOT port after switch is set/pressed',    :portA, 0b01011111, :p0_joystick_down
+      it_does 'set bits on RIOT port after switch is reset/released', :portA, 0b01111111, :p0_joystick_down
     end
 
     context 'fire button' do
-      it 'should put TIA input port 4 on low when pressed' do
+      it 'puts TIA input port 4 on low when pressed' do
         expect(tia).to receive(:set_port_level).with(4, :low)
 
         bus.p0_joystick_fire = true
       end
 
-      it 'should put TIA input port 4 on high when released' do
+      it 'puts TIA input port 4 on high when released' do
         expect(tia).to receive(:set_port_level).with(4, :high)
 
         bus.p0_joystick_fire = false
@@ -116,24 +116,24 @@ describe Ruby2600::Bus do
     end
 
     context 'single-switch press/release' do
-      it_should 'set bits on RIOT port after switch is set/pressed',    :portB, 0b11111110, :reset_switch
-      it_should 'set bits on RIOT port after switch is set/pressed',    :portB, 0b11111101, :select_switch
-      it_should 'set bits on RIOT port after switch is set/pressed',    :portB, 0b11110111, :color_bw_switch
-      it_should 'set bits on RIOT port after switch is set/pressed',    :portB, 0b10111111, :p0_difficulty_switch
-      it_should 'set bits on RIOT port after switch is set/pressed',    :portB, 0b01111111, :p1_difficulty_switch
-      it_should 'set bits on RIOT port after switch is reset/released', :portB, 0b11111111, :reset_switch
-      it_should 'set bits on RIOT port after switch is reset/released', :portB, 0b11111111, :select_switch
-      it_should 'set bits on RIOT port after switch is reset/released', :portB, 0b11111111, :color_bw_switch
-      it_should 'set bits on RIOT port after switch is reset/released', :portB, 0b11111111, :p0_difficulty_switch
-      it_should 'set bits on RIOT port after switch is reset/released', :portB, 0b11111111, :p1_difficulty_switch
+      it_does 'set bits on RIOT port after switch is set/pressed',    :portB, 0b11111110, :reset_switch
+      it_does 'set bits on RIOT port after switch is set/pressed',    :portB, 0b11111101, :select_switch
+      it_does 'set bits on RIOT port after switch is set/pressed',    :portB, 0b11110111, :color_bw_switch
+      it_does 'set bits on RIOT port after switch is set/pressed',    :portB, 0b10111111, :p0_difficulty_switch
+      it_does 'set bits on RIOT port after switch is set/pressed',    :portB, 0b01111111, :p1_difficulty_switch
+      it_does 'set bits on RIOT port after switch is reset/released', :portB, 0b11111111, :reset_switch
+      it_does 'set bits on RIOT port after switch is reset/released', :portB, 0b11111111, :select_switch
+      it_does 'set bits on RIOT port after switch is reset/released', :portB, 0b11111111, :color_bw_switch
+      it_does 'set bits on RIOT port after switch is reset/released', :portB, 0b11111111, :p0_difficulty_switch
+      it_does 'set bits on RIOT port after switch is reset/released', :portB, 0b11111111, :p1_difficulty_switch
     end
 
     context 'multiple switches' do
       context 'P1 difficulty set (A)' do
         before { bus.p1_difficulty_switch = true }
 
-        it_should 'set bits on RIOT port after switch is set/pressed',    :portB, 0b01111101, :select_switch
-        it_should 'set bits on RIOT port after switch is reset/released', :portB, 0b01111111, :select_switch
+        it_does 'set bits on RIOT port after switch is set/pressed',    :portB, 0b01111101, :select_switch
+        it_does 'set bits on RIOT port after switch is reset/released', :portB, 0b01111111, :select_switch
       end
 
       context 'everything but reset set/pressed' do
@@ -144,8 +144,8 @@ describe Ruby2600::Bus do
           bus.p1_difficulty_switch = true
         end
 
-        it_should 'set bits on RIOT port after switch is set/pressed', :portB, 0b00110100, :reset_switch
-        it_should 'set bits on RIOT port after switch is reset/released', :portB, 0b00110101, :reset_switch
+        it_does 'set bits on RIOT port after switch is set/pressed', :portB, 0b00110100, :reset_switch
+        it_does 'set bits on RIOT port after switch is reset/released', :portB, 0b00110101, :reset_switch
       end
     end
   end

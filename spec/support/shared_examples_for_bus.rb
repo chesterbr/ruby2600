@@ -23,7 +23,7 @@
 end
 
 shared_examples_for 'set bits on RIOT port after switch is set/pressed' do |port, bits, switch|
-  it 'should update portB' do
+  it 'updates portB' do
     expect(riot).to receive("#{port}=").with(bits)
 
     bus.send "#{switch}=", true
@@ -31,7 +31,7 @@ shared_examples_for 'set bits on RIOT port after switch is set/pressed' do |port
 end
 
 shared_examples_for 'set bits on RIOT port after switch is reset/released' do |port, bits, switch|
-  it 'should update portB' do
+  it 'updates portB' do
     expect(riot).to receive("#{port}=").with(bits)
 
     bus.send "#{switch}=", false

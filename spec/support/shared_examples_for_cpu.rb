@@ -110,13 +110,13 @@ shared_examples_for 'set memory with P for various flag values' do |address|
   context 'all flags set' do
     before { cpu.n = cpu.v = cpu.d = cpu.i = cpu.z = cpu.c = true }
 
-    it_should 'set memory with value', address, 0b11111111
+    it_does 'set memory with value', address, 0b11111111
   end
 
   context 'all flags clear' do
     before { cpu.n = cpu.v = cpu.d = cpu.i = cpu.z = cpu.c = false }
 
-    it_should 'set memory with value', address, 0b00110000
+    it_does 'set memory with value', address, 0b00110000
   end
 
   context 'mixed flags' do
@@ -125,7 +125,7 @@ shared_examples_for 'set memory with P for various flag values' do |address|
       cpu.v = cpu.i = cpu.c = false
     end
 
-    it_should 'set memory with value', address, 0b10111010
+    it_does 'set memory with value', address, 0b10111010
   end
 end
 
@@ -133,35 +133,35 @@ shared_examples_for 'read flags (P) from memory for various values' do |address|
   context 'all flags set' do
     before { cpu.memory[address] = 0b11111111 }
 
-    it_should 'set N flag'
-    it_should 'set V flag'
-    it_should 'set D flag'
-    it_should 'set I flag'
-    it_should 'set Z flag'
-    it_should 'set C flag'
+    it_does 'set N flag'
+    it_does 'set V flag'
+    it_does 'set D flag'
+    it_does 'set I flag'
+    it_does 'set Z flag'
+    it_does 'set C flag'
   end
 
   context 'all flags clear' do
     before { cpu.memory[address] = 0 }
 
-    it_should 'reset N flag'
-    it_should 'reset V flag'
-    it_should 'reset D flag'
-    it_should 'reset I flag'
-    it_should 'reset Z flag'
-    it_should 'reset C flag'
+    it_does 'reset N flag'
+    it_does 'reset V flag'
+    it_does 'reset D flag'
+    it_does 'reset I flag'
+    it_does 'reset Z flag'
+    it_does 'reset C flag'
   end
 
   context 'mixed flags' do
     before { cpu.memory[address] = 0b10111010 }
 
-    it_should 'set N flag'
-    it_should 'set D flag'
-    it_should 'set Z flag'
+    it_does 'set N flag'
+    it_does 'set D flag'
+    it_does 'set Z flag'
 
-    it_should 'reset V flag'
-    it_should 'reset I flag'
-    it_should 'reset C flag'
+    it_does 'reset V flag'
+    it_does 'reset I flag'
+    it_does 'reset C flag'
   end
 end
 
@@ -174,11 +174,11 @@ shared_examples_for "a branch instruction" do
       cpu.send("#{flag}=", !branch_state)
     end
 
-    it_should 'take two cycles'
+    it_does 'take two cycles'
 
-    it_should 'advance PC by two'
+    it_does 'advance PC by two'
 
-    it_should 'preserve flags'
+    it_does 'preserve flags'
   end
 
   context 'branch' do
@@ -187,21 +187,21 @@ shared_examples_for "a branch instruction" do
     context 'forward on same page' do
       before { cpu.memory[0x0510..0x0511] = opcode, 0x02 }  # B?? $0514
 
-      it_should 'take three cycles'
+      it_does 'take three cycles'
 
-      it_should 'set PC value', 0x0514
+      it_does 'set PC value', 0x0514
 
-      it_should 'preserve flags'
+      it_does 'preserve flags'
     end
 
     context 'backward on same page' do
       before { cpu.memory[0x0510..0x0511] = opcode, 0xFC }  # B?? $050E
 
-      it_should 'take three cycles'
+      it_does 'take three cycles'
 
-      it_should 'set PC value', 0x050E
+      it_does 'set PC value', 0x050E
 
-      it_should 'preserve flags'
+      it_does 'preserve flags'
     end
 
     context 'forward on another page' do
@@ -210,21 +210,21 @@ shared_examples_for "a branch instruction" do
         cpu.memory[0x0590..0x0591] = opcode, 0x7F # B?? $0611
       end
 
-      it_should 'take four cycles'
+      it_does 'take four cycles'
 
-      it_should 'set PC value', 0x0611
+      it_does 'set PC value', 0x0611
 
-      it_should 'preserve flags'
+      it_does 'preserve flags'
     end
 
     context 'backward on another page' do
       before { cpu.memory[0x0510..0x0511] = opcode, 0x80 }  # B?? $0492
 
-      it_should 'take four cycles'
+      it_does 'take four cycles'
 
-      it_should 'set PC value', 0x0492
+      it_does 'set PC value', 0x0492
 
-      it_should 'preserve flags'
+      it_does 'preserve flags'
     end
 
     context 'forward wrapping around memory' do
@@ -233,11 +233,11 @@ shared_examples_for "a branch instruction" do
         cpu.memory[0xFF90..0xFF91] = opcode, 0x7F # B?? $0611
       end
 
-      it_should 'take four cycles'
+      it_does 'take four cycles'
 
-      it_should 'set PC value', 0x0011
+      it_does 'set PC value', 0x0011
 
-      it_should 'preserve flags'
+      it_does 'preserve flags'
     end
   end
 end
@@ -246,31 +246,31 @@ shared_examples_for 'compare and set flags' do |register, value|
   context 'register < value' do
     before { cpu.send("#{register}=", value - 1) }
 
-    it_should 'set N flag'
+    it_does 'set N flag'
 
-    it_should 'reset C flag'
+    it_does 'reset C flag'
 
-    it_should 'reset Z flag'
+    it_does 'reset Z flag'
   end
 
   context 'register = value' do
     before { cpu.send("#{register}=", value) }
 
-    it_should 'reset N flag'
+    it_does 'reset N flag'
 
-    it_should 'set C flag'
+    it_does 'set C flag'
 
-    it_should 'set Z flag'
+    it_does 'set Z flag'
   end
 
   context 'register > value' do
     before { cpu.send("#{register}=", value + 1) }
 
-    it_should 'reset N flag'
+    it_does 'reset N flag'
 
-    it_should 'set C flag'
+    it_does 'set C flag'
 
-    it_should 'reset Z flag'
+    it_does 'reset Z flag'
   end
 end
 

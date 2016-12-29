@@ -6,13 +6,13 @@ describe Ruby2600::Counter do
   let(:sample_of_initial_values) { Array.new(100) { Ruby2600::Counter.new.value } }
 
   describe '#initialize' do
-    it 'should initialize with a random value' do
+    it 'initializes with a random value' do
       unique_value_count = sample_of_initial_values.uniq.length
 
       expect(unique_value_count).to be > 1
     end
 
-    it 'should initialize with valid values' do
+    it 'initializes with valid values' do
       sample_of_initial_values.each do |value|
         expect(value).to be_an Integer
         expect(0..39).to cover value
@@ -24,7 +24,7 @@ describe Ruby2600::Counter do
     let(:callback_double) { double 'callback' }
     before { subject.on_change(callback_double) }
 
-    it 'should be triggered every 4th call' do
+    it 'is triggered every 4th call' do
       subject.value = rand(40)
       3.times { subject.tick }
       expect(callback_double).to receive(:on_counter_change)
@@ -32,7 +32,7 @@ describe Ruby2600::Counter do
       subject.tick
     end
 
-    it 'should be triggered on wrap' do
+    it 'is triggered on wrap' do
       subject.value = 38
       expect(callback_double).to receive(:on_counter_change).twice
 
@@ -41,7 +41,7 @@ describe Ruby2600::Counter do
   end
 
   describe '#strobe' do
-    it 'should reset counter with RESET value from http://www.atarihq.com/danb/files/TIA_HW_Notes.txt' do
+    it 'resets counter with RESET value from http://www.atarihq.com/danb/files/TIA_HW_Notes.txt' do
       subject.reset
       expect(subject.value).to eq(39)
     end
@@ -51,7 +51,7 @@ describe Ruby2600::Counter do
     context 'ordinary values' do
       before { subject.value = rand(38) }
 
-      it 'should increase value once every 4 ticks' do
+      it 'increases value once every 4 ticks' do
         original_value = subject.value
 
         2.times do
@@ -66,7 +66,7 @@ describe Ruby2600::Counter do
     context 'upper boundary (39)' do
       before { subject.value = 39 }
 
-      it 'should wrap to 0' do
+      it 'wraps to 0' do
         3.times { subject.tick }
         expect { subject.tick }.to change { subject.value }.to 0
       end
@@ -82,7 +82,7 @@ describe Ruby2600::Counter do
     # Then it compensates by inserting additional clocks, from none
     # (for a -8 move) to 15 (for a +7 move). THAT is done by #apply_move
 
-    it 'should add no extra CLK ticks for a -8 move' do
+    it 'adds no extra CLK ticks for a -8 move' do
       value = 0b10000000
       subject.start_hmove value
 
@@ -91,7 +91,7 @@ describe Ruby2600::Counter do
       16.times { subject.apply_hmove value }
     end
 
-    it 'should add 1 extra CLK ticks for a -7 move' do
+    it 'adds 1 extra CLK ticks for a -7 move' do
       value = 0b10010000
       subject.start_hmove value
 
@@ -100,7 +100,7 @@ describe Ruby2600::Counter do
       16.times { subject.apply_hmove value }
     end
 
-    it 'should add 2 extra CLK ticks for a -6 move' do
+    it 'adds 2 extra CLK ticks for a -6 move' do
       value = 0b10100000
       subject.start_hmove value
 
@@ -109,7 +109,7 @@ describe Ruby2600::Counter do
       16.times { subject.apply_hmove value }
     end
 
-    it 'should add 6 extra CLK ticks for a -2 move' do
+    it 'adds 6 extra CLK ticks for a -2 move' do
       value = 0b11100000
       subject.start_hmove value
 
@@ -118,7 +118,7 @@ describe Ruby2600::Counter do
       16.times { subject.apply_hmove value }
     end
 
-    it 'should add 7 extra CLK ticks for a -1 move' do
+    it 'adds 7 extra CLK ticks for a -1 move' do
       value = 0b11110000
       subject.start_hmove value
 
@@ -128,7 +128,7 @@ describe Ruby2600::Counter do
     end
 
 
-    it 'should add 8 extra CLK ticks for a 0 move' do
+    it 'adds 8 extra CLK ticks for a 0 move' do
       value = 0
       subject.start_hmove value
 
@@ -137,7 +137,7 @@ describe Ruby2600::Counter do
       16.times { subject.apply_hmove value }
     end
 
-    it 'should add 12 extra CLK ticks for a +4 move' do
+    it 'adds 12 extra CLK ticks for a +4 move' do
       value = 0b01000000
       subject.start_hmove value
 
@@ -146,7 +146,7 @@ describe Ruby2600::Counter do
       16.times { subject.apply_hmove value }
     end
 
-    it 'should add 15 extra CLK ticks for a +7 move' do
+    it 'adds 15 extra CLK ticks for a +7 move' do
       value = 0b01110000
       subject.start_hmove value
 

@@ -4,14 +4,14 @@ describe Ruby2600::Cart do
   let(:cart_4K) { Ruby2600::Cart.new(path_for_ROM :hello)   }
   let(:cart_2K) { Ruby2600::Cart.new(path_for_ROM :hello2k) }
 
-  it 'should silently ignore writes' do
+  it 'silentlys ignore writes' do
     old_value = cart_4K[0x0000]
 
     cart_4K[0x0000] = rand(256)
     expect(cart_4K[0x0000]).to eq(old_value)
   end
 
-  it 'should load a 2K ROM' do
+  it 'loads a 2K ROM' do
     expect(cart_2K[0x0000]).to eq(0xA9)       # _000: LDA #02 (first instruction)
     expect(cart_2K[0x0001]).to eq(0x02)
 
@@ -19,7 +19,7 @@ describe Ruby2600::Cart do
     expect(cart_2K[0x07FF]).to eq(0XF8)
   end
 
-  it 'should load a 4K ROM' do
+  it 'loads a 4K ROM' do
     expect(cart_4K[0x0000]).to eq(0xA9)       # _000: LDA #02 (first instruction)
     expect(cart_4K[0x0001]).to eq(0x02)
 
@@ -27,7 +27,7 @@ describe Ruby2600::Cart do
     expect(cart_4K[0x0FFF]).to eq(0XF0)
   end
 
-  it 'should map a 2K ROM as a doubled 4k' do
+  it 'maps a 2K ROM as a doubled 4k' do
     0x0000.upto(0x07FF) do |addr|
       expect(cart_2K[addr]).to eq(cart_2K[addr + 2048])
     end

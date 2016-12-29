@@ -10,7 +10,7 @@ shared_examples_for 'update collision register bit for objects' do |register, bi
       turn_on obj2
    end
 
-  	it 'should set the flag' do
+  	it 'sets the flag' do
       tia.send(:update_collision_flags)
 
       expect(tia[register][bit]).to eq(1)
@@ -49,7 +49,7 @@ shared_examples_for 'update collision register bit for objects' do |register, bi
       %w'p0 p1 m0 m1 bl pf'.each { |obj| turn_on obj}
     end
 
-    it 'should set the flag' do
+    it 'sets the flag' do
       tia.send(:update_collision_flags)
 
       expect(tia[register][bit]).to eq(1)
@@ -66,7 +66,7 @@ shared_examples_for 'update collision register bit for objects' do |register, bi
 end
 
 shared_examples_for 'reflect port input' do |port|
-  it "should set/clear bit 7 on high/low level" do
+  it "set/clears bit 7 on high/low level" do
     tia.set_port_level port, :low
     expect(tia[INPT0 + port][7]).to eq(0)
 
