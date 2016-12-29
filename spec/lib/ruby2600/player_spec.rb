@@ -16,22 +16,22 @@ describe Ruby2600::Player do
       160.times { player1.tick }
     end
 
-    it 'should not draw anything without GRP1' do
-      pixels(player1, 1, 160).should_not include(0xFF)
+    it 'does not draw anything without GRP1' do
+      expect(pixels(player1, 1, 160)).not_to include(0xFF)
     end
 
-    it 'should draw if GRP1 is set' do
+    it 'draws if GRP1 is set' do
       tia.reg[GRP1] = 0xFF
-      pixels(player1, 1, 160).should include(0xFF)
+      expect(pixels(player1, 1, 160)).to include(0xFF)
     end
   end
 
   describe 'pixel' do
-    it 'should never output if GRP0 is all zeros' do
+    it 'never outputs if GRP0 is all zeros' do
       tia.reg[GRP0] = 0
       300.times do
         player.tick
-        player.pixel.should be_nil
+        expect(player.pixel).to be_nil
       end
     end
 
@@ -62,18 +62,18 @@ describe Ruby2600::Player do
           5.times { player.tick }
         end
 
-        it 'should not draw anything on current scanline' do
-          pixels(player, 1, 160).should == Array.new(160)
+        it 'does not draw anything on current scanline' do
+          expect(pixels(player, 1, 160)).to eq(Array.new(160))
         end
 
-        it 'should draw after a full scanline (160pixels) + 5-bit delay' do
+        it 'draws after a full scanline (160pixels) + 5-bit delay' do
           160.times { player.tick }
-          pixels(player, 1, 8).should == PIXELS
+          expect(pixels(player, 1, 8)).to eq(PIXELS)
         end
 
-        it 'should draw again on subsequent scanlines' do
+        it 'draws again on subsequent scanlines' do
           320.times { player.tick }
-          10.times { pixels(player, 1, 160).should == PIXELS + Array.new(152) }
+          10.times { expect(pixels(player, 1, 160)).to eq(PIXELS + Array.new(152)) }
         end
       end
 
@@ -84,13 +84,13 @@ describe Ruby2600::Player do
           5.times { player.tick }
         end
 
-        it 'should only draw second copy on current scanline (after 5 bit delay)' do
-          pixels(player, 1, 24).should == Array.new(16) + PIXELS
+        it 'onlys draw second copy on current scanline (after 5 bit delay)' do
+          expect(pixels(player, 1, 24)).to eq(Array.new(16) + PIXELS)
         end
 
-        it 'should draw both copies on subsequent scanlines' do
+        it 'draws both copies on subsequent scanlines' do
           160.times { player.tick }
-          pixels(player, 1, 24).should == PIXELS + Array.new(8) + PIXELS
+          expect(pixels(player, 1, 24)).to eq(PIXELS + Array.new(8) + PIXELS)
         end
       end
 
@@ -101,13 +101,13 @@ describe Ruby2600::Player do
           5.times { player.tick }
         end
 
-        it 'should only draw second copy on current scanline (after 5 bit delay)' do
-          pixels(player, 1, 40).should == Array.new(32) + PIXELS
+        it 'onlys draw second copy on current scanline (after 5 bit delay)' do
+          expect(pixels(player, 1, 40)).to eq(Array.new(32) + PIXELS)
         end
 
-        it 'should draw both copies on subsequent scanlines' do
+        it 'draws both copies on subsequent scanlines' do
           160.times { player.tick }
-          pixels(player, 1, 40).should == PIXELS + Array.new(24) + PIXELS
+          expect(pixels(player, 1, 40)).to eq(PIXELS + Array.new(24) + PIXELS)
         end
       end
 
@@ -118,13 +118,13 @@ describe Ruby2600::Player do
           5.times { player.tick }
         end
 
-        it 'should only draw second and third copy on current scanline (after 5 bit delay)' do
-          pixels(player, 1, 40).should == Array.new(16) + PIXELS + Array.new(8) + PIXELS
+        it 'onlys draw second and third copy on current scanline (after 5 bit delay)' do
+          expect(pixels(player, 1, 40)).to eq(Array.new(16) + PIXELS + Array.new(8) + PIXELS)
         end
 
-        it 'should draw three copies on subsequent scanlines' do
+        it 'draws three copies on subsequent scanlines' do
           160.times { player.tick }
-          pixels(player, 1, 40).should == PIXELS + Array.new(8) + PIXELS + Array.new(8) + PIXELS
+          expect(pixels(player, 1, 40)).to eq(PIXELS + Array.new(8) + PIXELS + Array.new(8) + PIXELS)
         end
       end
 
@@ -135,13 +135,13 @@ describe Ruby2600::Player do
           5.times { player.tick }
         end
 
-        it 'should only draw second copy on current scanline (after 5 bit delay)' do
-          pixels(player, 1, 72).should == Array.new(64) + PIXELS
+        it 'onlys draw second copy on current scanline (after 5 bit delay)' do
+          expect(pixels(player, 1, 72)).to eq(Array.new(64) + PIXELS)
         end
 
-        it 'should draw both copies on subsequent scanlines' do
+        it 'draws both copies on subsequent scanlines' do
           160.times { player.tick }
-          pixels(player, 1, 72).should == PIXELS + Array.new(56) + PIXELS
+          expect(pixels(player, 1, 72)).to eq(PIXELS + Array.new(56) + PIXELS)
         end
       end
 
@@ -152,13 +152,13 @@ describe Ruby2600::Player do
           5.times { player.tick }
         end
 
-        it 'should not draw anything on current scanline' do
-          pixels(player, 1, 160).should == Array.new(160)
+        it 'does not draw anything on current scanline' do
+          expect(pixels(player, 1, 160)).to eq(Array.new(160))
         end
 
-        it 'should draw on subsequent scanlines' do
+        it 'draws on subsequent scanlines' do
           160.times { player.tick }
-          pixels(player, 1, 160).should == PIXELS_2X + Array.new(144)
+          expect(pixels(player, 1, 160)).to eq(PIXELS_2X + Array.new(144))
         end
       end
 
@@ -169,21 +169,21 @@ describe Ruby2600::Player do
           5.times { player.tick }
         end
 
-        it 'should only draw second and third copy on current scanline (after 5 bit delay)' do
-          pixels(player, 1, 72).should == Array.new(32) + PIXELS + Array.new(24) + PIXELS
+        it 'onlys draw second and third copy on current scanline (after 5 bit delay)' do
+          expect(pixels(player, 1, 72)).to eq(Array.new(32) + PIXELS + Array.new(24) + PIXELS)
         end
 
-        it 'should draw three copies on subsequent scanlines' do
+        it 'draws three copies on subsequent scanlines' do
           160.times { player.tick }
-          pixels(player, 1, 72).should == PIXELS + Array.new(24) + PIXELS + Array.new(24) + PIXELS
+          expect(pixels(player, 1, 72)).to eq(PIXELS + Array.new(24) + PIXELS + Array.new(24) + PIXELS)
         end
 
         context 'with REFP0 set' do
           before { tia.reg[REFP0] = rand(256) | 0b1000 }
 
-          it 'should reflect the drawing' do
+          it 'reflects the drawing' do
             160.times { player.tick }
-            pixels(player, 1, 72).should == PIXELS.reverse + Array.new(24) + PIXELS.reverse + Array.new(24) + PIXELS.reverse
+            expect(pixels(player, 1, 72)).to eq(PIXELS.reverse + Array.new(24) + PIXELS.reverse + Array.new(24) + PIXELS.reverse)
           end
         end
       end
@@ -195,21 +195,21 @@ describe Ruby2600::Player do
           5.times { player.tick }
         end
 
-        it 'should not draw anything on current scanline' do
-          pixels(player, 1, 160).should == Array.new(160)
+        it 'does not draw anything on current scanline' do
+          expect(pixels(player, 1, 160)).to eq(Array.new(160))
         end
 
-        it 'should draw on subsequent scanlines' do
+        it 'draws on subsequent scanlines' do
           160.times { player.tick }
-          pixels(player, 1, 160).should == PIXELS_4X + Array.new(128)
+          expect(pixels(player, 1, 160)).to eq(PIXELS_4X + Array.new(128))
         end
 
         context 'with REFP0 set' do
           before { tia.reg[REFP0] = rand(256) | 0b1000 }
 
-          it 'should reflect the drawing' do
+          it 'reflects the drawing' do
             160.times { player.tick }
-            pixels(player, 1, 160).should == PIXELS_4X.reverse + Array.new(128)
+            expect(pixels(player, 1, 160)).to eq(PIXELS_4X.reverse + Array.new(128))
           end
         end
       end
@@ -221,15 +221,15 @@ describe Ruby2600::Player do
           5.times { player.tick }
         end
 
-        it 'should not be affected (should draw on subsequent scanlines)' do
+        it 'does not be affected (should draw on subsequent scanlines)' do
           160.times { player.tick }
-          pixels(player, 1, 160).should == PIXELS_2X + Array.new(144)
+          expect(pixels(player, 1, 160)).to eq(PIXELS_2X + Array.new(144))
         end
       end
 
-      pending 'VDELPn test'
+      skip 'VDELPn test'
 
-      pending 'dynamic change of GRPn/REFPn test'
+      skip 'dynamic change of GRPn/REFPn test'
     end
   end
 end

@@ -3,9 +3,9 @@
     it do
       range.each do |address|
         value = Random.rand(256)
-        send(chip).stub(:[]).with(address).and_return(value)
+        allow(send(chip)).to receive(:[]).with(address).and_return(value)
 
-        subject[address].should == value
+        expect(subject[address]).to eq(value)
       end
     end
   end
@@ -14,7 +14,7 @@
     it do
       range.each do |address|
         value = Random.rand(256)
-        send(chip).should_receive(:[]=).with address, value
+        expect(send(chip)).to receive(:[]=).with address, value
 
         subject[address] = value
       end
@@ -23,16 +23,16 @@
 end
 
 shared_examples_for 'set bits on RIOT port after switch is set/pressed' do |port, bits, switch|
-  it 'should update portB' do
-    riot.should_receive("#{port}=").with(bits)
+  it 'updates portB' do
+    expect(riot).to receive("#{port}=").with(bits)
 
     bus.send "#{switch}=", true
   end
 end
 
 shared_examples_for 'set bits on RIOT port after switch is reset/released' do |port, bits, switch|
-  it 'should update portB' do
-    riot.should_receive("#{port}=").with(bits)
+  it 'updates portB' do
+    expect(riot).to receive("#{port}=").with(bits)
 
     bus.send "#{switch}=", false
   end

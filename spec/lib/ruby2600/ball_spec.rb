@@ -13,16 +13,16 @@ describe Ruby2600::Ball do
       ball.reset
     end
 
-    it 'should never output if ENABL is disabled' do
+    it 'never outputs if ENABL is disabled' do
       tia.reg[ENABL] = 0
 
       pixels(ball, 1, 300).  == Array.new(300)
     end
 
-    it 'should generate some output if ENABL is enabled' do
+    it 'generates some output if ENABL is enabled' do
       tia.reg[ENABL] = rand(256) | 0b10
 
-      pixels(ball, 1, 300).should include(color[0])
+      expect(pixels(ball, 1, 300)).to include(color[0])
     end
 
     context 'drawing (strobe)' do
@@ -37,33 +37,33 @@ describe Ruby2600::Ball do
       context '1x' do
         before { tia.reg[CTRLPF] = 0b00000000 }
 
-        it 'should draw 1x ball on current scanline' do
-          pixels(ball, 1, 160).should == scanline_with_object(1, color[0])
+        it 'draws 1x ball on current scanline' do
+          expect(pixels(ball, 1, 160)).to eq(scanline_with_object(1, color[0]))
         end
 
-        it 'should NOT be affected by NUSZ0 (it is not player/missile)' do
+        it 'is NOT affected by NUSZ0 (it is not player/missile)' do
           tia.reg[NUSIZ0] = 1
 
-          pixels(ball, 1, 160).should == scanline_with_object(1, color[0])
+          expect(pixels(ball, 1, 160)).to eq(scanline_with_object(1, color[0]))
         end
       end
 
       context '2x' do
         before { tia.reg[CTRLPF] = 0b00010000 }
 
-        it { pixels(ball, 1, 160).should == scanline_with_object(2, color[0]) }
+        it { expect(pixels(ball, 1, 160)).to eq(scanline_with_object(2, color[0])) }
       end
 
       context '4x' do
         before { tia.reg[CTRLPF] = 0b00100000 }
 
-        it { pixels(ball, 1, 160).should == scanline_with_object(4, color[0]) }
+        it { expect(pixels(ball, 1, 160)).to eq(scanline_with_object(4, color[0])) }
       end
 
       context '8x' do
         before { tia.reg[CTRLPF] = 0b00110000 }
 
-        it { pixels(ball, 1, 160).should == scanline_with_object(8, color[0]) }
+        it { expect(pixels(ball, 1, 160)).to eq(scanline_with_object(8, color[0])) }
       end
     end
   end

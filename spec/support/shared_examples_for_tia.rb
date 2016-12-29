@@ -10,10 +10,10 @@ shared_examples_for 'update collision register bit for objects' do |register, bi
       turn_on obj2
    end
 
-  	it 'should set the flag' do
+  	it 'sets the flag' do
       tia.send(:update_collision_flags)
 
-      tia[register][bit].should == 1
+      expect(tia[register][bit]).to eq(1)
     end
   end
 
@@ -49,32 +49,32 @@ shared_examples_for 'update collision register bit for objects' do |register, bi
       %w'p0 p1 m0 m1 bl pf'.each { |obj| turn_on obj}
     end
 
-    it 'should set the flag' do
+    it 'sets the flag' do
       tia.send(:update_collision_flags)
 
-      tia[register][bit].should == 1
+      expect(tia[register][bit]).to eq(1)
     end
   end
 
   def turn_on(object)
-    tia.instance_variable_get("@#{object}").stub(:pixel).and_return(rand(256))
+    allow(tia.instance_variable_get("@#{object}")).to receive(:pixel).and_return(rand(256))
   end
 
   def turn_off(object)
-    tia.instance_variable_get("@#{object}").stub(:pixel).and_return(nil)
+    allow(tia.instance_variable_get("@#{object}")).to receive(:pixel).and_return(nil)
   end
 end
 
 shared_examples_for 'reflect port input' do |port|
-  it "should set/clear bit 7 on high/low level" do
+  it "sets/clears bit 7 on high/low level" do
     tia.set_port_level port, :low
-    tia[INPT0 + port][7].should == 0
+    expect(tia[INPT0 + port][7]).to eq(0)
 
     tia.set_port_level port, :high
-    tia[INPT0 + port][7].should == 1
+    expect(tia[INPT0 + port][7]).to eq(1)
 
     tia.set_port_level port, :low
-    tia[INPT0 + port][7].should == 0
+    expect(tia[INPT0 + port][7]).to eq(0)
   end
 end
 
@@ -85,19 +85,19 @@ shared_examples_for 'latch port input' do |port|
       tia.set_port_level port, :high
       tia[VBLANK] = 0b01000000
 
-      tia[INPT0 + port][7].should == 1
+      expect(tia[INPT0 + port][7]).to eq(1)
 
       tia.set_port_level port, :high
-      tia[INPT0 + port][7].should == 1
+      expect(tia[INPT0 + port][7]).to eq(1)
 
       tia.set_port_level port, :low
-      tia[INPT0 + port][7].should == 0
+      expect(tia[INPT0 + port][7]).to eq(0)
 
       tia.set_port_level port, :high
-      tia[INPT0 + port][7].should == 0
+      expect(tia[INPT0 + port][7]).to eq(0)
 
       tia.set_port_level port, :low
-      tia[INPT0 + port][7].should == 0
+      expect(tia[INPT0 + port][7]).to eq(0)
     end
 
     it "- INPT#{port} bit 7 should return to normal behavior after latching is disabled" do
@@ -105,16 +105,16 @@ shared_examples_for 'latch port input' do |port|
       tia.set_port_level port, :high
       tia[VBLANK] = 0
 
-      tia[INPT0 + port][7].should == 1
+      expect(tia[INPT0 + port][7]).to eq(1)
 
       tia.set_port_level port, :low
-      tia[INPT0 + port][7].should == 0
+      expect(tia[INPT0 + port][7]).to eq(0)
 
       tia.set_port_level port, :high
-      tia[INPT0 + port][7].should == 1
+      expect(tia[INPT0 + port][7]).to eq(1)
 
       tia.set_port_level port, :low
-      tia[INPT0 + port][7].should == 0
+      expect(tia[INPT0 + port][7]).to eq(0)
     end
   end
 
@@ -127,19 +127,19 @@ shared_examples_for 'latch port input' do |port|
       tia.set_port_level port, :low
       tia[VBLANK] = 0b01000000
 
-      tia[INPT0 + port][7].should == 0
+      expect(tia[INPT0 + port][7]).to eq(0)
 
       tia.set_port_level port, :high
-      tia[INPT0 + port][7].should == 1
+      expect(tia[INPT0 + port][7]).to eq(1)
 
       tia.set_port_level port, :low
-      tia[INPT0 + port][7].should == 0
+      expect(tia[INPT0 + port][7]).to eq(0)
 
       tia.set_port_level port, :high
-      tia[INPT0 + port][7].should == 0
+      expect(tia[INPT0 + port][7]).to eq(0)
 
       tia.set_port_level port, :low
-      tia[INPT0 + port][7].should == 0
+      expect(tia[INPT0 + port][7]).to eq(0)
     end
 
     it "- INPT#{port} bit 7 should return to normal behavior after latching is disabled" do
@@ -147,16 +147,16 @@ shared_examples_for 'latch port input' do |port|
       tia[VBLANK] = 0b01000000
       tia[VBLANK] = 0
 
-      tia[INPT0 + port][7].should == 0
+      expect(tia[INPT0 + port][7]).to eq(0)
 
       tia.set_port_level port, :low
-      tia[INPT0 + port][7].should == 0
+      expect(tia[INPT0 + port][7]).to eq(0)
 
       tia.set_port_level port, :high
-      tia[INPT0 + port][7].should == 1
+      expect(tia[INPT0 + port][7]).to eq(1)
 
       tia.set_port_level port, :low
-      tia[INPT0 + port][7].should == 0
+      expect(tia[INPT0 + port][7]).to eq(0)
     end
   end
 end
@@ -164,12 +164,12 @@ end
 shared_examples_for 'dump port to ground' do |port|
   it "INPT#{port} bit 7 should not be affected by input (should always be 0)" do
     tia.set_port_level port, :low
-    tia[INPT0 + port][7].should == 0
+    expect(tia[INPT0 + port][7]).to eq(0)
 
     tia.set_port_level port, :high
-    tia[INPT0 + port][7].should == 0
+    expect(tia[INPT0 + port][7]).to eq(0)
 
     tia.set_port_level port, :low
-    tia[INPT0 + port][7].should == 0
+    expect(tia[INPT0 + port][7]).to eq(0)
   end
 end

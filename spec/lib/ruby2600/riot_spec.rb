@@ -4,18 +4,18 @@ describe Ruby2600::RIOT do
 
   subject(:riot) { Ruby2600::RIOT.new }
 
-  it 'should initialize on a working state' do
+  it 'initializes on a working state' do
     expect { riot.tick        }.to_not raise_error
     expect { riot[SWCHA].to_i }.to_not raise_error
     expect { riot[SWCHB].to_i }.to_not raise_error
   end
 
   describe 'ram (#ram)' do
-    it 'should have lower 128 bytes available for reading/writing' do
+    it 'has lower 128 bytes available for reading/writing' do
       0.upto(127).each do |position|
         value = Random.rand(256)
         riot[position] = value
-        riot[position].should be(value), "Failed for value $#{value.to_s(16)} at $#{position.to_s(16)}"
+        expect(riot[position]).to be(value), "Failed for value $#{value.to_s(16)} at $#{position.to_s(16)}"
       end
     end
   end
@@ -24,25 +24,25 @@ describe Ruby2600::RIOT do
     context '1-clock timer' do
       let(:timer_register) { TIM1T }
 
-      it_should_behave_like 'a timer with clock interval', 1
+      it_behaves_like 'a timer with clock interval', 1
     end
 
     context '8-clock timer' do
       let(:timer_register) { TIM8T }
 
-      it_should_behave_like 'a timer with clock interval', 8
+      it_behaves_like 'a timer with clock interval', 8
     end
 
     context '64-clock timer' do
       let(:timer_register) { TIM64T }
 
-      it_should_behave_like 'a timer with clock interval', 64
+      it_behaves_like 'a timer with clock interval', 64
     end
 
     context '1024-clock timer' do
       let(:timer_register) { T1024T }
 
-      it_should_behave_like 'a timer with clock interval', 1024
+      it_behaves_like 'a timer with clock interval', 1024
     end
   end
 
@@ -53,8 +53,8 @@ describe Ruby2600::RIOT do
       riot.portA   = 0b01010011 # read input ports as      _1_1_0_1
     end
 
-    it 'should read output bits from register and input bits from hardware port' do
-      riot[SWCHA].should == 0b11011001 # combined result:  11011001
+    it 'reads output bits from register and input bits from hardware port' do
+      expect(riot[SWCHA]).to eq(0b11011001) # combined result:  11011001
     end
   end
 
@@ -65,8 +65,8 @@ describe Ruby2600::RIOT do
       riot.portB   = 0b01010011 # read input ports as      01_10_1_
     end
 
-    it 'should read output bits from register and input bits from hardware port' do
-      riot[SWCHB].should == 0b01010110 # combined result:  01010110
+    it 'reads output bits from register and input bits from hardware port' do
+      expect(riot[SWCHB]).to eq(0b01010110) # combined result:  01010110
     end
   end
 end

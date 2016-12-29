@@ -9,8 +9,8 @@ describe Ruby2600::Graphic do
     context 'p0 / m0 / bl' do
       let(:subject) { Ruby2600::Graphic.new(tia, 0) }
 
-      it 'should always read the requested register' do
-        tia.reg.should_receive(:[]).with(HMP0)
+      it 'alwayss read the requested register' do
+        expect(tia.reg).to receive(:[]).with(HMP0)
 
         subject.send(:reg, HMP0)
       end
@@ -19,8 +19,8 @@ describe Ruby2600::Graphic do
     context 'p1 / m1' do
       let(:subject) { Ruby2600::Graphic.new(tia, 1) }
 
-      it 'should read the matching register for the other object' do
-        tia.reg.should_receive(:[]).with(HMP1)
+      it 'reads the matching register for the other object' do
+        expect(tia.reg).to receive(:[]).with(HMP1)
 
         subject.send(:reg, HMP0)
       end
@@ -32,54 +32,54 @@ describe Ruby2600::Graphic do
       it 'by being nil if the graphic bit is clear' do
         subject.instance_variable_set(:@graphic_bit_value, 0)
 
-        subject.pixel.should == nil
+        expect(subject.pixel).to eq(nil)
       end
 
       it "by being the graphic color register's value if the graphic bit is set" do
         subject.instance_variable_set(:@graphic_bit_value, 1)
 
-        subject.pixel.should == 0xAB
+        expect(subject.pixel).to eq(0xAB)
       end
     end
 
     before do
-      subject.stub :tick
-      subject.stub :tick_graphic_circuit
+      allow(subject).to receive :tick
+      allow(subject).to receive :tick_graphic_circuit
       subject.class.color_register = [COLUPF, COLUP0, COLUP1].sample
       tia.reg[subject.class.color_register] = 0xAB
     end
 
     # REVIEW these
     # context 'in visible scanline' do
-    #   it 'should tick the counter' do
+    #   it 'ticks the counter' do
     #     subject.counter.should_receive(:tick)
 
     #     subject.pixel
     #   end
 
-    #   it 'should advance the graphic bit' do
+    #   it 'advances the graphic bit' do
     #     subject.should_receive(:tick_graphic_circuit)
 
     #     subject.pixel
     #   end
 
-    #   it_should 'reflect graphic bit'
+    #   it_does 'reflect graphic bit'
     # end
 
     # context 'in extended hblank (aka "comb effect", caused by HMOVE during hblank)' do
-    #   it 'should not tick the counter' do
+    #   it 'does not tick the counter' do
     #     subject.counter.should_not_receive(:tick)
 
     #     subject.pixel :extended_hblank => true
     #   end
 
-    #   it 'should not advance the graphic' do
+    #   it 'does not advance the graphic' do
     #     subject.should_not_receive(:tick_graphic_circuit)
 
     #     subject.pixel :extended_hblank => true
     #   end
 
-    #   it_should 'reflect graphic bit' # (won't be displayed, but needed for collision checking)
+    #   it_does 'reflect graphic bit' # (won't be displayed, but needed for collision checking)
     # end
   end
 end

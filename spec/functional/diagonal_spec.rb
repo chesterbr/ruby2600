@@ -9,9 +9,9 @@ describe 'diagonal drawn with stetched missile and HMOV' do
   let!(:bus) { Ruby2600::Bus.new(cpu, tia, cart, riot) }
 
   it 'draws the diagonal' do
-    pending 'adjust the off-by-one drawing'
+    skip 'adjust the off-by-one drawing'
     tia.frame # first frame won't sync, discard it
-    2.times { text(tia.frame).should == hello_world_text }
+    2.times { expect(text(tia.frame)).to eq(hello_world_text) }
   end
 
   def text(frame)
