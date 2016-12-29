@@ -15,7 +15,7 @@ describe Ruby2600::RIOT do
       0.upto(127).each do |position|
         value = Random.rand(256)
         riot[position] = value
-        riot[position].should be(value), "Failed for value $#{value.to_s(16)} at $#{position.to_s(16)}"
+        expect(riot[position]).to be(value), "Failed for value $#{value.to_s(16)} at $#{position.to_s(16)}"
       end
     end
   end
@@ -54,7 +54,7 @@ describe Ruby2600::RIOT do
     end
 
     it 'should read output bits from register and input bits from hardware port' do
-      riot[SWCHA].should == 0b11011001 # combined result:  11011001
+      expect(riot[SWCHA]).to eq(0b11011001) # combined result:  11011001
     end
   end
 
@@ -66,7 +66,7 @@ describe Ruby2600::RIOT do
     end
 
     it 'should read output bits from register and input bits from hardware port' do
-      riot[SWCHB].should == 0b01010110 # combined result:  01010110
+      expect(riot[SWCHB]).to eq(0b01010110) # combined result:  01010110
     end
   end
 end

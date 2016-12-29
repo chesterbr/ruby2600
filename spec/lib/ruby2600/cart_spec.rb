@@ -8,28 +8,28 @@ describe Ruby2600::Cart do
     old_value = cart_4K[0x0000]
 
     cart_4K[0x0000] = rand(256)
-    cart_4K[0x0000].should == old_value
+    expect(cart_4K[0x0000]).to eq(old_value)
   end
 
   it 'should load a 2K ROM' do
-    cart_2K[0x0000].should == 0xA9       # _000: LDA #02 (first instruction)
-    cart_2K[0x0001].should == 0x02
+    expect(cart_2K[0x0000]).to eq(0xA9)       # _000: LDA #02 (first instruction)
+    expect(cart_2K[0x0001]).to eq(0x02)
 
-    cart_2K[0x07FE].should == 0x00       # _FFE: word $F800     (BRK vector)
-    cart_2K[0x07FF].should == 0XF8
+    expect(cart_2K[0x07FE]).to eq(0x00)       # _FFE: word $F800     (BRK vector)
+    expect(cart_2K[0x07FF]).to eq(0XF8)
   end
 
   it 'should load a 4K ROM' do
-    cart_4K[0x0000].should == 0xA9       # _000: LDA #02 (first instruction)
-    cart_4K[0x0001].should == 0x02
+    expect(cart_4K[0x0000]).to eq(0xA9)       # _000: LDA #02 (first instruction)
+    expect(cart_4K[0x0001]).to eq(0x02)
 
-    cart_4K[0x0FFE].should == 0x00       # _FFE: word $F000     (BRK vector)
-    cart_4K[0x0FFF].should == 0XF0
+    expect(cart_4K[0x0FFE]).to eq(0x00)       # _FFE: word $F000     (BRK vector)
+    expect(cart_4K[0x0FFF]).to eq(0XF0)
   end
 
   it 'should map a 2K ROM as a doubled 4k' do
     0x0000.upto(0x07FF) do |addr|
-      cart_2K[addr].should == cart_2K[addr + 2048]
+      expect(cart_2K[addr]).to eq(cart_2K[addr + 2048])
     end
   end
 end

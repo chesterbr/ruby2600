@@ -7,7 +7,7 @@ CPU_8_BIT_REGISTERS.each do |register|
       cpu.step
 
       value = cpu.send(register)
-      value.should be(expected), "Expected: #{hex_byte(expected)}, found: #{hex_byte(value)}"
+      expect(value).to be(expected), "Expected: #{hex_byte(expected)}, found: #{hex_byte(value)}"
     end
   end
 end
@@ -17,7 +17,7 @@ CPU_FLAGS.each do |flag|
     it do
       cpu.step
 
-      cpu.send(flag).should be_truthy
+      expect(cpu.send(flag)).to be_truthy
     end
   end
 
@@ -25,7 +25,7 @@ CPU_FLAGS.each do |flag|
     it do
       cpu.step
 
-      cpu.send(flag).should be_falsey
+      expect(cpu.send(flag)).to be_falsey
     end
   end
 end
@@ -37,7 +37,7 @@ shared_examples_for "preserve flags" do
 
       cpu.step
 
-      cpu.send(flag).should be_falsey
+      expect(cpu.send(flag)).to be_falsey
     end
 
     it "keeps #{flag} set" do
@@ -45,7 +45,7 @@ shared_examples_for "preserve flags" do
 
       cpu.step
 
-      cpu.send(flag).should be_truthy
+      expect(cpu.send(flag)).to be_truthy
     end
   end
 end
@@ -55,7 +55,7 @@ shared_examples_for 'set PC value' do |expected|
     cpu.step
 
     value = cpu.pc
-    value.should be(expected), "Expected: #{hex_word(expected)}, found: #{hex_word(value)}"
+    expect(value).to be(expected), "Expected: #{hex_word(expected)}, found: #{hex_word(value)}"
   end
 end
 
@@ -64,7 +64,7 @@ shared_examples_for 'set memory with value' do |position, expected|
     cpu.step
 
     value = cpu.memory[position]
-    value.should be(expected), "Expected: #{hex_byte(expected)} at address #{hex_word(position)}, found: #{hex_byte(value)}"
+    expect(value).to be(expected), "Expected: #{hex_byte(expected)} at address #{hex_word(position)}, found: #{hex_byte(value)}"
   end
 end
 
@@ -76,7 +76,7 @@ end
 
 2.upto 7 do |number|
   shared_examples_for "take #{number.humanize} cycles" do
-    it { cpu.step.should == number }
+    it { expect(cpu.step).to eq(number) }
   end
 end
 
@@ -88,9 +88,9 @@ shared_examples_for 'add and set A/C/V' do |a, m, result, c, v|
     cpu.step
   end
 
-  it { cpu.a.should == result }
-  it { cpu.c.should == c }
-  it { cpu.v.should == v }
+  it { expect(cpu.a).to eq(result) }
+  it { expect(cpu.c).to eq(c) }
+  it { expect(cpu.v).to eq(v) }
 end
 
 shared_examples_for 'subtract and set A/C/V' do |a, m, result, c, v|
@@ -101,9 +101,9 @@ shared_examples_for 'subtract and set A/C/V' do |a, m, result, c, v|
     cpu.step
   end
 
-  it { cpu.a.should == result }
-  it { cpu.c.should == c }
-  it { cpu.v.should == v }
+  it { expect(cpu.a).to eq(result) }
+  it { expect(cpu.c).to eq(c) }
+  it { expect(cpu.v).to eq(v) }
 end
 
 shared_examples_for 'set memory with P for various flag values' do |address|
@@ -295,8 +295,8 @@ shared_examples_for 'work on any memory position' do
     cpu.pc = position
     cpu.step
 
-    cpu.pc.should eq(expected_pc)
-    cpu.a.should  eq(expected_a), "for position=#{hex_word(position)}" if expected_a
+    expect(cpu.pc).to eq(expected_pc)
+    expect(cpu.a).to  eq(expected_a), "for position=#{hex_word(position)}" if expected_a
   end
 
   def store_in_64KB_memory(code, position)

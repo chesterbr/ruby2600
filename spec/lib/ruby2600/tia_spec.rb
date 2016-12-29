@@ -24,12 +24,12 @@ describe Ruby2600::TIA do
       registers1 = Ruby2600::TIA.new.instance_variable_get(:@reg)
       registers2 = tia.instance_variable_get(:@reg)
 
-      registers1.should_not == registers2
+      expect(registers1).not_to eq(registers2)
     end
 
     it "should initialize with valid (byte-size) values on registers" do
       tia.instance_variable_get(:@reg).each do |register_value|
-        (0..255).should cover register_value
+        expect(0..255).to cover register_value
       end
     end
   end
@@ -46,13 +46,13 @@ describe Ruby2600::TIA do
     context 'CTRLPF priority bit clear' do
       before { tia[CTRLPF] = rand(256) & 0b011 }
 
-      it { tia.should be_using_priority [:p0, :m0, :p1, :m1, :bl, :pf] }
+      it { expect(tia).to be_using_priority [:p0, :m0, :p1, :m1, :bl, :pf] }
     end
 
     context 'CTRLPF priority bit set' do
       before { tia[CTRLPF] = rand(256) | 0b100 }
 
-      it { tia.should be_using_priority [:pf, :bl, :p0, :m0, :p1, :m1] }
+      it { expect(tia).to be_using_priority [:pf, :bl, :p0, :m0, :p1, :m1] }
     end
 
     # This code tests that, for an ordered list of graphic objects,
@@ -107,7 +107,7 @@ describe Ruby2600::TIA do
         value = rand(256)
         tia[r] = value
 
-        tia.reg[r].should == value
+        expect(tia.reg[r]).to eq(value)
       end
     end
 
@@ -119,7 +119,7 @@ describe Ruby2600::TIA do
         value = rand(63)
         tia[r] = value
 
-        tia.reg[r].should == value
+        expect(tia.reg[r]).to eq(value)
       end
     end
 
@@ -130,7 +130,7 @@ describe Ruby2600::TIA do
     ].each do |r|
       it "should not store the value for #{r}" do
         value = rand(256)
-        tia.reg.should_not_receive(:[]=).with(r, value)
+        expect(tia.reg).not_to receive(:[]=).with(r, value)
 
         tia[r] = value
       end
@@ -143,7 +143,7 @@ describe Ruby2600::TIA do
         let(:player)  { tia.instance_variable_get "@p#{n}" }
         let(:missile) { tia.instance_variable_get "@m#{n}" }
         it "should reset m#{n}'s counter to p#{n}'s when strobed" do
-          missile.should_receive(:reset_to).with(player)
+          expect(missile).to receive(:reset_to).with(player)
 
           tia[RESMP0 + n] = rand(256)
         end
@@ -161,22 +161,22 @@ describe Ruby2600::TIA do
       it 'should reset flags when written' do
         tia[CXCLR] = 0
 
-        tia[CXM0P][6].should == 0
-        tia[CXM0P][7].should == 0
-        tia[CXM1P][6].should == 0
-        tia[CXM1P][7].should == 0
-        tia[CXP0FB][6].should == 0
-        tia[CXP0FB][7].should == 0
-        tia[CXP1FB][6].should == 0
-        tia[CXP1FB][7].should == 0
-        tia[CXM0FB][6].should == 0
-        tia[CXM0FB][7].should == 0
-        tia[CXM1FB][6].should == 0
-        tia[CXM1FB][7].should == 0
+        expect(tia[CXM0P][6]).to eq(0)
+        expect(tia[CXM0P][7]).to eq(0)
+        expect(tia[CXM1P][6]).to eq(0)
+        expect(tia[CXM1P][7]).to eq(0)
+        expect(tia[CXP0FB][6]).to eq(0)
+        expect(tia[CXP0FB][7]).to eq(0)
+        expect(tia[CXP1FB][6]).to eq(0)
+        expect(tia[CXP1FB][7]).to eq(0)
+        expect(tia[CXM0FB][6]).to eq(0)
+        expect(tia[CXM0FB][7]).to eq(0)
+        expect(tia[CXM1FB][6]).to eq(0)
+        expect(tia[CXM1FB][7]).to eq(0)
         # Bit 6 of CXBLPF is not used
-        tia[CXBLPF][7].should == 0
-        tia[CXPPMM][6].should == 0
-        tia[CXPPMM][7].should == 0
+        expect(tia[CXBLPF][7]).to eq(0)
+        expect(tia[CXPPMM][6]).to eq(0)
+        expect(tia[CXPPMM][7]).to eq(0)
       end
     end
 
@@ -246,11 +246,11 @@ describe Ruby2600::TIA do
 
     258.upto(260).each do |lines|
       xit "should generate a frame with #{lines} scanlines" do
-        tia.cpu.stub(:tick) { build_frame(lines) }
+        allow(tia.cpu).to receive(:tick) { build_frame(lines) }
 
         tia[VSYNC] = rand_with_bit 1, :clear
         tia.frame
-        tia.frame.size.should == lines
+        expect(tia.frame.size).to eq(lines)
       end
     end
   end

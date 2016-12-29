@@ -9,9 +9,8 @@ describe 'hello world with CPU, TIA, Cart and Bus' do
   let!(:bus) { Ruby2600::Bus.new(cpu, tia, cart, riot) }
 
   it 'generates frames with hello world' do
-    skip
     bus.frame # first frame won't sync, discard it
-    2.times { text(bus.frame).should == hello_world_text }
+    2.times { expect(text(bus.frame)).to eq(hello_world_text) }
   end
 
   def text(frame)
