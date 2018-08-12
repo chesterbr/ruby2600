@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
   if RUBY_PLATFORM == 'java'
     spec.add_dependency 'swt'
   else
-    spec.add_dependency 'gosu'
+    spec.add_runtime_dependency 'gosu'
     spec.add_dependency 'texplay', '~> 0.4.4.pre'
 
     spec.add_development_dependency 'pry-byebug'
