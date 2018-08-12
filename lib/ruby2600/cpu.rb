@@ -480,9 +480,12 @@ module Ruby2600
     end
 
     # Debug tools (should be expanded and moved into its own module)
-
     def to_s
-      "PC=#{sprintf("$%04X", @pc)} A=#{sprintf("$%02X", @a)} X=#{sprintf("$%02X", @x)} Y=#{sprintf("$%02X", @y)}"
+      "PC=#{sprintf("$%04X", @pc)} A=#{sprintf("$%02X", @a)} X=#{sprintf("$%02X", @x)} Y=#{sprintf("$%02X", @y)} " +
+      " opcode: #{sprintf("$%02X", @opcode)}" +
+      (OPCODE_SIZES[@opcode] > 1 ? " @param_lo: #{sprintf("$%02X", @param_lo)}" : "") +
+      (OPCODE_SIZES[@opcode] > 2 ? " @param_hi: #{sprintf("$%02X", @param_hi)}" : "") +
+      " cycles: #{time_in_cycles}"
     end
   end
 end
