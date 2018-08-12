@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
     spec.add_dependency 'gosu'
     spec.add_dependency 'texplay', '~> 0.4.4.pre'
 
-    spec.add_development_dependency 'byebug'
+    spec.add_development_dependency 'pry-byebug'
     spec.add_development_dependency 'ruby-prof'
   end
 

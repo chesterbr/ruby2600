@@ -37,10 +37,10 @@ Standard Ruby (MRI) will use [Gosu](http://www.libgosu.org/) to display the fram
 
     git clone git@github.com:chesterbr/ruby2600.git
     cd ruby2600
-    # If you want to use JRuby:
-    # cp .ruby-version-for-jruby .ruby-version
-    rvm install # (or whatever you use to install the Ruby in .ruby-version)
-    bundle install
+    # cp .ruby-version-for-jruby .ruby-version # Only for JRuby
+    rvm install # (or rbenv install, or whatever you need to install the Ruby in .ruby-version)
+    gem install bundler
+    bundle
 
 ## Usage
 
