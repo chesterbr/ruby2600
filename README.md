@@ -8,6 +8,8 @@ These [RubyConfBr 2013 slides](http://www.slideshare.net/chesterbr/ruby2600-an-a
 
 ## Current status
 
+[![Build Status](https://travis-ci.com/chesterbr/ruby2600.svg?branch=master)](https://travis-ci.com/chesterbr/ruby2600)
+
 Games **working** with no noticeable glitches include:
 
 - *Pitfall!*
