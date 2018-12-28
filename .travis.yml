@@ -1,8 +1,23 @@
 language: ruby
 
-dist: xenial
+dist: trusty
+sudo: requried
+compiler: gcc
 
-before_install:
-  - sudo apt-get update
-  - sudo apt-get install build-essential libsdl2-dev libsdl2-ttf-dev libpango1.0-dev \
-                         libopenal-dev libsndfile-dev libmpg123-dev \
+# Linux dependencies
+# This is mostly for Gosu (see https://github.com/gosu/gosu/blob/master/.travis.yml)
+# Copied blatantly from https://github.com/gosu/gosu/wiki/Getting-Started-on-Linux
+addons:
+  apt:
+    packages:
+      - libsdl2-dev
+      - libgl1-mesa-dev
+      - libfontconfig1-dev
+      - libopenal-dev
+      - libsndfile1-dev
+      - libmpg123-dev
+      # For Ruby
+      - ruby-dev
+      - rake
+      # For C++
+      - cmake
