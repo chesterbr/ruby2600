@@ -16,6 +16,7 @@ addons:
       - libopenal-dev
       - libsndfile1-dev
       - libmpg123-dev
+      - freeglut3-dev
       # For Ruby
       - ruby-dev
       - rake
