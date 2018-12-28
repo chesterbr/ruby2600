@@ -4,5 +4,6 @@ dist: xenial
 
 addons:
   apt:
+    update: true
     packages:
       - libsdl2-dev, libgl1-mesa-dev, libopenal-dev, libsndfile-dev, libmpg123-dev, libgmp-dev
