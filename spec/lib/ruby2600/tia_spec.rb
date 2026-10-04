@@ -74,11 +74,11 @@ describe Ruby2600::TIA do
       end
 
       def turn_on(object, color)
-        instance_variable_get("@#{object}").stub(:pixel).and_return(color)
+        RSpec::Mocks.allow_message(instance_variable_get("@#{object}"), :pixel).and_return(color)
       end
 
       def turn_off(object)
-        instance_variable_get("@#{object}").stub(:pixel).and_return(nil)
+        RSpec::Mocks.allow_message(instance_variable_get("@#{object}"), :pixel).and_return(nil)
       end
     end
   end

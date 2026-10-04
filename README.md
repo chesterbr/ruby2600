@@ -21,7 +21,7 @@ Games **working** with no noticeable glitches include:
 
 You can load most 2K and 4K carts and try them out.
 
-Speed is very low: about ~2 FPS (from the expected 60) on a 2.3Ghz computer. An [accelerated video](http://www.youtube.com/watch?v=S3qAOu41CxE) shows how the emulator would run in full speed.
+Speed is very low: about ~2 FPS (from the expected 60) on a 2.3GHz Intel Mac running an old Ruby. On an Apple M3 it was about 4 FPS on Ruby 2.7.2, and about 7 FPS on Ruby 3.4.11. An [accelerated video](http://www.youtube.com/watch?v=S3qAOu41CxE) shows how the emulator would run in full speed.
 
 Also, no sound is emulated, nor any controllers other than the console switches and player 0 joystick.
 
@@ -46,14 +46,9 @@ Standard Ruby (MRI) will use [Gosu](http://www.libgosu.org/) to display the fram
 
 ### Troubleshooting Gosu on recent macOS
 
-Ruby 2.7 with a recent macOS SDK and Homebrew's `sdl2-compat` may need two build flags for Gosu. You only need them if you see one of these errors:
+With Homebrew's `sdl2-compat`, Gosu may build but fail to load with `symbol not found in flat namespace '_OBJC_CLASS_$_NSScreen'`. Its build script calls `sdl2-config --static-libs`, which `sdl2-compat` doesn't support, so SDL2 and Cocoa never get linked. Reinstall Gosu passing the link flags (remove it first with `gem uninstall gosu -I` if it was already built):
 
-- At `bundle` time: `no member named 'finite' in namespace 'std::__math'` (fixed by `-DHAVE_ISFINITE=1`)
-- At run time: `symbol not found in flat namespace '_OBJC_CLASS_$_NSScreen'` (fixed by linking SDL2, AppKit and Foundation)
-
-Reinstall Gosu with both flags (remove it first with `gem uninstall gosu -I` if it was already built):
-
-    BUNDLE_BUILD__GOSU="--with-cppflags=-DHAVE_ISFINITE=1 --with-ldflags='$(sdl2-config --libs) -framework AppKit -framework Foundation'" bundle
+    BUNDLE_BUILD__GOSU="--with-ldflags='$(sdl2-config --libs) -framework AppKit -framework Foundation'" bundle
 
 To make this stick on your machine, use `bundle config set --local build.gosu "<same flags, with $(sdl2-config --libs) expanded>"` (it is saved in `.bundle/config`, which is not committed).
 
@@ -166,6 +161,12 @@ Here is a backlog of things that may help towards increasing performance:
 - [JRuby+Truffle](https://eregon.me/blog/2016/11/28/optcarrot.html) is capable of running OptCarrot at 150fps, worth taking a look.
 
 ## Changelog
+
+##### 0.1.5
+- Ruby 3.4 is now the baseline (with a 50% performance improvement 🎉). Replaced TexPlay (which no longer compiles) with `Gosu::Image.from_blob` for drawing frames, and updated development dependencies (RSpec 3.13, SimpleCov, bigdecimal).
+
+##### 0.1.4
+- Maintenance release: default Ruby bumped to 2.2.2, texplay pinned to 0.4.4.pre, and README clarified (Gosu dependencies on OS X, run command, technical debt list).
 
 ##### 0.1.3
 - Separated frame generation from TIA emulation; added headless mode and improved FPS counting; reworked most-used methods based on [ruby-prof](https://github.com/ruby-prof/ruby-prof) information.
