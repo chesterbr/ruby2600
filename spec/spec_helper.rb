@@ -1,6 +1,7 @@
 require 'simplecov'
-require 'simplecov-gem-adapter'
-SimpleCov.start 'gem'
+SimpleCov.start do
+  skip '/spec/'
+end
 
 require 'rubygems'
 require 'json'

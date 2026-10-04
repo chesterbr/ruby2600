@@ -24,7 +24,6 @@ Gem::Specification.new do |spec|
     spec.add_dependency 'swt'
   else
     spec.add_runtime_dependency 'gosu'
-    spec.add_dependency 'texplay', '~> 0.4.4.pre'
 
     spec.add_development_dependency 'pry-byebug'
     spec.add_development_dependency 'ruby-prof'
@@ -37,6 +36,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'guard-rspec'
   spec.add_development_dependency 'guard-bundler'
   spec.add_development_dependency 'humanize'
+  spec.add_development_dependency 'bigdecimal' # needed by humanize; not bundled since Ruby 3.4
   spec.add_development_dependency 'simplecov'
-  spec.add_development_dependency 'simplecov-gem-adapter'
 end

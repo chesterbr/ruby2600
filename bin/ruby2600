@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 require 'gosu'
-require 'texplay'
 require 'ruby2600'
 
 # This is a first hack just to see the emulator runing.
@@ -140,36 +139,14 @@ NTSC_COLOR_LUM_TO_SRGB = [
   0xFFFCE08C
 ]
 
-# http://www.libgosu.org/cgi-bin/mwf/topic_show.pl?tid=196
-# EmptyImageStub is based on an idea Julian Raschke suggested in #gosu
-# on IRC. It provides empty RMagic::Image-like objects which, when
-# passed to Gosu::Image's constructor, have their to_blob method called,
-# to provide RGBA data. This allows the easy creation of new Gosu::Image
-# objects without accessing the filesystem, which can then be drawn into
-# with TexPlay.
-class EmptyImageStub
-  def initialize(w,h)
-    @w, @h = w, h;
-  end
-
-  def to_blob
-    "\0" * @w * @h * 4
-  end
-
-  def rows
-    @h
-  end
-
-  def columns
-    @w
-  end
+# Gosu::Image.from_blob expects raw RGBA bytes
+NTSC_COLOR_LUM_TO_RGBA = NTSC_COLOR_LUM_TO_SRGB.map do |argb|
+  [(argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, 0xFF].pack('C4')
 end
 
 class GameWindow < Gosu::Window
   def initialize
-    super 640, 400, false, 1
-    stub = EmptyImageStub.new(160,200)
-    @canvas = Gosu::Image.new(self, stub, true)
+    super 640, 400, update_interval: 1
     self.caption = "ruby2600"
   end
 
@@ -195,17 +172,12 @@ class GameWindow < Gosu::Window
 
   def update
     frame = @bus.frame
-    @canvas.paint do
-      frame.each_index do |y|
-        frame[y].each_index do |x|
-          pixel x, y, :color => NTSC_COLOR_LUM_TO_SRGB[frame[y][x] / 2]
-        end
-      end
-    end
+    blob = frame.flat_map { |row| row.map { |color| NTSC_COLOR_LUM_TO_RGBA[color / 2] } }.join
+    @canvas = Gosu::Image.from_blob(frame.first.size, frame.size, blob)
   end
 
   def draw
-    @canvas.draw(0, 0, 0, 4, 2)
+    @canvas&.draw(0, 0, 0, 4, 2)
   end
 
   def button_down(id)
