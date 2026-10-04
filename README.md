@@ -44,6 +44,19 @@ Standard Ruby (MRI) will use [Gosu](http://www.libgosu.org/) to display the fram
     gem install bundler
     bundle
 
+### Troubleshooting Gosu on recent macOS
+
+Ruby 2.7 with a recent macOS SDK and Homebrew's `sdl2-compat` may need two build flags for Gosu. You only need them if you see one of these errors:
+
+- At `bundle` time: `no member named 'finite' in namespace 'std::__math'` (fixed by `-DHAVE_ISFINITE=1`)
+- At run time: `symbol not found in flat namespace '_OBJC_CLASS_$_NSScreen'` (fixed by linking SDL2, AppKit and Foundation)
+
+Reinstall Gosu with both flags (remove it first with `gem uninstall gosu -I` if it was already built):
+
+    BUNDLE_BUILD__GOSU="--with-cppflags=-DHAVE_ISFINITE=1 --with-ldflags='$(sdl2-config --libs) -framework AppKit -framework Foundation'" bundle
+
+To make this stick on your machine, use `bundle config set --local build.gosu "<same flags, with $(sdl2-config --libs) expanded>"` (it is saved in `.bundle/config`, which is not committed).
+
 ## Usage
 
 To run on MRI:
