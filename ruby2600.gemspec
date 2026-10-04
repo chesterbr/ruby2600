@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rubygems-bundler'
-  spec.add_development_dependency 'rspec', '~> 3.5.0'
+  spec.add_development_dependency 'rspec', '~> 3.13'
   spec.add_development_dependency 'guard-rspec'
   spec.add_development_dependency 'guard-bundler'
   spec.add_development_dependency 'humanize'
